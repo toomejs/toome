@@ -1,0 +1,37 @@
+{
+    "compilerOptions": {
+        "lib": ["ESNext", "DOM"],
+        "allowJs": false,
+        "skipLibCheck": false,
+        "allowSyntheticDefaultImports": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "target": "esnext",
+        "module": "esnext",
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        "jsx": "react-jsx",
+        "declaration": true,
+        "removeComments": true,
+        "experimentalDecorators": true,
+        "alwaysStrict": true,
+        "sourceMap": true,
+        "incremental": true,
+        "esModuleInterop": true,
+        "noUnusedLocals": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "pretty": true,
+        "noImplicitAny": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "importsNotUsedAsValues": "error",
+        "outDir": "./dist",
+        "baseUrl": "./",
+        "paths": {
+            "@/*": ["src/*"]
+        }
+    },
+    "include": ["./src", "./typings/**/*.d.ts"]
+}

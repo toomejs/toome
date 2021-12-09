@@ -1,0 +1,8 @@
+import { memo } from 'react';
+import createContext from 'zustand/context';
+
+import type { RouterState } from './types';
+
+const { Provider, useStore, useStoreApi } = createContext<RouterState>();
+export const RouterContextProvider = memo(Provider);
+export { useStore, useStoreApi };

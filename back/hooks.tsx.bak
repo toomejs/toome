@@ -1,0 +1,189 @@
+import { useAsyncEffect, useDeepCompareEffect } from 'ahooks';
+
+import { isArray, omit } from 'lodash-es';
+import { useCallback, useEffect, useState } from 'react';
+import type { RouteObject } from 'react-router-dom';
+
+import shallow from 'zustand/shallow';
+
+import { useDeepCompareMemo } from '@/hooks';
+import { createImmer } from '@/utils/store';
+
+import { deepMerge } from '@/utils/tools';
+
+import { useUser } from '../Auth';
+
+import { useRequest } from '../Request';
+
+import { getDefaultState } from './_defaultConfig';
+
+import { AuthRedirect } from './redirect';
+import type { RouteOption, RouterConfig, RouterState } from './types';
+import { filteWhiteList, filteAccessRoutes, factoryRoutes } from './utils';
+
+const useShouldChange = createImmer<{ constants: boolean; dynamic: boolean }>(() => ({
+    constants: false,
+    dynamic: false,
+}));
+const useConfigStore = createImmer<RouterState>(() => getDefaultState());
+const useRoutesStore = createImmer<{ constants: RouteOption[]; dynamic: RouteOption[] }>(() => ({
+    constants: [],
+    dynamic: [],
+}));
+const useDataStore = createImmer<{ routes: RouteObject[]; names: Record<string, string> }>(() => ({
+    routes: [],
+    names: {},
+}));
+
+export const useSetupRouter = (config?: RouterConfig) => {
+    const { setuped: userSetuped } = useUser();
+    const { user } = useUser();
+    const [configed, setConfiged] = useState<boolean>(false);
+    const shouldChange = useShouldChange((state) => ({ ...state }), shallow);
+    const configState = useConfigStore((state) => ({ ...omit(state, ['routes']) }), shallow);
+    const routeState = useConfigStore((state) => state.routes, shallow);
+    const { constants, dynamic } = useRoutesStore((state) => ({ ...state }), shallow);
+    const { auth, basePath, render, server } = configState;
+    const { getAuthRequest } = useRequest();
+    const request = getAuthRequest();
+    useEffect(() => {
+        if (!configed && config) {
+            useConfigStore.setState((draft) => deepMerge(draft, config), true);
+            setConfiged(true);
+        }
+    }, [config, configed]);
+    useEffect(() => {
+        useShouldChange.setState((state) => {
+            state.constants = true;
+            state.dynamic = true;
+        });
+    }, [configed, userSetuped]);
+    useEffect(() => {
+        if (shouldChange.constants && configed) {
+            if (auth.enabled) {
+                if (userInited) {
+                    useRoutesStore.setState((draft) => {
+                        draft.constants = filteAccessRoutes(user, routeState.constants, auth, {
+                            basePath: configState.basePath,
+                        });
+                    });
+                } else {
+                    useRoutesStore.setState((draft) => {
+                        draft.constants = filteWhiteList(routeState.constants, auth, {
+                            basePath: configState.basePath,
+                        });
+                    });
+                }
+            } else {
+                useRoutesStore.setState((draft) => {
+                    draft.constants = routeState.constants;
+                });
+            }
+            useShouldChange.setState((state) => {
+                state.constants = false;
+            });
+        }
+    }, [shouldChange.constants]);
+    useAsyncEffect(async () => {
+        if (shouldChange.dynamic && configed) {
+            if (auth.enabled) {
+                if (!server) {
+                    if (userInited) {
+                        useRoutesStore.setState((draft) => {
+                            draft.dynamic = filteAccessRoutes(user, routeState.dynamic, auth, {
+                                basePath,
+                            });
+                        });
+                    } else {
+                        if (auth.enabled && !userInited) {
+                            useRoutesStore.setState((draft) => {
+                                draft.dynamic = filteWhiteList(routeState.dynamic, auth, {
+                                    basePath,
+                                });
+                            });
+                        }
+                    }
+                } else {
+                    if (request && server) {
+                        try {
+                            const { data } = await request.get<RouteOption[]>(server);
+                            if (isArray(data))
+                                useRoutesStore.setState((draft) => {
+                                    draft.dynamic = data;
+                                });
+                        } catch (error) {
+                            console.log(error);
+                        }
+                    }
+                }
+            } else {
+                useRoutesStore.setState((draft) => {
+                    draft.dynamic = routeState.dynamic;
+                });
+            }
+
+            useShouldChange.setState((state) => {
+                state.dynamic = false;
+            });
+        }
+    }, [shouldChange.dynamic]);
+    useDeepCompareEffect(() => {
+        if (configed) {
+            const { routes: items, nameMaps } = factoryRoutes([...constants, ...dynamic], {
+                basePath,
+                render,
+            });
+            useDataStore.setState((state) => {
+                state.routes = items;
+                if (auth.enabled && !userInited && auth.redirect === 'login') {
+                    state.routes.push({
+                        path: '*',
+                        element: <AuthRedirect loginPath={auth.login_path} />,
+                    });
+                }
+            });
+            useDataStore.setState((state) => {
+                state.names = nameMaps;
+            });
+        }
+    }, [constants, dynamic]);
+};
+export const useRouter = <T extends Record<string, any> = Record<string, any>>() => {
+    const names = useDataStore((state) => state.names);
+    const routes = useDataStore((state) => state.routes);
+    const constants = useRoutesStore((state) => state.constants);
+    const dynamic = useRoutesStore((state) => state.dynamic);
+    return {
+        names: useDeepCompareMemo(() => names, [names]),
+        options: useDeepCompareMemo(
+            () => [...constants, ...dynamic],
+            [constants, dynamic],
+        ) as RouteOption<T>[],
+        routes: useDeepCompareMemo(() => routes, [routes]),
+    };
+};
+export const useRouterMutation = () => {
+    const addRoutes = useCallback((routes: RouteOption[]) => {
+        useShouldChange.setState((state) => {
+            state.dynamic = false;
+        });
+        useRoutesStore.setState((state) => {
+            state.dynamic = [...state.dynamic, ...routes];
+        });
+    }, []);
+    const setRoutes = useCallback((routes: RouteOption[]) => {
+        useShouldChange.setState((state) => {
+            state.dynamic = false;
+        });
+        useRoutesStore.setState((state) => {
+            state.dynamic = routes;
+        });
+    }, []);
+    return {
+        configure: useCallback(useConfigStore.setState, []),
+        addRoutes,
+        setRoutes,
+    };
+};
+
+export const useRouterConfig = () => useConfigStore((state) => ({ ...state }), shallow);

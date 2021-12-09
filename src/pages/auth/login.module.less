@@ -1,0 +1,132 @@
+@prefix-cls: ~'login';
+@logo-prefix-cls: ~'app-logo';
+@countdown-prefix-cls: ~'countdown-input';
+@dark-bg: #293146;
+
+html[data-theme='dark'] {
+    .@{prefix-cls} {
+        background: @dark-bg;
+
+        &::before {
+            background-image: url(/@/assets/svg/login-bg-dark.svg);
+        }
+        :global {
+            .ant-input-affix-wrapper {
+                background-color: #232a3b;
+            }
+
+            .ant-btn:not(.ant-btn-link):not(.ant-btn-primary) {
+                border: 1px solid #4a5569;
+            }
+
+            &-form {
+                background: transparent !important;
+            }
+
+            .app-iconify {
+                color: #fff;
+            }
+        }
+    }
+}
+
+.@{prefix-cls} {
+    overflow: hidden;
+    @media (max-width: @screen-xl) {
+        background: #293146;
+        :local(.@{prefix-cls}) {
+            :global {
+                .@{prefix-cls}-form {
+                    background: #fff;
+                }
+            }
+        }
+    }
+    &-sign-in-way {
+        .anticon {
+            font-size: 22px;
+            color: #888;
+            cursor: pointer;
+
+            &:hover {
+                color: @primary-color;
+            }
+        }
+    }
+
+    input:not([type='checkbox']) {
+        min-width: 360px;
+
+        @media (max-width: @screen-lg) {
+            min-width: 300px;
+        }
+
+        @media (max-width: @screen-md) {
+            min-width: 280px;
+        }
+
+        @media (max-width: @screen-sm) {
+            min-width: 180px;
+        }
+    }
+    .@{countdown-prefix-cls} input {
+        min-width: unset;
+    }
+
+    .ant-divider-inner-text {
+        font-size: 12px;
+        color: @text-color-secondary;
+    }
+}
+
+:global {
+    :local(.@{prefix-cls}) {
+        &::before {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            margin-left: -48%;
+            background-image: url(@/assets/svg/login-bg.svg);
+            background-position: 100%;
+            background-repeat: no-repeat;
+            background-size: auto 100%;
+            content: '';
+            @media (max-width: @screen-xl) {
+                display: none;
+            }
+        }
+        & .@{logo-prefix-cls} {
+            position: absolute;
+            top: 12px;
+            height: 30px;
+
+            & > .title {
+                font-size: 16px;
+                color: #fff;
+            }
+
+            & > img {
+                width: 32px;
+            }
+        }
+
+        .container {
+            .@{logo-prefix-cls} {
+                display: flex;
+                width: 60%;
+                height: 80px;
+
+                & > .title {
+                    font-size: 24px;
+                    color: #fff;
+                }
+
+                & > img {
+                    width: 48px;
+                }
+            }
+        }
+    }
+}
