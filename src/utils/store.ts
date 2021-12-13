@@ -1,10 +1,13 @@
+import { createSelectorFunctions, createSelectorHooks } from 'auto-zustand-selectors-hook';
 import produce from 'immer';
 import type { Draft } from 'immer';
-import type { State, GetState, SetState, StoreApi } from 'zustand';
+import type { State, GetState, SetState, StoreApi, UseBoundStore } from 'zustand';
 
 import create from 'zustand';
 
 import type {
+    ZSelector,
+    ZHookSelector,
     ZImmberStateCreator,
     ZImmberUseBoundStore,
     ZImmerSetState,
@@ -55,4 +58,39 @@ export function createImmer(createState: any) {
     const store = create(ImmerMiddleware(createState));
     store.setState = setImmerState(store.setState);
     return store;
+}
+
+export function createSelectors<
+    TState extends State,
+    CustomStoreApi extends ZImmerStoreApi<TState>,
+>(store: ZImmberUseBoundStore<TState, CustomStoreApi>): ZHookSelector<TState>;
+export function createSelectors<TState extends State>(
+    store: ZImmberUseBoundStore<TState, ZImmerStoreApi<TState>>,
+): ZSelector<TState>;
+export function createSelectors<TState extends State, CustomStoreApi extends StoreApi<TState>>(
+    store: UseBoundStore<TState, CustomStoreApi>,
+): ZSelector<TState>;
+export function createSelectors<TState extends State>(
+    store: UseBoundStore<TState, StoreApi<TState>>,
+): ZSelector<TState>;
+
+export function createSelectors(store: any) {
+    return createSelectorFunctions(store) as any;
+}
+
+export function createHookSelectors<
+    TState extends State,
+    CustomStoreApi extends ZImmerStoreApi<TState>,
+>(store: ZImmberUseBoundStore<TState, CustomStoreApi>): ZHookSelector<TState>;
+export function createHookSelectors<TState extends State>(
+    store: ZImmberUseBoundStore<TState, ZImmerStoreApi<TState>>,
+): ZHookSelector<TState>;
+export function createHookSelectors<TState extends State, CustomStoreApi extends StoreApi<TState>>(
+    store: UseBoundStore<TState, CustomStoreApi>,
+): ZHookSelector<TState>;
+export function createHookSelectors<TState extends State>(
+    store: UseBoundStore<TState, StoreApi<TState>>,
+): ZHookSelector<TState>;
+export function createHookSelectors(store: any) {
+    return createSelectorHooks(store) as any;
 }

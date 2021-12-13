@@ -3,4 +3,4 @@ export interface Config {
         account?: string;
     };
 }
-export interface ConfigState extends ReReuired<Config> {}
+export interface ConfigState extends ReRequired<Config> {}

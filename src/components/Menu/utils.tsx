@@ -2,14 +2,13 @@ import { omit } from 'lodash-es';
 
 import { isUrl } from '@/utils/tools';
 
-import type { BaseRouteMenuMeta, ParentRouteProps, RouteOption } from '../Routing';
-
-import { formatPath } from '../Routing/utils';
+import type { BaseRouteMenuMeta, ParentRouteProps, RouteOption } from '../Router/types';
+import { formatPath } from '../Router/utils/filter';
 
 import type { AntdMenuOption, MenuOption } from './types';
 
-export const getRouteMenus = (routes: RouteOption[], parent: ParentRouteProps): MenuOption[] => {
-    return routes
+export const getRouteMenus = (routes: RouteOption[], parent: ParentRouteProps): MenuOption[] =>
+    routes
         .map((route, index) => {
             const current: ParentRouteProps = {
                 ...parent,
@@ -46,9 +45,8 @@ export const getRouteMenus = (routes: RouteOption[], parent: ParentRouteProps): 
         })
         .reduce((o, n) => [...o, ...n], [])
         .filter((m) => !!m) as MenuOption[];
-};
 
-export const getAntdMenus = <T extends Record<string, any>>(
+export const getAntdMenus = <T extends RecordAnyOrNever>(
     menus: MenuOption<T>[],
 ): AntdMenuOption<T>[] =>
     menus.map((item) => {

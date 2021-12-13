@@ -1,36 +1,8 @@
-import loadable from '@loadable/component';
+import { trim } from 'lodash-es';
 
-import { omit, pick, trim } from 'lodash-es';
-import type { FC, ReactElement } from 'react';
-import type { RouteObject } from 'react-router-dom';
-import { Navigate, Outlet } from 'react-router-dom';
+import type { Permission, User } from '../../Auth';
 
-import { isUrl } from '@/utils/tools';
-
-import type { Permission, User } from '../Auth';
-
-import type { RouterState, ParentRouteProps, RouteOption, WhiteRoute } from './types';
-
-const getAsyncImports = (imports: Record<string, () => Promise<any>>, reg: RegExp) => {
-    return Object.keys(imports)
-        .map((key) => {
-            const names = reg.exec(key);
-            return Array.isArray(names) && names.length >= 2
-                ? { [names[1]]: imports[key] }
-                : undefined;
-        })
-        .filter((m) => !!m)
-        .reduce((o, n) => ({ ...o, ...n }), []) as unknown as Record<string, () => Promise<any>>;
-};
-export const pages = getAsyncImports(
-    import.meta.glob('../../**/*.{tsx,jsx}'),
-    /..\/..\/([\w+.?/?]+).tsx|.jsx/i,
-);
-export const Loading: FC = () => (
-    <div className="fixed w-full h-full top-0 left-0 dark:bg-white bg-gray-800 bg-opacity-25 flex items-center justify-center">
-        <span>加载中</span>
-    </div>
-);
+import type { RouterState, ParentRouteProps, RouteOption, WhiteRoute } from '../types';
 
 /**
  * @description 格式化路由路径
@@ -53,21 +25,6 @@ export const formatPath = (item: RouteOption, basePath: string, parentPath?: str
     return `${prefix}${trim(currentPath, '/')}`;
 };
 
-export const getAsyncPage = (props: {
-    cacheKey: string;
-    loading?: JSX.Element | boolean;
-    page: string;
-}) => {
-    const { cacheKey, loading, page } = props;
-    let fallback: JSX.Element | undefined;
-    if (loading) {
-        fallback = typeof loading === 'boolean' ? <Loading /> : loading;
-    }
-    return loadable(pages[page], {
-        cacheKey: () => cacheKey,
-        fallback,
-    });
-};
 const checkInWhiteList = (
     route: RouteOption,
     parent: Omit<ParentRouteProps, 'index'>,
@@ -132,13 +89,13 @@ export const filteAccessRoutes = (
     routes: RouteOption[],
     authConfig: RouterState['auth'],
     parent: Omit<ParentRouteProps, 'index'>,
-): RouteOption<Record<string, any>>[] => {
+): RouteOption<RecordNever>[] => {
     const roleColumn = authConfig.role_column;
     const permColumn = authConfig.permission_column;
     const loginPath = authConfig.login_path;
     const whiteList = authConfig.white_list;
-    let userRoles: Array<Permission<Record<string, any>>> = [];
-    let userPerms: Array<Permission<Record<string, any>>> = [];
+    let userRoles: Array<Permission<RecordNever>> = [];
+    let userPerms: Array<Permission<RecordNever>> = [];
     if (user) {
         if (user.roles) userRoles = user.roles;
         if (user.permissions) userPerms = user.permissions;
@@ -179,62 +136,4 @@ export const filteAccessRoutes = (
                 children: filteAccessRoutes(user, route.children, authConfig, current),
             };
         });
-};
-export const factoryRoutes = (children: RouteOption[], parent: ParentRouteProps) => {
-    let nameMaps: Record<string, string> = {};
-    const routes = children
-        .map((item, index) => {
-            const route: RouteObject = { ...omit(item, ['page', 'children']) };
-            const current: ParentRouteProps = {
-                ...parent,
-                basePath: parent.basePath,
-                index: parent.index ? `${parent.index}.${index.toString()}` : index.toString(),
-            };
-            const isRoute =
-                ('path' in item && item.path && !isUrl('path')) || 'index' in item || 'to' in item;
-            if (isRoute) {
-                const currentPath = formatPath(item, parent.basePath, parent.path);
-                current.path = currentPath;
-                // 当前项是一个跳转路由
-                const isRedirectRoute = 'to' in item;
-                if (item.name) {
-                    nameMaps[item.name] = current.path;
-                }
-                // 当前项是一个跳转路由
-                if (isRedirectRoute) {
-                    route.element = <Navigate {...pick(item, ['to', 'state'])} replace />;
-                    // 当前项是一个页面路由
-                } else if ('page' in item && item.page) {
-                    if (typeof item.page === 'string') {
-                        const AsyncPage = getAsyncPage({
-                            page: item.page as string,
-                            cacheKey: item.cacheKey ?? item.name ?? current.index!,
-                            loading: item.loading,
-                        });
-                        route.element = <AsyncPage />;
-                    } else {
-                        route.element = item.page;
-                    }
-                } else {
-                    route.element = <Outlet />;
-                }
-                if (current.render) {
-                    route.element = current.render(
-                        current.basePath,
-                        item,
-                        route.element as ReactElement,
-                    );
-                }
-            }
-            if (!item.children?.length) delete item.children;
-            if (item.children) {
-                const rst = factoryRoutes(item.children, current);
-                nameMaps = { ...nameMaps, ...rst.nameMaps };
-                if (isRoute) route.children = rst.routes;
-                else return rst.routes;
-            }
-            return [route];
-        })
-        .reduce((o, n) => [...o, ...n], []) as RouteObject[];
-    return { routes, nameMaps };
 };

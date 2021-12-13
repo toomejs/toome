@@ -2,82 +2,94 @@ import { useAsyncEffect, useDeepCompareEffect } from 'ahooks';
 
 import { isArray } from 'lodash-es';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import shallow from 'zustand/shallow';
 
-import { useDeepCompareMemo } from '@/hooks';
-import { createImmer } from '@/utils/store';
-
+import { createHookSelectors, createImmer } from '@/utils/store';
 import { deepMerge } from '@/utils/tools';
 
-import { useUser } from '../Auth';
-import { useRequest } from '../Request';
+import { useAuthStore, useUser } from '../Auth';
 
-import { useRouter, useRouterConfig } from '../Routing';
+import { useFetcher } from '../Request';
 
-import { getDefaultMenuState } from './_defaultState';
-import type { MenuConfig, MenuState, AntdMenuOption, MenuOption } from './types';
+import { useRouterStore } from '../Router';
+
+import { getDefaultMenuStore } from './_default.store';
+import type { MenuConfig, MenuStore, MenuOption } from './types';
 import { getAntdMenus, getRouteMenus } from './utils';
 
-const useConfigStore = createImmer<MenuState>(getDefaultMenuState);
-const useMenuStore = createImmer<{ menus: AntdMenuOption[] }>(() => ({
-    menus: [],
-}));
-export const useSetupMenu = <
-    T extends Record<string, any> = Record<string, any>,
-    M = MenuOption<T>,
->(
+export const useMenuStore = createImmer<MenuStore>(() => getDefaultMenuStore());
+export const useMenu = createHookSelectors(useMenuStore);
+export const useAntdMenus = () =>
+    useMenuStore(useCallback((state) => getAntdMenus(state.data), []));
+
+export const useSetupMenu = <T extends RecordAnyOrNever = RecordNever, M = MenuOption<T>>(
     config?: MenuConfig<M>,
 ) => {
-    const { generated: routeGenerated, options: routes } = useRouter();
-    const { basePath } = useRouterConfig();
-    const { user } = useUser();
-    const [configed, setConfiged] = useState<boolean>(false);
-    const [shouldChnage, setShouldChange] = useState<boolean>(false);
-    const { type, server } = useConfigStore((state) => ({ ...state }), shallow);
-    const { getAuthRequest } = useRequest();
-    useDeepCompareEffect(() => {
-        if (!configed || config) {
-            if (config) useConfigStore.setState((draft) => deepMerge(draft, config ?? {}), true);
-            setConfiged(true);
-        }
-    }, [config, configed]);
-    useDeepCompareEffect(() => {
-        setShouldChange(true);
-    }, [configed, user]);
-    useDeepCompareEffect(() => {
-        if (type === 'router') setShouldChange(true);
-    }, [routes, routeGenerated]);
-    useAsyncEffect(async () => {
-        if (configed && shouldChnage) {
-            if (user) {
-                const request = getAuthRequest();
-                if (type === 'server' && server && request) {
-                    try {
-                        const { data } = await request.get<MenuOption<T>[]>(server);
-                        if (isArray(data)) {
-                            useMenuStore.setState((draft) => {
-                                draft.menus = data;
-                            });
-                        }
-                    } catch (error) {
-                        console.log(error);
-                    }
-                } else if (type === 'router' && routeGenerated) {
-                    useMenuStore.setState((draft) => {
-                        draft.menus = getRouteMenus(routes, { basePath });
-                    });
-                }
+    const user = useUser();
+    const fecher = useFetcher();
+    const setuped = useRef<boolean>(false);
+    const { routes, basePath } = useRouterStore(
+        (state) => ({
+            routes: state.routes,
+            basePath: state.config.basePath,
+        }),
+        shallow,
+    );
+
+    const userChanged = useAuthStore((state) => state.changed);
+    const { configed, shouldChange } = useMenuStore(
+        (state) => ({ configed: state.config, shouldChange: state.shouldChange }),
+        shallow,
+    );
+    useEffect(() => {
+        if (!setuped.current || config) {
+            if (config) {
+                useMenuStore.setState((state) => {
+                    state.config = deepMerge(state.config, config ?? {});
+                });
             }
-            setShouldChange(false);
+            setuped.current = true;
         }
-    }, [shouldChnage]);
-};
-export const useMenu = <T extends Record<string, any> = Record<string, any>>() => {
-    const menus = useMenuStore((state) => state.menus);
-    return {
-        menus: useDeepCompareMemo(() => menus, [menus]) as MenuOption<T>[],
-        antdMenus: useDeepCompareMemo(() => getAntdMenus(menus), [menus]) as AntdMenuOption<T>[],
-    };
+    }, [config]);
+    useEffect(() => {
+        if (setuped.current && configed.type !== 'router')
+            useMenuStore.setState((state) => {
+                state.shouldChange = true;
+            });
+    }, [userChanged]);
+    useDeepCompareEffect(() => {
+        if (setuped.current && configed.type === 'router')
+            useMenuStore.setState((state) => {
+                state.shouldChange = true;
+            });
+    }, [routes]);
+    useAsyncEffect(async () => {
+        if (setuped.current && shouldChange) {
+            if (configed.type === 'router') {
+                useMenuStore.setState((state) => {
+                    state.data = getRouteMenus(routes, { basePath });
+                });
+            } else if (configed.type === 'server' && configed.server && user) {
+                try {
+                    const { data } = await fecher().get<MenuOption<T>[]>(configed.server);
+                    if (isArray(data)) {
+                        useMenuStore.setState((state) => {
+                            state.data = data;
+                        });
+                    }
+                } catch (error) {
+                    console.log(error);
+                }
+            } else {
+                useMenuStore.setState((state) => {
+                    state.data = [];
+                });
+            }
+            useMenuStore.setState((state) => {
+                state.shouldChange = false;
+            });
+        }
+    }, [shouldChange]);
 };

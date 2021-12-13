@@ -10,6 +10,7 @@ import type {
     TableItem,
     StorageState,
     TableConfig,
+    StorageStore,
 } from './types';
 
 /**
@@ -36,15 +37,6 @@ const createDb = produce<DbItem<TableConfig>>((db) => {
     return db;
 }) as (db: DbItem<TableConfig>) => DbItem<TableItem>;
 
-/**
- * @description 根据配置的状态修复或初始化Storage
- * @param        {*} produce
- * @return       {*}
- */
-export const initStorage = produce<StorageConfig>((draft) => fixStorage(draft)) as (
-    state?: StorageConfig,
-) => StorageState;
-
 export const fixStorage = (state: StorageConfig) => {
     if (!state.dbs) {
         state.dbs = [
@@ -62,6 +54,7 @@ export const fixStorage = (state: StorageConfig) => {
             return { ...d, defaultTable, tables };
         })
         .map((d) => createDb(d));
+    return state as StorageState;
 };
 /**
  * @description 获取数据库配置
@@ -86,54 +79,65 @@ const getTable = (state: StorageState, dbname: string, name: string) => {
  * @param        {*} produce
  * @return       {*}
  */
-export const storageReducer: Reducer<StorageState, DbAction> = produce((draft, action) => {
+export const storageReducer: Reducer<StorageStore, DbAction> = produce((draft, action) => {
     switch (action.type) {
+        case DbActionType.SETUP:
+            if (!draft.setuped) {
+                draft.config = fixStorage(action.config ?? {});
+                draft.setuped = true;
+            }
+            break;
         case DbActionType.ADD_DB:
-            if (!getDb(draft, action.config.name)) {
-                draft.dbs = [...draft.dbs, action.config as DbItem<TableItem>];
-                fixStorage(draft);
+            if (!getDb(draft.config, action.config.name)) {
+                draft.config.dbs = [...draft.config.dbs, action.config as DbItem<TableItem>];
+                fixStorage(draft.config);
             }
             break;
         case DbActionType.SET_DEFAULT_DB:
-            if (draft.default !== action.name && getDb(draft, action.name))
-                draft.default = action.name;
+            if (draft.config.default !== action.name && getDb(draft.config, action.name))
+                draft.config.default = action.name;
             break;
         case DbActionType.DELETE_DB:
-            draft.dbs = draft.dbs.filter((d) => d.name === action.name);
-            fixStorage(draft);
+            draft.config.dbs = draft.config.dbs.filter((d) => d.name === action.name);
+            fixStorage(draft.config);
             break;
         case DbActionType.ADD_TABLE: {
-            const dbname = action.dbname ?? draft.default;
-            draft.dbs.forEach((db, index) => {
-                if (db.name === dbname && !getTable(draft, dbname, action.config.name)) {
-                    draft.dbs[index].tables.push(action.config as TableItem);
+            const dbname = action.dbname ?? draft.config.default;
+            draft.config.dbs.forEach((db, index) => {
+                if (db.name === dbname && !getTable(draft.config, dbname, action.config.name)) {
+                    draft.config.dbs[index].tables.push(action.config as TableItem);
                 }
             });
-            fixStorage(draft);
+            fixStorage(draft.config);
             break;
         }
         case DbActionType.DELETE_TABLE: {
-            const dbname = action.dbname ?? draft.default;
-            draft.dbs.forEach((db, index) => {
-                if (getTable(draft, dbname, action.name)) {
-                    draft.dbs[index].tables = db.tables.filter((t) => t.name !== action.name);
+            const dbname = action.dbname ?? draft.config.default;
+            draft.config.dbs.forEach((db, index) => {
+                if (getTable(draft.config, dbname, action.name)) {
+                    draft.config.dbs[index].tables = db.tables.filter(
+                        (t) => t.name !== action.name,
+                    );
                 }
             });
-            fixStorage(draft);
+            fixStorage(draft.config);
             break;
         }
         case DbActionType.SET_DEFAULT_TABLE: {
-            const dbname = action.dbname ?? draft.default;
-            draft.dbs.forEach((db, index) => {
-                if (db.defaultTable !== action.name && getTable(draft, dbname, action.name)) {
-                    draft.dbs[index].defaultTable = action.name;
+            const dbname = action.dbname ?? draft.config.default;
+            draft.config.dbs.forEach((db, index) => {
+                if (
+                    db.defaultTable !== action.name &&
+                    getTable(draft.config, dbname, action.name)
+                ) {
+                    draft.config.dbs[index].defaultTable = action.name;
                 }
             });
-            fixStorage(draft);
+            fixStorage(draft.config);
             break;
         }
         default:
-            fixStorage(draft);
+            fixStorage(draft.config);
             break;
     }
 });

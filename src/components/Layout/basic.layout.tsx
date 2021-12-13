@@ -1,55 +1,25 @@
-import { UserOutlined } from '@ant-design/icons';
+import type { ProSettings } from '@ant-design/pro-layout/es';
+import ProLayout, { PageContainer } from '@ant-design/pro-layout/es';
 
-import type { MenuDataItem, ProSettings } from '@ant-design/pro-layout';
-import ProLayout, { PageContainer } from '@ant-design/pro-layout';
+import { useSafeState } from 'ahooks';
+import type { FC } from 'react';
 
-import { Avatar } from 'antd';
+import { Link, useLocation } from 'react-router-dom';
 
-import { useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { useAntdMenus } from '../Menu';
+import { useRouter } from '../Router';
 
-import { useMenu } from '../Menu';
+import { HeaderRight } from './header';
+import { MenuItem, SubMenuItem } from './menu';
+import { SideFooter } from './sidebar';
 
-import { useLocationPath } from '../Router';
-
-const MenuItem: (
-    item: MenuDataItem & {
-        isUrl: boolean;
-        onClick: () => void;
-    },
-    dom: React.ReactNode,
-) => React.ReactNode = (item, dom) => {
-    const { basePath } = useLocationPath();
-    const navigate = useNavigate();
-    if (item.isUrl) {
-        return (
-            <a href={item.path} target={item.target ?? '_blank'}>
-                {dom}
-            </a>
-        );
-    }
-    return (
-        <a
-            onClick={(e) => {
-                e.preventDefault();
-                navigate(item.path ?? basePath);
-            }}
-        >
-            {dom}
-        </a>
-    );
-};
-const subMenuItem: (item: MenuDataItem, dom: React.ReactNode) => React.ReactNode = (item, dom) => (
-    <div ref={(el) => el && el.addEventListener('selectstart', (e) => e.preventDefault())}>
-        {dom}
-    </div>
-);
-export default () => {
-    const [settings] = useState<Partial<ProSettings> | undefined>({
+const BasicLayout: FC = ({ children }) => {
+    const [settings] = useSafeState<Partial<ProSettings> | undefined>({
         fixSiderbar: true,
     });
-    const { pathname } = useLocationPath();
-    const { antdMenus } = useMenu();
+    const location = useLocation();
+    const menus = useAntdMenus();
+    const { basePath } = useRouter.useConfig();
     return (
         <div
             id="app-layout"
@@ -59,53 +29,20 @@ export default () => {
         >
             <ProLayout
                 location={{
-                    pathname,
+                    pathname: location.pathname,
                 }}
-                route={{ path: '/', routes: antdMenus }}
-                // eslint-disable-next-line react/no-unstable-nested-components
-                subMenuItemRender={subMenuItem}
-                // eslint-disable-next-line react/no-unstable-nested-components
-                menuFooterRender={(props) => {
-                    return (
-                        <a
-                            style={{
-                                lineHeight: '48rpx',
-                                display: 'flex',
-                                height: 48,
-                                color: 'rgba(255, 255, 255, 0.65)',
-                                alignItems: 'center',
-                            }}
-                            href="https://preview.pro.ant.design/dashboard/analysis"
-                            target="_blank"
-                            rel="noreferrer"
-                        >
-                            <img
-                                alt="pro-logo"
-                                src="https://procomponents.ant.design/favicon.ico"
-                                style={{
-                                    width: 16,
-                                    height: 16,
-                                    margin: '0 16px',
-                                    marginRight: 10,
-                                }}
-                            />
-                            {!props?.collapsed && 'Preview Pro'}
-                        </a>
-                    );
-                }}
-                onMenuHeaderClick={(e) => console.log(e)}
-                // eslint-disable-next-line react/no-unstable-nested-components
+                route={{ path: basePath, routes: menus }}
                 menuItemRender={MenuItem}
-                // eslint-disable-next-line react/no-unstable-nested-components
-                rightContentRender={() => (
-                    <div>
-                        <Avatar shape="square" size="small" icon={<UserOutlined />} />
-                    </div>
-                )}
+                subMenuItemRender={SubMenuItem}
+                rightContentRender={HeaderRight}
+                menuFooterRender={SideFooter}
+                onMenuHeaderClick={(e) => console.log(e)}
                 {...settings}
             >
-                <PageContainer content={<Outlet />} />
+                <PageContainer content={children} />
+                <Link to="/auth/signup">test</Link>
             </ProLayout>
         </div>
     );
 };
+export default BasicLayout;

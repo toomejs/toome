@@ -2,44 +2,35 @@ import type { AxiosInstance } from 'axios';
 
 import { useCallback, useRef } from 'react';
 
-import { useAuth } from '@/components/Auth/hooks';
+import { useToken, useTokenDispatch } from '../Auth';
 
 import { createRequest } from './request';
 import type { RequestConfig } from './types';
 
-export function useRequest() {
-    // const { setuped: authInited, token, setToken, clearToken } = useAuth();
-    const { token, setToken, clearToken } = useAuth();
-    const ref = useRef<AxiosInstance | null>(null);
-    const authRef = useRef<AxiosInstance | null>(null);
-    const getRequest = useCallback((config?: RequestConfig, reCreate?: boolean) => {
-        if (reCreate || !ref.current) {
-            const instance = createRequest(config, {
-                withToken: false,
-            });
-            ref.current = instance;
-            return instance;
+export function useFetcher() {
+    const { setToken, clearToken } = useTokenDispatch();
+    const token = useToken.useValue();
+    const tokened = useToken.useSetuped();
+    const tokenRef = useRef<string | null>(null);
+    const instanceRef = useRef<AxiosInstance | null>(null);
+    function fetchGetter(): AxiosInstance;
+    function fetchGetter(reset: boolean): AxiosInstance;
+    function fetchGetter(config: RequestConfig): AxiosInstance;
+    function fetchGetter(reset: boolean, config: RequestConfig): AxiosInstance;
+    function fetchGetter(reset?: boolean | RequestConfig, config?: RequestConfig) {
+        if (!reset && instanceRef.current && tokenRef.current === token && tokened) {
+            return instanceRef.current;
         }
-        return ref.current;
-    }, []);
-    const getAuthRequest = useCallback(
-        (config?: RequestConfig, reCreate?: boolean) => {
-            if (!reCreate && authRef.current) return authRef.current;
-            if (!token) {
-                // if (!authInited || (authInited && !token)) {
-                authRef.current = null;
-                return null;
-            }
-            const instance = createRequest(config, {
-                withToken: true,
-                token,
-                setToken,
-                clearToken,
-            });
-            authRef.current = instance;
-            return instance;
-        },
-        [token],
-    );
-    return { getRequest, getAuthRequest };
+        const instance = createRequest(config, {
+            withToken: true,
+            token,
+            setToken,
+            clearToken,
+        });
+        instanceRef.current = instance;
+        tokenRef.current = token;
+        return instance;
+    }
+    const getFetcher = useCallback(fetchGetter, [tokened, token]);
+    return getFetcher;
 }

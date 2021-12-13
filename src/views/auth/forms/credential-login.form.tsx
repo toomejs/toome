@@ -1,31 +1,26 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable autofix/no-unused-vars */
 import ProForm, { ProFormText } from '@ant-design/pro-form';
 
 import { useDeepCompareEffect } from 'ahooks';
 import { message } from 'antd';
 
-import { FC, useCallback, useEffect } from 'react';
+import { FC, useCallback } from 'react';
 
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import shallow from 'zustand/shallow';
+import { useUser, useTokenDispatch, useAuth } from '@/components/Auth/hooks';
 
-import { useAuth, useUserStore, useUser } from '@/components/Auth/hooks';
-
-import { useRequest } from '@/components/Request';
-import { useLocationPath } from '@/components/Router';
+import { useFetcher } from '@/components/Request';
+import { useRouter } from '@/components/Router';
 
 const CredentialLoginForm: FC = () => {
-    const { clearToken, setToken } = useAuth();
-    const { getRequest } = useRequest();
-    const request = getRequest();
-    const { basePath } = useLocationPath();
+    const { clearToken, setToken } = useTokenDispatch();
+    const fetcher = useFetcher();
+    const { basePath } = useRouter.useConfig();
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
 
-    const user = useUserStore((state) => state.user, shallow);
-    const { changed: userChanged } = useUser();
+    const user = useUser();
+    const userChanged = useAuth.useChanged();
     const getRedirect = useCallback(() => {
         let queryRedirect = searchParams.get('redirect');
         if (queryRedirect && queryRedirect.length > 0) {
@@ -38,7 +33,6 @@ const CredentialLoginForm: FC = () => {
     }, []);
     useDeepCompareEffect(() => {
         const redirect = getRedirect();
-        console.log(redirect);
         if (user) navigate(redirect, { replace: true });
     }, [userChanged]);
     return (
@@ -50,7 +44,7 @@ const CredentialLoginForm: FC = () => {
                     try {
                         const {
                             data: { token },
-                        } = await request.post('/user/auth/login', values);
+                        } = await fetcher().post('/user/auth/login', values);
                         if (token) await setToken(token);
                         message.success('登录成功');
                         // waitTime();

@@ -1,7 +1,5 @@
 import { SmileOutlined } from '@ant-design/icons';
 
-import type { AntdRouteOption } from '@/components/Router';
-
 export const routes: AntdRouteOption[] = [
     {
         path: '/',

@@ -1,47 +1,32 @@
-/* eslint-disable autofix/no-unused-vars */
-import { useCreation } from 'ahooks';
+import { createSelectorHooks } from 'auto-zustand-selectors-hook';
+import produce from 'immer';
 import { dropInstance } from 'localforage';
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import create from 'zustand';
 import { redux } from 'zustand/middleware';
 
-import { createImmer } from '@/utils/store';
-
 import { DbActionType } from './constants';
 
-import type { DbConfig, StorageConfig, TableConfig } from './types';
-import { initStorage, storageReducer } from './utils';
+import type { DbConfig, StorageConfig, StorageStore, TableConfig } from './types';
+import { fixStorage, storageReducer } from './utils';
 
-const useInitStore = createImmer<{ inited: boolean }>(
-    () => ({ inited: false } as { inited: boolean }),
+const useStore = create(
+    redux(storageReducer, { setuped: false, doF: false, config: fixStorage({}) }),
 );
-const { getState, setState, dispatch } = create(redux(storageReducer, initStorage({})));
-export const useStorageInit = (config?: StorageConfig) => {
-    const inited = useInitStore((state) => state.inited);
-    if (!inited) {
-        setState(() => initStorage(config ?? {}), true);
-        useInitStore.setState((draft) => {
-            draft.inited = true;
-        });
-    }
-    return useMemo(() => inited, [inited]);
+export const useSetupStorage = (config?: StorageConfig) => {
+    useStore.dispatch({ type: DbActionType.SETUP, config });
 };
-
-export const useStorageState = () => {
-    const state = getState();
-    return useCreation(() => state, [state]);
-};
-
+export const useStorageStore = createSelectorHooks(useStore);
 export const useStorage = () => {
     const getDb = useCallback((name?: string) => {
-        const state = getState();
-        const dbname = name ?? state.default;
-        return state.dbs.find((db) => db.name === dbname);
+        const { config } = useStore.getState();
+        const dbname = name ?? config.default;
+        return config.dbs.find((db) => db.name === dbname);
     }, []);
     const getTable = useCallback((name?: string, dbname?: string) => {
-        const state = getState();
-        const dname = dbname ?? state.default;
-        const db = state.dbs.find((d) => d.name === dname);
+        const { config } = useStore.getState();
+        const dname = dbname ?? config.default;
+        const db = config.dbs.find((d) => d.name === dname);
         return (
             db &&
             db.tables.find((t) => {
@@ -54,12 +39,8 @@ export const useStorage = () => {
         const table = getTable(tablename, dbname);
         return table && table.instance;
     }, []);
-    return { getDb, getTable, getInstance };
-};
-export const useStorageMutation = () => {
-    const { getDb, getTable } = useStorage();
     const addDb = useCallback(
-        (options: DbConfig) => dispatch({ type: DbActionType.ADD_DB, config: options }),
+        (options: DbConfig) => useStore.dispatch({ type: DbActionType.ADD_DB, config: options }),
         [],
     );
     const removeDb = useCallback(async (name: string) => {
@@ -69,16 +50,32 @@ export const useStorageMutation = () => {
                 db.tables.map(async (t) => dropInstance({ name: db.name, storeName: t.name })),
             );
         }
-        dispatch({ type: DbActionType.DELETE_DB, name });
+        useStore.dispatch({ type: DbActionType.DELETE_DB, name });
     }, []);
     const addTable = useCallback((options: TableConfig, dbname?: string) => {
-        dispatch({ type: DbActionType.ADD_TABLE, config: options, dbname });
+        useStore.dispatch({ type: DbActionType.ADD_TABLE, config: options, dbname });
     }, []);
     const removeTable = useCallback(async (name: string, dbname?: string) => {
-        const state = getState();
-        const dname = dbname ?? state.default;
-        dispatch({ type: DbActionType.DELETE_TABLE, name, dbname: dname });
+        const { config } = useStore.getState();
+        const dname = dbname ?? config.default;
+        useStore.dispatch({ type: DbActionType.DELETE_TABLE, name, dbname: dname });
         if (getTable(name, dbname)) await dropInstance({ name: dname, storeName: name });
     }, []);
-    return { addDb, removeDb, addTable, removeTable };
+    const doIn = useCallback(() => {
+        useStore.setState(
+            produce((state: StorageStore) => {
+                state.doF = !state.doF;
+            }),
+        );
+    }, []);
+    return {
+        doIn,
+        getDb,
+        getInstance,
+        getTable,
+        addDb,
+        removeDb,
+        addTable,
+        removeTable,
+    };
 };

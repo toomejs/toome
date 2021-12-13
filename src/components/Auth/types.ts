@@ -1,19 +1,31 @@
-export type Role<T extends Record<string, any> = Record<string, any>> = {
-    id: string;
-    name: string;
-} & T;
-export type Permission<T extends Record<string, any> = Record<string, any>> = {
-    id: string;
-    name: string;
-} & T;
+export type Role<T extends RecordAnyOrNever = RecordNever> = RecordScalable<
+    {
+        id: string;
+        name: string;
+    },
+    T
+>;
+export type Permission<T extends RecordAnyOrNever = RecordNever> = RecordScalable<
+    {
+        id: string;
+        name: string;
+    },
+    T
+>;
+
 export type User<
-    T extends Record<string, any> = Record<string, any>,
-    R extends Record<string, any> = Record<string, any>,
-    P extends Record<string, any> = Record<string, any>,
-> = {
-    id: string;
-    username: string;
-    roles?: Role<R>[];
-    permissions?: Permission<P>[];
-} & T;
-export type Auth = { token: null | string };
+    T extends RecordAnyOrNever = RecordNever,
+    R extends RecordAnyOrNever = RecordNever,
+    P extends RecordAnyOrNever = RecordNever,
+> = RecordScalable<
+    {
+        roles?: Role<R>[];
+        permissions?: Permission<P>[];
+    },
+    T
+>;
+export type TokenStore = { setuped: boolean; value: null | string };
+export type UserStore = {
+    user: User | null;
+    changed: boolean;
+};

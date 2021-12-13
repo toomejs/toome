@@ -1,35 +1,34 @@
-import { useCreation } from 'ahooks';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useCallback } from 'react';
 
-import { getAntdMenus, RouterContext } from './util';
+import { createHookSelectors, createImmer } from '@/utils/store';
 
-export const useAppRouter = () => {
-    const { basePath, routes, menus, names, setConfig } = useContext(RouterContext);
+import { getDefaultStore } from './_defaultConfig';
+import type { RouterStore, RouteOption } from './types';
+
+export const useRouterStore = createImmer<RouterStore>(() => getDefaultStore());
+export const useRouter = createHookSelectors(useRouterStore);
+export const useRouterReset = () =>
+    useCallback(() => {
+        useRouterStore.setState((state) => {
+            state.signal.shouldChange = true;
+        });
+    }, []);
+
+export const useRoutesChange = () => {
+    const addRoutes = useCallback(<T extends RecordAnyOrNever>(items: RouteOption<T>[]) => {
+        useRouterStore.setState((state) => {
+            state.config.routes.dynamic = [...state.config.routes.dynamic, ...items];
+            state.signal.shouldChange = true;
+        });
+    }, []);
+    const setRoutes = useCallback(<T extends RecordAnyOrNever>(items: RouteOption<T>[]) => {
+        useRouterStore.setState((state) => {
+            state.config.routes.dynamic = [...items];
+            state.signal.shouldChange = true;
+        });
+    }, []);
     return {
-        basePath: useMemo(() => basePath, [basePath]),
-        routes: useCreation(() => routes, [routes]),
-        menus: useCreation(() => menus, [menus]),
-        names: useCreation(() => names, [names]),
-        setConfig: useCallback(setConfig, [setConfig]),
-    };
-};
-export const useMenus = () => {
-    const { menus } = useContext(RouterContext);
-    return useMemo(() => menus, [menus]);
-};
-export const useAntdMenus = () => {
-    const { menus } = useContext(RouterContext);
-    const antdMenus = useMemo(() => getAntdMenus(menus), [menus]);
-    return antdMenus;
-};
-export const useLocationPath = () => {
-    const { basePath } = useAppRouter();
-    const [pathname, setPathname] = useState(basePath);
-    const location = useLocation();
-    useEffect(() => setPathname(location.pathname), [location.pathname]);
-    return {
-        basePath,
-        pathname,
+        addRoutes,
+        setRoutes,
     };
 };

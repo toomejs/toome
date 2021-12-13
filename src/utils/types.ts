@@ -22,3 +22,11 @@ export type ZImmberUseBoundStore<
     (): T;
     <U>(selector: StateSelector<T, U>, equalityFn?: EqualityChecker<U>): U;
 } & CustomStoreApi;
+export type ZSelector<StoreType> = {
+    use: {
+        [key in keyof StoreType]: () => StoreType[key];
+    };
+};
+export type ZHookSelector<StoreType> = {
+    [Key in keyof StoreType as `use${Capitalize<string & Key>}`]: () => StoreType[Key];
+};

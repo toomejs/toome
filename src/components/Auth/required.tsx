@@ -2,19 +2,17 @@ import { trim } from 'lodash-es';
 import type { FC, ReactElement } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 
-import type { AntdRouteOption, RouteOption } from '../Router';
-
-import { useAuth } from './hooks';
+import { useToken } from './hooks';
 
 export const RequirdAuth: FC<{
-    route: RouteOption | AntdRouteOption;
     basename: string;
     path?: string;
     element: ReactElement;
-}> = ({ route: { auth }, element, basename, path = '/auth/login' }) => {
+}> = ({ element, basename, path = '/auth/login' }) => {
     const location = useLocation();
-    const { token } = useAuth();
-    if (auth && token !== undefined) {
+    const token = useToken.useValue();
+    const tokened = useToken.useSetuped();
+    if (tokened && token !== undefined) {
         let redirect = '';
         if (location.pathname !== path && trim(location.pathname, '/') !== trim(basename, '/')) {
             redirect = `?redirect=${location.pathname}`;

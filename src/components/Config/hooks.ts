@@ -7,7 +7,7 @@ import { createImmer } from '@/utils/store';
 
 import { deepMerge } from '@/utils/tools';
 
-import { useStorageInit } from '../Storage';
+import { useStorageStore } from '../Storage';
 
 import { defaultConfig } from './_default.config';
 import type { Config, ConfigState } from './types';
@@ -16,8 +16,8 @@ type ConfigStore = { config: ConfigState; inited: boolean };
 const useStore = createImmer<ConfigStore>(() => ({ config: defaultConfig, inited: false }));
 export const useConfigInit = (config?: Config) => {
     const inited = useStore((state) => state.inited);
-    const storageInited = useStorageInit();
-    if (config && storageInited && !inited) {
+    const setupStorage = useStorageStore.useSetuped();
+    if (config && setupStorage && !inited) {
         useStore.setState((draft) => {
             draft.config = deepMerge(draft.config, config);
             draft.inited = true;

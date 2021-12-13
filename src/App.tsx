@@ -1,19 +1,22 @@
 import './App.css';
-import { useSetupUser } from './components/Auth';
+import { useSetupAuth } from './components/Auth';
+import { useSetupMenu } from './components/Menu';
 
-// import { AppRouter } from './components/Router';
+import { Router } from './components/Router/provider';
+import { useSetupRouter } from './components/Router/setup';
 
-import { Router } from './components/Routing';
-
-import { useStorageInit } from './components/Storage';
+import { useSetupStorage } from './components/Storage';
 import { routing } from './config/routeConfig';
 
 const App = () => {
     // useConfigInit(config);
-    useStorageInit();
-    useSetupUser('/user/info');
-    return <Router config={routing} />;
-    // return <AppRouter config={routerConfig} />;
+    useSetupStorage();
+    useSetupAuth('/user/info');
+    useSetupRouter(routing);
+    useSetupMenu();
+    // useSetupIcon();
+    // useSetupIcon();
+    return <Router />;
 };
 
 export default App;

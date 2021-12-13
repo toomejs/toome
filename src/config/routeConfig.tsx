@@ -1,6 +1,6 @@
 import { SmileOutlined } from '@ant-design/icons';
 
-import type { AntdRouteMenuMeta, RouterConfig } from '@/components/Routing';
+import type { AntdRouteMenuMeta, RouterConfig } from '@/components/Router';
 
 export const routing: RouterConfig<AntdRouteMenuMeta> = {
     basePath: import.meta.env.BASE_URL,
@@ -20,21 +20,21 @@ export const routing: RouterConfig<AntdRouteMenuMeta> = {
                     {
                         name: 'auth.login',
                         path: 'login',
-                        page: 'pages/auth/login',
+                        page: 'auth/login',
                         meta: { hide: true },
                     },
                     {
                         name: 'auth.singup',
                         path: 'signup',
-                        page: 'pages/auth/signup',
-                        meta: { hide: true },
+                        page: 'auth/signup',
+                        // meta: { hide: true },
                     },
                 ],
             },
             {
                 name: '404',
                 path: '*',
-                page: 'pages/errors/404',
+                page: 'errors/404',
                 meta: { hide: true },
             },
         ],
@@ -47,7 +47,7 @@ export const routing: RouterConfig<AntdRouteMenuMeta> = {
                     {
                         name: 'dashboard',
                         index: true,
-                        page: 'pages/dashboard/index',
+                        page: 'dashboard/index',
                         meta: { text: '仪表盘', icon: <SmileOutlined /> },
                     },
                     {
@@ -64,13 +64,13 @@ export const routing: RouterConfig<AntdRouteMenuMeta> = {
                             {
                                 name: 'articles',
                                 path: 'articles',
-                                page: 'pages/content/articles/index',
+                                page: 'content/articles/index',
                                 meta: { text: '文章管理', icon: <SmileOutlined /> },
                             },
                             {
                                 name: 'categories',
                                 path: 'categories',
-                                page: 'pages/content/categories/index',
+                                page: 'content/categories/index',
                                 meta: { text: '分类管理', icon: <SmileOutlined /> },
                             },
                         ],

@@ -1,4 +1,5 @@
 export enum DbActionType {
+    SETUP = 'setup',
     ADD_DB = 'add_db',
     DELETE_DB = 'delete_db',
     SET_DEFAULT_DB = 'set_default_db',
