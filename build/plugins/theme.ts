@@ -48,8 +48,7 @@ export function configThemePlugin(isBuild: boolean): Plugin[] {
         }),
         antdDarkThemePlugin({
             preloadFiles: [
-                path.resolve(process.cwd(), 'node_modules/ant-design-vue/dist/antd.less'),
-                // path.resolve(process.cwd(), 'node_modules/ant-design-vue/dist/antd.dark.less'),
+                path.resolve(process.cwd(), 'node_modules/antd/dist/antd.less'),
                 path.resolve(process.cwd(), 'src/styles/antd/components.less'),
             ],
             filter: (id) => (isBuild ? !id.endsWith('antd.less') : true),

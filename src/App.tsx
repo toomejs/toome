@@ -7,6 +7,7 @@ import { Router } from './components/Router/provider';
 import { useSetupRouter } from './components/Router/setup';
 
 import { useSetupStorage } from './components/Storage';
+import { useSetupTheme } from './components/Theme';
 import { routing } from './config/routeConfig';
 
 const App = () => {
@@ -15,6 +16,7 @@ const App = () => {
     useSetupAuth('/user/info');
     useSetupRouter(routing);
     useSetupMenu();
+    useSetupTheme();
     useSetupIcon({
         iconfont_urls: ['//at.alicdn.com/t/font_2497975_4zt848h920t.js'],
     });

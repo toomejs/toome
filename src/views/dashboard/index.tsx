@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 
 import { Icon } from '@/components/Icon';
 import { useStorage, useStorageStore } from '@/components/Storage';
+import { useThemeDispatch } from '@/components/Theme';
 
 const DoF: FC = () => {
     const config = useStorageStore.useConfig();
@@ -35,13 +36,13 @@ const DoQ: FC = () => {
     );
 };
 const DoIn: FC = () => {
-    const { doIn } = useStorage();
+    const { toggleTheme } = useThemeDispatch();
     // console.log('渲染操作2');
     return (
         <>
             <Link to="/auth/signup">Link</Link>
-            <Button type="primary" onClick={() => doIn()}>
-                Change DoF
+            <Button type="primary" onClick={() => toggleTheme()}>
+                Change Theme
                 <Icon type="ionify" name="la:bacon" style={{ color: 'blue', fontSize: '1em' }} />
             </Button>
         </>
