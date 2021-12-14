@@ -1,5 +1,6 @@
 import './App.css';
 import { useSetupAuth } from './components/Auth';
+import { useSetupIcon } from './components/Icon';
 import { useSetupMenu } from './components/Menu';
 
 import { Router } from './components/Router/provider';
@@ -14,7 +15,9 @@ const App = () => {
     useSetupAuth('/user/info');
     useSetupRouter(routing);
     useSetupMenu();
-    // useSetupIcon();
+    useSetupIcon({
+        iconfont_urls: ['//at.alicdn.com/t/font_2497975_4zt848h920t.js'],
+    });
     // useSetupIcon();
     return <Router />;
 };

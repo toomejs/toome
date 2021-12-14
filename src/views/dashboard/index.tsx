@@ -4,6 +4,7 @@ import type { FC } from 'react';
 
 import { Link } from 'react-router-dom';
 
+import { Icon } from '@/components/Icon';
 import { useStorage, useStorageStore } from '@/components/Storage';
 
 const DoF: FC = () => {
@@ -41,6 +42,7 @@ const DoIn: FC = () => {
             <Link to="/auth/signup">Link</Link>
             <Button type="primary" onClick={() => doIn()}>
                 Change DoF
+                <Icon type="ionify" name="la:bacon" style={{ color: 'blue', fontSize: '1em' }} />
             </Button>
         </>
     );

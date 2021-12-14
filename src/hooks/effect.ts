@@ -1,6 +1,5 @@
 import { useDeepCompareEffect } from 'ahooks';
-import type { EffectCallback, DependencyList } from 'react';
-import { useRef } from 'react';
+import { EffectCallback, DependencyList, useRef } from 'react';
 
 export const useAsyncDeepCompareEffect = (
     effect: () => AsyncGenerator<void, void, void> | Promise<void>,
@@ -51,7 +50,6 @@ export function useAsyncEffectAll(
         })();
     }, [effect, prevDeps, deps]);
 }
-
 // taken from https://usehooks.com/usePrevious/
 function usePrevious(value: DependencyList) {
     const ref = useRef<DependencyList>();

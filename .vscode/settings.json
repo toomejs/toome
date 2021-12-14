@@ -3,5 +3,9 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
     },
+    "[less]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
     "javascript.preferences.importModuleSpecifier": "project-relative"
 }

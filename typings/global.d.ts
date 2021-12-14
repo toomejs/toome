@@ -16,10 +16,10 @@ declare type ReRequired<T> = {
             : ReRequired<T[P]>
         : T[P];
 };
-declare type RecordStringAny = Record<string, any>;
+declare type RecordAny = Record<string, any>;
 declare type RecordNever = Record<never, never>;
-declare type RecordAnyOrNever = RecordStringAny | RecordNever;
-declare type RecordScalable<T extends RecordStringAny, U extends RecordAnyOrNever> = T &
+declare type RecordAnyOrNever = RecordAny | RecordNever;
+declare type RecordScalable<T extends RecordAny, U extends RecordAnyOrNever> = T &
     (U extends Record<string, never> ? RecordNever : U);
 /**
  * 一个类的类型

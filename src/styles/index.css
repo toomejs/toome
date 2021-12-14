@@ -1,6 +1,3 @@
-@import './vars/index.less';
-@import './antd/index.less';
-
 input:-webkit-autofill {
   box-shadow: 0 0 0 1000px white inset !important;
 }
@@ -11,18 +8,25 @@ input:-webkit-autofill {
 
 html {
   overflow: hidden;
-  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 html,
-body,
-#root {
+body {
   width: 100%;
-  height: 100vh;
+  height: 100%;
   overflow: visible !important;
   overflow-x: hidden !important;
-}
 
+  &.color-weak {
+    filter: invert(80%);
+  }
+
+  &.gray-mode {
+    filter: grayscale(100%);
+    filter: progid:dximagetransform.microsoft.basicimage(grayscale=1);
+  }
+}
 
 a:focus,
 a:active,

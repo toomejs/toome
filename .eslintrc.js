@@ -43,7 +43,7 @@ module.exports = {
         jest: true,
         node: true,
     },
-    plugins: ['@typescript-eslint', 'import', 'jest', 'autofix'],
+    plugins: ['@typescript-eslint', 'import', 'jest', 'unused-imports'],
     rules: {
         /* ********************************** ES6+ ********************************** */
         'no-console': 0,
@@ -52,14 +52,6 @@ module.exports = {
         'no-continue': 0,
         'no-await-in-loop': 0,
         'no-return-await': 0,
-        'no-unused-vars': [
-            'error',
-            {
-                vars: 'all',
-                args: 'none',
-                ignoreRestSiblings: true,
-            },
-        ],
         'no-multi-assign': 0,
         'no-param-reassign': [2, { props: false }],
         'max-classes-per-file': 0,
@@ -107,10 +99,14 @@ module.exports = {
                 warnOnUnassignedImports: true,
             },
         ],
-
-        // 自动删除未使用导入
-        // https://github.com/aladdin-add/eslint-plugin/tree/master/packages/autofix
-        'autofix/no-unused-vars': [
+        // 自动删除未使用的导入
+        // https://github.com/sweepline/eslint-plugin-unused-imports
+        'no-unused-vars': 0,
+        '@typescript-eslint/no-unused-vars': 0,
+        'react/jsx-uses-react': 1,
+        'react/jsx-uses-vars': 1,
+        'unused-imports/no-unused-imports': 1,
+        'unused-imports/no-unused-vars': [
             'error',
             {
                 vars: 'all',
@@ -118,12 +114,26 @@ module.exports = {
                 ignoreRestSiblings: true,
             },
         ],
-        // 自动删除未使用的导入(另一种方案)
-        // https://github.com/sweepline/eslint-plugin-unused-imports
-        // 'no-unused-vars': 0,
-        // '@typescript-eslint/no-unused-vars': 0,
-        // 'unused-imports/no-unused-imports': 1,
-        // 'unused-imports/no-unused-vars': [
+
+        // 自动删除未使用导入(另一种方案)
+        // https://github.com/aladdin-add/eslint-plugin/tree/master/packages/autofix
+        // 'no-unused-vars': [
+        //     'error',
+        //     {
+        //         vars: 'all',
+        //         args: 'none',
+        //         ignoreRestSiblings: true,
+        //     },
+        // ],
+        // 'autofix/no-unused-vars': [
+        //     'error',
+        //     {
+        //         vars: 'all',
+        //         args: 'none',
+        //         ignoreRestSiblings: true,
+        //     },
+        // ],
+        // '@typescript-eslint/no-unused-vars': [
         //     'error',
         //     {
         //         vars: 'all',
@@ -155,14 +165,6 @@ module.exports = {
         '@typescript-eslint/no-unsafe-member-access': 0,
         '@typescript-eslint/no-unsafe-call': 0,
         '@typescript-eslint/no-unsafe-argument': 0,
-        '@typescript-eslint/no-unused-vars': [
-            'error',
-            {
-                vars: 'all',
-                args: 'none',
-                ignoreRestSiblings: true,
-            },
-        ],
 
         /* ********************************** React and Hooks ********************************** */
         'react/display-name': 0,

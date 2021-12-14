@@ -2,7 +2,8 @@ import { enableMapSet } from 'immer';
 
 import ReactDOM from 'react-dom';
 
-import '@/styles/index.less';
+import '@/styles/antd/index.less';
+import '@/styles/index.css';
 
 import App from './App';
 

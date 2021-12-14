@@ -1,5 +1,4 @@
 /* eslint-disable import/no-extraneous-dependencies */
-import { getThemeVariables } from 'antd/dist/theme';
 import merge from 'deepmerge';
 import { ConfigEnv, UserConfig } from 'vite';
 
@@ -7,7 +6,7 @@ import { getPlugins } from './plugins';
 import { createProxy } from './proxy';
 
 import { Configure } from './types';
-import { pathResolve } from './utils';
+import { generateModifyVars, pathResolve } from './utils';
 
 export const getConfig = (params: ConfigEnv, configure?: Configure): UserConfig => {
     const isBuild = params.command === 'build';
@@ -27,7 +26,7 @@ export const getConfig = (params: ConfigEnv, configure?: Configure): UserConfig 
                 preprocessorOptions: {
                     less: {
                         javascriptEnabled: true,
-                        modifyVars: { ...getThemeVariables(), '@primary-color': '#1DA57A' },
+                        modifyVars: generateModifyVars(),
                     },
                 },
             },
