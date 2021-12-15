@@ -1,5 +1,4 @@
 import { createFromIconfontCN } from '@ant-design/icons';
-
 import { omit } from 'lodash-es';
 
 import create from 'zustand';
@@ -14,22 +13,26 @@ import type { BaseIconProps, IconComputed, IconConfig, IconState } from './types
 
 const Setuped = create(() => ({
     created: false,
+    setuped: false,
 }));
 
 const IconStore = createImmer<IconState>(() => getDefaultIconConfig());
 export const useSetupIcon = <T extends RecordAnyOrNever = RecordNever>(config?: IconConfig<T>) => {
-    useSetupedEffect(Setuped, () => {
-        if (config) {
-            IconStore.setState((state) => {
-                const newState = deepMerge(state, omit(config, ['iconfont']) as any);
-                if (config.iconfont_urls) {
-                    newState.iconfont = createFromIconfontCN({
-                        scriptUrl: config.iconfont_urls,
-                    });
-                }
-                return newState;
-            });
-        }
+    useSetupedEffect({
+        store: Setuped,
+        callback: () => {
+            if (config) {
+                IconStore.setState((state) => {
+                    const newState = deepMerge(state, omit(config, ['iconfont']) as any);
+                    if (config.iconfont_urls) {
+                        newState.iconfont = createFromIconfontCN({
+                            scriptUrl: config.iconfont_urls,
+                        });
+                    }
+                    return newState;
+                });
+            }
+        },
     });
 };
 export const useIcon = <U extends BaseIconProps<T>, T extends RecordAny>(

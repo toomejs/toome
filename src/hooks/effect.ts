@@ -1,7 +1,10 @@
 import { useDebounceEffect, useDeepCompareEffect } from 'ahooks';
 import { EffectCallback, DependencyList, useRef } from 'react';
+import type { State } from 'zustand';
 
-import type { OnceEffectProps } from './types';
+import { isAsyncFn } from '@/utils/tools';
+
+import type { SetupedEffectProps, SubsciberDebounceProps } from './types';
 
 export const useAsyncDeepCompareEffect = (
     effect: () => AsyncGenerator<void, void, void> | Promise<void>,
@@ -64,16 +67,53 @@ function usePrevious(value: DependencyList) {
 }
 
 export function useSetupedEffect<T extends RecordAnyOrNever>(
-    store: OnceEffectProps<T>,
-    callback: () => void | Promise<void>,
+    { store, callback, wait }: SetupedEffectProps<T>,
     deps?: DependencyList,
 ) {
     const depends = deps ?? [];
 
-    useDebounceEffect(() => {
-        if (depends.every((d) => !!d) && !store.getState().created) {
-            store.setState((state: any) => ({ ...state, created: true }));
-            callback();
-        }
-    }, [depends]);
+    useDebounceEffect(
+        () => {
+            if (
+                depends.every((d) => !!d) &&
+                !store.getState().created &&
+                !store.getState().setuped
+            ) {
+                store.setState((state: any) => ({ ...state, created: true }));
+                if (isAsyncFn(callback)) {
+                    callback().then(() => {
+                        store.setState((state: any) => ({ ...state, setuped: true }));
+                    });
+                } else {
+                    store.setState((state: any) => ({ ...state, setuped: true }));
+                }
+            }
+        },
+        [depends],
+        { wait: wait ?? 10 },
+    );
+}
+
+export function useSubsciberDebounce<T extends State, K extends keyof T>(
+    { store, select, callback, wait }: SubsciberDebounceProps<T, K>,
+    deps?: DependencyList,
+) {
+    const changing = useRef<boolean>(false);
+    store.subscribe(
+        (state) => state[select],
+        (current, pre) => {
+            if (!changing.current) {
+                changing.current = true;
+                const value = store.getState()[select];
+                if (isAsyncFn(callback)) {
+                    callback(value).then(() => {
+                        changing.current = false;
+                    });
+                } else {
+                    callback(value);
+                    changing.current = false;
+                }
+            }
+        },
+    );
 }

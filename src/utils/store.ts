@@ -1,21 +1,25 @@
 import { createSelectorFunctions, createSelectorHooks } from 'auto-zustand-selectors-hook';
 import produce from 'immer';
 import type { Draft } from 'immer';
-import type { State, GetState, SetState, StoreApi, UseBoundStore } from 'zustand';
+import type { State, GetState, SetState, StoreApi, UseBoundStore, StateCreator } from 'zustand';
 
 import create from 'zustand';
 
+import { subscribeWithSelector } from 'zustand/middleware';
+import type { StoreApiWithSubscribeWithSelector } from 'zustand/middleware';
+
 import type {
-    ZSelector,
-    ZHookSelector,
-    ZImmberStateCreator,
-    ZImmberUseBoundStore,
-    ZImmerSetState,
-    ZImmerStoreApi,
+    ZSSelector,
+    ZSImmberStateCreator,
+    ZSImmberUseBoundStore,
+    ZSImmerSetState,
+    ZSImmerStoreApi,
+    ZSHookSelector,
+    ZSImmberSelectorStoreApi,
 } from './types';
 
 const setImmerState =
-    <T extends State>(set: SetState<T>): ZImmerSetState<T> =>
+    <T extends State>(set: SetState<T>): ZSImmerSetState<T> =>
     (partial, replace) => {
         const nextState =
             typeof partial === 'function'
@@ -23,74 +27,63 @@ const setImmerState =
                 : (partial as T);
         return set(nextState, replace);
     };
+const setImmerStateWithGet = <T extends State>(
+    set: SetState<T>,
+    get: GetState<T>,
+): ZSImmerSetState<T> => setImmerState(set);
 
 const ImmerMiddleware =
-    <
-        T extends State,
-        CustomSetState extends SetState<T>,
-        CustomGetState extends GetState<T>,
-        CustomStoreApi extends StoreApi<T>,
-    >(
-        config: ZImmberStateCreator<T, ZImmerSetState<T>, CustomGetState, ZImmerStoreApi<T>>,
-    ): ZImmberStateCreator<T, CustomSetState, CustomGetState, CustomStoreApi> =>
+    <T extends State, CS extends SetState<T>, CG extends GetState<T>, CA extends StoreApi<T>>(
+        config: ZSImmberStateCreator<T, ZSImmerSetState<T>, CG, ZSImmerStoreApi<T>>,
+    ): ZSImmberStateCreator<T, CS, CG, CA> =>
     (set, get, api) => {
-        return config(setImmerState(set), get, { ...api, setState: setImmerState(api.setState) });
+        return config(setImmerStateWithGet(set, get), get, {
+            ...api,
+            setState: setImmerState(api.setState),
+        });
     };
 
-export function createImmer<
-    TState extends State,
-    CustomSetState,
-    CustomGetState,
-    CustomStoreApi extends ZImmerStoreApi<TState>,
->(
+export function createImmer<T extends State>(
     createState:
-        | ZImmberStateCreator<TState, CustomSetState, CustomGetState, CustomStoreApi>
-        | CustomStoreApi,
-): ZImmberUseBoundStore<TState, CustomStoreApi>;
-
-export function createImmer<TState extends State>(
-    createState:
-        | ZImmberStateCreator<TState, SetState<TState>, GetState<TState>, any>
-        | ZImmerStoreApi<TState>,
-): ZImmberUseBoundStore<TState, ZImmerStoreApi<TState>>;
-
-export function createImmer(createState: any) {
-    const store = create(ImmerMiddleware(createState));
+        | ZSImmberStateCreator<T, ZSImmerSetState<T>, GetState<T>, ZSImmerStoreApi<T>>
+        | ZSImmerStoreApi<T>,
+): ZSImmberUseBoundStore<T, ZSImmerStoreApi<T>> {
+    const store = create(ImmerMiddleware(createState as any));
     store.setState = setImmerState(store.setState);
-    return store;
+    return store as any;
+}
+
+export function createSubsciberImmer<T extends State>(
+    createState: ZSImmberStateCreator<
+        T,
+        ZSImmerSetState<T>,
+        GetState<T>,
+        ZSImmberSelectorStoreApi<T>
+    >,
+): ZSImmberUseBoundStore<T, ZSImmberSelectorStoreApi<T>> {
+    const store = create(subscribeWithSelector(ImmerMiddleware(createState as any)));
+    store.setState = setImmerState(store.setState) as any;
+    return store as any;
+}
+
+export function createSubsciber<T extends State>(
+    createState: StateCreator<T, SetState<T>, GetState<T>, StoreApiWithSubscribeWithSelector<T>>,
+): UseBoundStore<T, StoreApiWithSubscribeWithSelector<T>> {
+    return create(subscribeWithSelector(createState as any));
 }
 
 export function createSelectors<
-    TState extends State,
-    CustomStoreApi extends ZImmerStoreApi<TState>,
->(store: ZImmberUseBoundStore<TState, CustomStoreApi>): ZHookSelector<TState>;
-export function createSelectors<TState extends State>(
-    store: ZImmberUseBoundStore<TState, ZImmerStoreApi<TState>>,
-): ZSelector<TState>;
-export function createSelectors<TState extends State, CustomStoreApi extends StoreApi<TState>>(
-    store: UseBoundStore<TState, CustomStoreApi>,
-): ZSelector<TState>;
-export function createSelectors<TState extends State>(
-    store: UseBoundStore<TState, StoreApi<TState>>,
-): ZSelector<TState>;
-
-export function createSelectors(store: any) {
-    return createSelectorFunctions(store) as any;
+    T extends State,
+    A extends ZSImmerStoreApi<T>,
+    B extends StoreApi<T>,
+>(store: ZSImmberUseBoundStore<T, A> | UseBoundStore<T, B>): ZSSelector<T> {
+    return createSelectorFunctions(store as any) as any;
 }
 
 export function createHookSelectors<
-    TState extends State,
-    CustomStoreApi extends ZImmerStoreApi<TState>,
->(store: ZImmberUseBoundStore<TState, CustomStoreApi>): ZHookSelector<TState>;
-export function createHookSelectors<TState extends State>(
-    store: ZImmberUseBoundStore<TState, ZImmerStoreApi<TState>>,
-): ZHookSelector<TState>;
-export function createHookSelectors<TState extends State, CustomStoreApi extends StoreApi<TState>>(
-    store: UseBoundStore<TState, CustomStoreApi>,
-): ZHookSelector<TState>;
-export function createHookSelectors<TState extends State>(
-    store: UseBoundStore<TState, StoreApi<TState>>,
-): ZHookSelector<TState>;
-export function createHookSelectors(store: any) {
-    return createSelectorHooks(store) as any;
+    T extends State,
+    A extends ZSImmerStoreApi<T>,
+    B extends StoreApi<T>,
+>(store: ZSImmberUseBoundStore<T, A> | UseBoundStore<T, B>): ZSHookSelector<T> {
+    return createSelectorHooks(store as any) as any;
 }

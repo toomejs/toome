@@ -1,10 +1,12 @@
 import create from 'zustand';
 
-import { subscribeWithSelector } from 'zustand/middleware';
+import { createSubsciberImmer } from '@/utils/store';
 
 import type { ThemeState } from './types';
 
-export const ThemeSetup = create(() => ({
+const ThemeSetup = create(() => ({
     created: false,
+    setuped: false,
 }));
-export const ThemeStore = create<ThemeState>(subscribeWithSelector(() => ({ mode: 'light' })));
+const ThemeStore = createSubsciberImmer<ThemeState>(() => ({ mode: 'light' }));
+export { ThemeSetup, ThemeStore };

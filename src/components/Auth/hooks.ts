@@ -3,6 +3,8 @@ import { useAsyncEffect, useDeepCompareEffect, useSafeState } from 'ahooks';
 import { dequal } from 'dequal';
 import { useCallback, useEffect, useRef } from 'react';
 
+import create from 'zustand';
+
 import { createHookSelectors, createImmer } from '@/utils/store';
 
 import { useFetcher } from '../Request';
@@ -12,13 +14,14 @@ import { useStorage, useStorageStore } from '../Storage';
 
 import type { User, TokenStore, UserStore } from './types';
 
-const useTokenStore = createImmer<TokenStore>(() => ({ setuped: false, value: null }));
+const useTokenStore = create<TokenStore>(() => ({ setuped: false, value: null }));
 export const useToken = createHookSelectors(useTokenStore);
 export const useAuthStore = createImmer<UserStore>(() => ({
     user: null,
     requested: false,
     changed: false,
 }));
+
 export const useAuth = createHookSelectors(useAuthStore);
 export const useUser = <
     T extends RecordAnyOrNever = RecordNever,

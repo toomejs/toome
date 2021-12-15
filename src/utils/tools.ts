@@ -4,7 +4,12 @@ import deepmergeDo from 'deepmerge';
 export function isPromise(promise: any): promise is PromiseLike<any> {
     return !!promise && promise instanceof Promise;
 }
-
+export function isAsyncFn<R, A extends Array<any>>(
+    callback: (...asgs: A) => Promise<R> | R,
+): callback is (...asgs: A) => Promise<R> {
+    const AsyncFunction = (async () => {}).constructor;
+    return callback instanceof AsyncFunction === true;
+}
 export const deepMerge = <T1, T2>(x: Partial<T1>, y: Partial<T2>, options?: deepmerge.Options) => {
     return deepmergeDo(
         x,

@@ -9,6 +9,7 @@ import shallow from 'zustand/shallow';
 
 import { useSetupedEffect } from '@/hooks';
 import { createHookSelectors, createImmer } from '@/utils/store';
+
 import { deepMerge } from '@/utils/tools';
 
 import { useAuthStore, useUser } from '../Auth';
@@ -21,7 +22,7 @@ import { getDefaultMenuStore } from './_default.store';
 import type { MenuConfig, MenuStore, MenuOption } from './types';
 import { getAntdMenus, getRouteMenus } from './utils';
 
-const Setuped = create(() => ({ created: false }));
+const Setuped = create(() => ({ created: false, setuped: false }));
 export const useMenuStore = createImmer<MenuStore>(() => getDefaultMenuStore());
 export const useMenu = createHookSelectors(useMenuStore);
 export const useAntdMenus = () =>
@@ -45,12 +46,15 @@ export const useSetupMenu = <T extends RecordAnyOrNever = RecordNever, M = MenuO
         (state) => ({ configed: state.config, shouldChange: state.shouldChange }),
         shallow,
     );
-    useSetupedEffect(Setuped, () => {
-        if (config) {
-            useMenuStore.setState((state) => {
-                state.config = deepMerge(state.config, config ?? {});
-            });
-        }
+    useSetupedEffect({
+        store: Setuped,
+        callback: () => {
+            if (config) {
+                useMenuStore.setState((state) => {
+                    state.config = deepMerge(state.config, config ?? {});
+                });
+            }
+        },
     });
     useEffect(() => {
         if (configed.type !== 'router')
