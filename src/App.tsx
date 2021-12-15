@@ -17,9 +17,13 @@ const App = () => {
     useSetupRouter(routing);
     useSetupMenu();
     useSetupTheme();
+    useSetupTheme();
     useSetupIcon({
         iconfont_urls: ['//at.alicdn.com/t/font_2497975_4zt848h920t.js'],
     });
+    // useSetupIcon({
+    //     iconfont_urls: ['//at.alicdn.com/t/font_2497975_4zt848h920t.js'],
+    // });
     // useSetupIcon();
     return <Router />;
 };

@@ -1,47 +1,45 @@
-import { useAsyncEffect } from 'ahooks';
-
+import { useUpdateEffect } from 'ahooks';
 import { useCallback } from 'react';
 
-import { createImmer } from '@/utils/store';
+import { useSetupedEffect } from '@/hooks';
 
 import { useStorage, useStorageStore } from '../Storage';
 
-import type { ThemeConfig, ThemeMode, ThemeState } from './types';
+import { ThemeSetup, ThemeStore } from './store';
 
-const ThemeSetup = createImmer<{ setuped: boolean }>(() => ({ setuped: false }));
-const ThemeStore = createImmer<ThemeState>(() => ({ mode: 'light' }));
+import type { ThemeConfig, ThemeMode } from './types';
+
 export const useSetupTheme = (config?: ThemeConfig) => {
     const storageSetuped = useStorageStore.useSetuped();
     const theme = ThemeStore((state) => state.mode);
     const { addTable, getInstance } = useStorage();
-    const themeSetuped = ThemeSetup((state) => state.setuped);
-    useAsyncEffect(async () => {
-        if (!themeSetuped && storageSetuped) {
+    useSetupedEffect(
+        ThemeSetup,
+        async () => {
             if (config) ThemeStore.setState(() => config, true);
             addTable({ name: 'config' });
             const storage = getInstance('config');
             if (storage) {
                 const themeMode = await storage.getItem<ThemeMode | undefined>('theme');
-                if (themeMode) {
-                    ThemeStore.setState((state) => {
-                        state.mode = themeMode;
-                    });
-                }
+                ThemeStore.setState((state) => {
+                    state.mode = themeMode || state.mode;
+                });
             }
-            ThemeSetup.setState(() => ({ setuped: true }), true);
-        }
-    }, [storageSetuped]);
-    useAsyncEffect(async () => {
-        const reverse = theme === 'dark' ? 'light' : 'dark';
-        const html = document.documentElement;
-        html.removeAttribute('data-theme');
-        html.classList.remove(reverse);
-        html.classList.remove(theme);
-        html.setAttribute('data-theme', theme);
-        html.classList.add(theme);
+        },
+        [storageSetuped],
+    );
+    useUpdateEffect(() => {
         const storage = getInstance('config');
-        if (storage) {
-            await storage.setItem<ThemeMode>('theme', theme);
+        console.log(theme);
+        if (ThemeSetup.getState().created && storage) {
+            const reverse = theme === 'dark' ? 'light' : 'dark';
+            const html = document.documentElement;
+            html.removeAttribute('data-theme');
+            html.classList.remove(reverse);
+            html.classList.remove(theme);
+            html.setAttribute('data-theme', theme);
+            html.classList.add(theme);
+            storage.setItem<ThemeMode>('theme', theme);
         }
     }, [theme]);
 };

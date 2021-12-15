@@ -1,16 +1,19 @@
-import type { FC } from 'react';
+import { useDeepCompareEffect } from 'ahooks';
+import { FC, useState } from 'react';
 
 import { useAntdMenus } from '@/components/Menu';
+import type { AntdMenuOption } from '@/components/Menu';
 
 const SingUp: FC = () => {
     const menus = useAntdMenus();
-
+    const [sss, setSss] = useState<AntdMenuOption<RecordNever>[]>([]);
+    useDeepCompareEffect(() => setSss(menus), [menus]);
     return (
         <div>
             User SingUdp
             <ul>
-                {menus.map((m) => (
-                    <li key={m.id}>{m.name as any}</li>
+                {sss.map((m) => (
+                    <li key={m.id}>{(m.name ?? m.id) as any}</li>
                 ))}
             </ul>
         </div>

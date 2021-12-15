@@ -2,23 +2,25 @@ import { createFromIconfontCN } from '@ant-design/icons';
 
 import { omit } from 'lodash-es';
 
-import { useEffectOnce } from 'react-use';
+import create from 'zustand';
 
-import { createHookSelectors, createImmer } from '@/utils/store';
-
+import { useSetupedEffect } from '@/hooks';
+import { createImmer } from '@/utils/store';
 import { deepMerge } from '@/utils/tools';
 
 import { getDefaultIconConfig } from './_default.config';
-
 import { IconType } from './constants';
 import type { BaseIconProps, IconComputed, IconConfig, IconState } from './types';
 
-const useIconStore = createImmer<IconState>(() => getDefaultIconConfig());
-export const useIconConfig = createHookSelectors(useIconStore);
+const Setuped = create(() => ({
+    created: false,
+}));
+
+const IconStore = createImmer<IconState>(() => getDefaultIconConfig());
 export const useSetupIcon = <T extends RecordAnyOrNever = RecordNever>(config?: IconConfig<T>) => {
-    useEffectOnce(() => {
+    useSetupedEffect(Setuped, () => {
         if (config) {
-            useIconStore.setState((state) => {
+            IconStore.setState((state) => {
                 const newState = deepMerge(state, omit(config, ['iconfont']) as any);
                 if (config.iconfont_urls) {
                     newState.iconfont = createFromIconfontCN({
@@ -33,7 +35,7 @@ export const useSetupIcon = <T extends RecordAnyOrNever = RecordNever>(config?: 
 export const useIcon = <U extends BaseIconProps<T>, T extends RecordAny>(
     args: U,
 ): IconComputed<T> => {
-    const config = useIconStore((state) => ({ ...state }));
+    const config = IconStore((state) => ({ ...state }));
     let { name } = args;
     let { iconfont } = config;
     if (args.type === IconType.ICONFONT) {

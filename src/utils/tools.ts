@@ -1,8 +1,8 @@
 import type deepmerge from 'deepmerge';
 import deepmergeDo from 'deepmerge';
 
-export function isPromise(promise: any) {
-    return !!promise && typeof promise === 'function' && typeof promise().then === 'function';
+export function isPromise(promise: any): promise is PromiseLike<any> {
+    return !!promise && promise instanceof Promise;
 }
 
 export const deepMerge = <T1, T2>(x: Partial<T1>, y: Partial<T2>, options?: deepmerge.Options) => {

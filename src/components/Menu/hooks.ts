@@ -2,10 +2,12 @@ import { useAsyncEffect, useDeepCompareEffect } from 'ahooks';
 
 import { isArray } from 'lodash-es';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect } from 'react';
 
+import create from 'zustand';
 import shallow from 'zustand/shallow';
 
+import { useSetupedEffect } from '@/hooks';
 import { createHookSelectors, createImmer } from '@/utils/store';
 import { deepMerge } from '@/utils/tools';
 
@@ -19,6 +21,7 @@ import { getDefaultMenuStore } from './_default.store';
 import type { MenuConfig, MenuStore, MenuOption } from './types';
 import { getAntdMenus, getRouteMenus } from './utils';
 
+const Setuped = create(() => ({ created: false }));
 export const useMenuStore = createImmer<MenuStore>(() => getDefaultMenuStore());
 export const useMenu = createHookSelectors(useMenuStore);
 export const useAntdMenus = () =>
@@ -29,7 +32,6 @@ export const useSetupMenu = <T extends RecordAnyOrNever = RecordNever, M = MenuO
 ) => {
     const user = useUser();
     const fecher = useFetcher();
-    const setuped = useRef<boolean>(false);
     const { routes, basePath } = useRouterStore(
         (state) => ({
             routes: state.routes,
@@ -43,30 +45,27 @@ export const useSetupMenu = <T extends RecordAnyOrNever = RecordNever, M = MenuO
         (state) => ({ configed: state.config, shouldChange: state.shouldChange }),
         shallow,
     );
-    useEffect(() => {
-        if (!setuped.current || config) {
-            if (config) {
-                useMenuStore.setState((state) => {
-                    state.config = deepMerge(state.config, config ?? {});
-                });
-            }
-            setuped.current = true;
+    useSetupedEffect(Setuped, () => {
+        if (config) {
+            useMenuStore.setState((state) => {
+                state.config = deepMerge(state.config, config ?? {});
+            });
         }
-    }, [config]);
+    });
     useEffect(() => {
-        if (setuped.current && configed.type !== 'router')
+        if (configed.type !== 'router')
             useMenuStore.setState((state) => {
                 state.shouldChange = true;
             });
     }, [userChanged]);
     useDeepCompareEffect(() => {
-        if (setuped.current && configed.type === 'router')
+        if (configed.type === 'router')
             useMenuStore.setState((state) => {
                 state.shouldChange = true;
             });
     }, [routes]);
     useAsyncEffect(async () => {
-        if (setuped.current && shouldChange) {
+        if (shouldChange) {
             if (configed.type === 'router') {
                 useMenuStore.setState((state) => {
                     state.data = getRouteMenus(routes, { basePath });

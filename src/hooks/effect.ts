@@ -1,5 +1,7 @@
-import { useDeepCompareEffect } from 'ahooks';
+import { useDebounceEffect, useDeepCompareEffect } from 'ahooks';
 import { EffectCallback, DependencyList, useRef } from 'react';
+
+import type { OnceEffectProps } from './types';
 
 export const useAsyncDeepCompareEffect = (
     effect: () => AsyncGenerator<void, void, void> | Promise<void>,
@@ -59,4 +61,19 @@ function usePrevious(value: DependencyList) {
     }, [value]);
 
     return ref.current;
+}
+
+export function useSetupedEffect<T extends RecordAnyOrNever>(
+    store: OnceEffectProps<T>,
+    callback: () => void | Promise<void>,
+    deps?: DependencyList,
+) {
+    const depends = deps ?? [];
+
+    useDebounceEffect(() => {
+        if (depends.every((d) => !!d) && !store.getState().created) {
+            store.setState((state: any) => ({ ...state, created: true }));
+            callback();
+        }
+    }, [depends]);
 }
