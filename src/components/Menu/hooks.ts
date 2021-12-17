@@ -2,27 +2,24 @@ import { useAsyncEffect, useDeepCompareEffect } from 'ahooks';
 
 import { isArray } from 'lodash-es';
 
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 
 import create from 'zustand';
 import shallow from 'zustand/shallow';
 
-import { useSetupedEffect } from '@/hooks';
-import { createHookSelectors, createImmer } from '@/utils/store';
+import { useStoreSetuped, createHookSelectors, createImmer, deepMerge } from '@/utils';
 
-import { deepMerge } from '@/utils/tools';
-
-import { useAuthStore, useUser } from '../Auth';
+import { useUser } from '../Auth';
 
 import { useFetcher } from '../Request';
 
 import { useRouterStore } from '../Router';
 
-import { getDefaultMenuStore } from './_default.store';
+import { getDefaultMenuStore } from './_default.config';
 import type { MenuConfig, MenuStore, MenuOption } from './types';
 import { getAntdMenus, getRouteMenus } from './utils';
 
-const Setuped = create(() => ({ created: false, setuped: false }));
+const Setuped = create(() => ({}));
 export const useMenuStore = createImmer<MenuStore>(() => getDefaultMenuStore());
 export const useMenu = createHookSelectors(useMenuStore);
 export const useAntdMenus = () =>
@@ -41,12 +38,11 @@ export const useSetupMenu = <T extends RecordAnyOrNever = RecordNever, M = MenuO
         shallow,
     );
 
-    const userChanged = useAuthStore((state) => state.changed);
     const { configed, shouldChange } = useMenuStore(
         (state) => ({ configed: state.config, shouldChange: state.shouldChange }),
         shallow,
     );
-    useSetupedEffect({
+    useStoreSetuped({
         store: Setuped,
         callback: () => {
             if (config) {
@@ -56,12 +52,12 @@ export const useSetupMenu = <T extends RecordAnyOrNever = RecordNever, M = MenuO
             }
         },
     });
-    useEffect(() => {
+    useDeepCompareEffect(() => {
         if (configed.type !== 'router')
             useMenuStore.setState((state) => {
                 state.shouldChange = true;
             });
-    }, [userChanged]);
+    }, [user]);
     useDeepCompareEffect(() => {
         if (configed.type === 'router')
             useMenuStore.setState((state) => {

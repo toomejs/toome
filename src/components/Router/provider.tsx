@@ -8,7 +8,7 @@ import {
 } from 'react-router-dom';
 import type { RouteObject } from 'react-router-dom';
 
-import { useRouter } from './hooks';
+import { useRouter } from './hooks/store';
 
 const RoutesList: FC<{ routes: RouteObject[]; basename: string }> = ({ routes, basename }) => {
     const location = useLocation();
@@ -29,5 +29,8 @@ const RouterRender: FC = () => {
 };
 export const Router = () => {
     const { generated } = useRouter.useSignal();
+    // useEffect(() => {
+    //     console.log(generated);
+    // }, [generated]);
     return generated ? <RouterRender /> : <div>加载中{`${generated}`}</div>;
 };

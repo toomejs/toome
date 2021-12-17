@@ -2,7 +2,7 @@ import { trim } from 'lodash-es';
 import type { FC, ReactElement } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 
-import { useToken } from './hooks';
+import { useAuthInited, useToken } from './hooks';
 
 export const RequirdAuth: FC<{
     basename: string;
@@ -10,8 +10,8 @@ export const RequirdAuth: FC<{
     element: ReactElement;
 }> = ({ element, basename, path = '/auth/login' }) => {
     const location = useLocation();
-    const token = useToken.useValue();
-    const tokened = useToken.useSetuped();
+    const token = useToken();
+    const tokened = useAuthInited();
     if (tokened && token !== undefined) {
         let redirect = '';
         if (location.pathname !== path && trim(location.pathname, '/') !== trim(basename, '/')) {

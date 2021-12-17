@@ -7,8 +7,12 @@ import type {
     StateSelector,
     StateSliceListener,
     StoreApi,
+    UseBoundStore,
 } from 'zustand';
 
+import type { StoreApiWithSubscribeWithSelector } from 'zustand/middleware';
+
+/** ********************** zustand *************************** */
 export type ZSImmerSetState<T extends State> = (
     partial: ((draft: Draft<T>) => void) | T,
     replace?: boolean,
@@ -50,4 +54,34 @@ export type ZSSelector<StoreType> = {
 };
 export type ZSHookSelector<StoreType> = {
     [Key in keyof StoreType as `use${Capitalize<string & Key>}`]: () => StoreType[Key];
+};
+
+/** ********************** debounce *************************** */
+export type SetupByDepProps<T extends RecordAny> = {
+    action: (config?: T) => void;
+    config?: T;
+};
+
+export type SetupedState<T extends RecordAnyOrNever = RecordNever> = RecordScalable<
+    { created?: true; setuped?: true },
+    T
+>;
+export type SetupedStore<T extends RecordAnyOrNever = RecordNever> = UseBoundStore<
+    { created?: true; setuped?: true } & T,
+    StoreApi<{ created?: true; setuped?: true } & T>
+>;
+export type SetupedEffectProps<T extends RecordAnyOrNever = RecordNever> = {
+    store: SetupedStore<T>;
+    callback: () => void | Promise<void>;
+    clear?: () => any;
+    wait?: number;
+};
+export type SubsciberDebounceStore<T extends State> =
+    | UseBoundStore<T, StoreApiWithSubscribeWithSelector<T>>
+    | ZSImmberUseBoundStore<T, ZSImmberSelectorStoreApi<T>>;
+export type SubsciberDebounceProps<T extends State, K extends keyof T> = {
+    store: SubsciberDebounceStore<T>;
+    select: string;
+    callback: (current: T[K], pre?: T[K]) => void | Promise<void>;
+    wait?: number;
 };

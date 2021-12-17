@@ -2,15 +2,15 @@ import type { AxiosInstance } from 'axios';
 
 import { useCallback, useRef } from 'react';
 
-import { useToken, useTokenDispatch } from '../Auth';
+import { useAuthDispatch, useAuthInited, useToken } from '../Auth';
 
 import { createRequest } from './request';
 import type { RequestConfig } from './types';
 
 export function useFetcher() {
-    const { setToken, clearToken } = useTokenDispatch();
-    const token = useToken.useValue();
-    const tokened = useToken.useSetuped();
+    const { setToken, clearToken } = useAuthDispatch();
+    const token = useToken();
+    const tokened = useAuthInited();
     const tokenRef = useRef<string | null>(null);
     const instanceRef = useRef<AxiosInstance | null>(null);
     function fetchGetter(): AxiosInstance;

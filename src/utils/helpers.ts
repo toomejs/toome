@@ -10,12 +10,18 @@ export function isAsyncFn<R, A extends Array<any>>(
     const AsyncFunction = (async () => {}).constructor;
     return callback instanceof AsyncFunction === true;
 }
-export const deepMerge = <T1, T2>(x: Partial<T1>, y: Partial<T2>, options?: deepmerge.Options) => {
-    return deepmergeDo(
-        x,
-        y,
-        options ?? { arrayMerge: (_d, s, _o) => Array.from(new Set([..._d, ...s])) },
-    ) as T2 extends T1 ? T1 : T1 & T2;
+export const deepMerge = <T1, T2>(
+    x: Partial<T1>,
+    y: Partial<T2>,
+    arrayMode: 'replace' | 'merge' = 'merge',
+) => {
+    const options: deepmerge.Options = {};
+    if (arrayMode === 'replace') {
+        options.arrayMerge = (_d, s, _o) => s;
+    } else if (arrayMode === 'merge') {
+        options.arrayMerge = (_d, s, _o) => Array.from(new Set([..._d, ...s]));
+    }
+    return deepmergeDo(x, y, options) as T2 extends T1 ? T1 : T1 & T2;
 };
 
 export const isUrl = (path: string): boolean => {

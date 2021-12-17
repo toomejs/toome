@@ -1,26 +1,22 @@
 import ProForm, { ProFormText } from '@ant-design/pro-form';
 
-import { useDeepCompareEffect } from 'ahooks';
 import { message } from 'antd';
 
-import { FC, useCallback } from 'react';
+import { FC, useCallback, useEffect } from 'react';
 
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import { useUser, useTokenDispatch, useAuth } from '@/components/Auth/hooks';
-
 import { useFetcher } from '@/components/Request';
 import { useRouter } from '@/components/Router';
+import { getUser, useAuthDispatch } from '@/components/Auth';
 
 const CredentialLoginForm: FC = () => {
-    const { clearToken, setToken } = useTokenDispatch();
+    const { clearToken, setToken } = useAuthDispatch();
     const fetcher = useFetcher();
     const { basePath } = useRouter.useConfig();
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
-
-    const user = useUser();
-    const userChanged = useAuth.useChanged();
+    const { generated } = useRouter.useSignal();
     const getRedirect = useCallback(() => {
         let queryRedirect = searchParams.get('redirect');
         if (queryRedirect && queryRedirect.length > 0) {
@@ -31,10 +27,12 @@ const CredentialLoginForm: FC = () => {
         }
         return basePath;
     }, []);
-    useDeepCompareEffect(() => {
+    useEffect(() => {
         const redirect = getRedirect();
-        if (user) navigate(redirect, { replace: true });
-    }, [userChanged]);
+        if (generated && getUser()) {
+            navigate(redirect, { replace: true });
+        }
+    }, [generated]);
     return (
         <div className="p-4 w-full">
             <ProForm

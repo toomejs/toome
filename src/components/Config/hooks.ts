@@ -3,9 +3,7 @@ import { useMemo } from 'react';
 
 import shallow from 'zustand/shallow';
 
-import { createImmer } from '@/utils/store';
-
-import { deepMerge } from '@/utils/tools';
+import { createImmer, deepMerge } from '@/utils';
 
 import { useStorageStore } from '../Storage';
 

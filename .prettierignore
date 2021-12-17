@@ -7,7 +7,6 @@
 **/*.html
 **/*.png
 **/*.toml
-package.json
 .dockerignore
 .DS_Store
 .eslintignore

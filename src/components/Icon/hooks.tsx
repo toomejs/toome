@@ -3,22 +3,17 @@ import { omit } from 'lodash-es';
 
 import create from 'zustand';
 
-import { useSetupedEffect } from '@/hooks';
-import { createImmer } from '@/utils/store';
-import { deepMerge } from '@/utils/tools';
+import { useStoreSetuped, createImmer, deepMerge } from '@/utils';
 
 import { getDefaultIconConfig } from './_default.config';
 import { IconType } from './constants';
 import type { BaseIconProps, IconComputed, IconConfig, IconState } from './types';
 
-const Setuped = create(() => ({
-    created: false,
-    setuped: false,
-}));
+const Setuped = create(() => ({}));
 
 const IconStore = createImmer<IconState>(() => getDefaultIconConfig());
 export const useSetupIcon = <T extends RecordAnyOrNever = RecordNever>(config?: IconConfig<T>) => {
-    useSetupedEffect({
+    useStoreSetuped({
         store: Setuped,
         callback: () => {
             if (config) {

@@ -1,9 +1,9 @@
 import { omit } from 'lodash-es';
 
-import { isUrl } from '@/utils/tools';
+import { isUrl } from '@/utils';
 
 import type { BaseRouteMenuMeta, ParentRouteProps, RouteOption } from '../Router/types';
-import { formatPath } from '../Router/utils/filter';
+import { formatPath } from '../Router/utils';
 
 import type { AntdMenuOption, MenuOption } from './types';
 

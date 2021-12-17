@@ -24,8 +24,4 @@ export type User<
     },
     T
 >;
-export type TokenStore = { setuped: boolean; value: null | string };
-export type UserStore = {
-    user: User | null;
-    changed: boolean;
-};
+export type AuthStore = { inited: boolean; token: null | string; user: User | null };

@@ -1,6 +1,11 @@
 import type { ThemeMode } from './types';
-
-export const changeHtmlThemeMode = (theme: ThemeMode, storage: LocalForage | undefined) => {
+/**
+ * @description : 设置elment和本地存储的主题设置
+ * @param        {ThemeMode} theme
+ * @param        {LocalForage} storage
+ * @return       void
+ */
+export const changeHtmlThemeMode = async (theme: ThemeMode, storage: LocalForage | undefined) => {
     if (storage) {
         const reverse = theme === 'dark' ? 'light' : 'dark';
         const html = document.documentElement;
@@ -9,6 +14,6 @@ export const changeHtmlThemeMode = (theme: ThemeMode, storage: LocalForage | und
         html.classList.remove(theme);
         html.setAttribute('data-theme', theme);
         html.classList.add(theme);
-        storage.setItem<ThemeMode>('theme', theme);
+        await storage.setItem<ThemeMode>('theme', theme);
     }
 };

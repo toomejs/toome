@@ -4,6 +4,16 @@ import type { Dispatch } from 'react';
 import type { DbActionType } from './constants';
 
 /**
+ * @description 外部传入的存储配置
+ * @interface IConfig
+ * @template T
+ */
+interface IConfig<T extends DbConfig> {
+    default?: string;
+    dbs?: T[];
+}
+
+/**
  * @description 数据表配置
  * @export
  * @interface TableConfig
@@ -52,11 +62,6 @@ export interface DbConfig {
 export interface DbItem<T extends TableConfig> extends Omit<DbConfig, 'defaultTable' | 'tables'> {
     defaultTable: string;
     tables: Array<T>;
-}
-
-interface IConfig<T extends DbConfig> {
-    default?: string;
-    dbs?: T[];
 }
 
 export interface StorageConfig extends IConfig<DbConfig> {}

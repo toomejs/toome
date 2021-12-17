@@ -94,7 +94,6 @@ module.exports = {
                         position: 'after',
                     },
                 ],
-                alphabetize: { order: 'asc', caseInsensitive: false },
                 'newlines-between': 'always-and-inside-groups',
                 warnOnUnassignedImports: true,
             },

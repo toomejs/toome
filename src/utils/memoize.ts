@@ -2,7 +2,7 @@ import { dequal } from 'dequal';
 import { useMemo, useRef } from 'react';
 import type { DependencyList } from 'react';
 
-function useDeepCompareMemoize(value: DependencyList) {
+export function useDeepCompareMemoize(value: DependencyList) {
     const ref = useRef<DependencyList>([]);
 
     if (!dequal(value, ref.current)) {

@@ -2,7 +2,6 @@ import type { RouterStore } from './types';
 
 export const getDefaultStore: <M extends RecordNever>() => RouterStore<M> = () => ({
     signal: {
-        setuped: false,
         shouldChange: false,
         canGenerate: false,
         generated: false,

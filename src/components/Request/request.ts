@@ -3,7 +3,7 @@ import type { AxiosRequestConfig, AxiosInstance } from 'axios';
 
 import produce from 'immer';
 
-import { deepMerge } from '@/utils/tools';
+import { deepMerge } from '@/utils';
 
 import type { RequestConfig, RequestOption } from './types';
 

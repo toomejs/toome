@@ -102,7 +102,6 @@ export type RouterStore<T extends RecordAnyOrNever = RecordNever> = {
     names: Record<string, string>;
     config: RouterState<T>;
     signal: {
-        setuped: boolean;
         shouldChange: boolean;
         canGenerate: boolean;
         generated: boolean;

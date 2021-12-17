@@ -2,7 +2,7 @@ import type { BasicLayoutProps } from '@ant-design/pro-layout';
 
 import { Link } from 'react-router-dom';
 
-import { isUrl } from '@/utils/tools';
+import { isUrl } from '@/utils';
 
 export const MenuItem: BasicLayoutProps['menuItemRender'] = (item, dom) => {
     if (!item) return null;
