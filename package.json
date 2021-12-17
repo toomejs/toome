@@ -33,6 +33,13 @@
     },
     "devDependencies": {
         "@ant-design/colors": "^6.0.0",
+        "@sicons/antd": "^0.11.0",
+        "@sicons/carbon": "^0.11.0",
+        "@sicons/fa": "^0.11.0",
+        "@sicons/fluent": "^0.11.0",
+        "@sicons/ionicons5": "^0.11.0",
+        "@sicons/material": "^0.11.0",
+        "@sicons/tabler": "^0.11.0",
         "@types/loadable__component": "^5.13.4",
         "@types/lodash-es": "^4.17.5",
         "@types/react": "^17.0.37",

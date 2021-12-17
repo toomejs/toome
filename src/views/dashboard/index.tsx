@@ -45,6 +45,8 @@ const DoIn: FC = () => {
                 Change Theme
                 <Icon type="ionify" name="la:bacon" style={{ color: 'blue', fontSize: '1em' }} />
             </Button>
+            <span>xicons</span>
+            <Icon type="xicons" name="carbon:Sunny" style={{ color: 'blue', fontSize: '1rem' }} />
         </>
     );
 };

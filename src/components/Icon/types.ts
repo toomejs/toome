@@ -1,7 +1,7 @@
-import type { CustomIconComponentProps } from '@ant-design/icons/es/components/Icon';
+import type { IconComponentProps as AntdIconProps } from '@ant-design/icons/es/components/Icon';
 import type { IconFontProps as DefaultIconFontProps } from '@ant-design/icons/lib/components/IconFont';
 import type { IconProps as IconifyIconProps } from '@iconify/react';
-import type { CSSProperties, FC } from 'react';
+import type { CSSProperties, FC, RefAttributes } from 'react';
 
 import type { IconType } from './constants';
 
@@ -24,20 +24,26 @@ export type IconState<T extends RecordAnyOrNever = RecordNever> = RecordScalable
 export type IconComputed<T extends RecordAnyOrNever = RecordNever> = Omit<
     IconState<T>,
     'prefix' | 'size'
->;
+> & { name: string; type: `${IconType}` };
 export type BaseIconProps<T extends RecordAnyOrNever = RecordNever> = RecordScalable<
     Omit<IconConfig, 'iconfont_urls' | 'size' | 'prefix'> & { name: string },
     T
 >;
-export type SvgProps<T extends RecordAnyOrNever = RecordNever> = (
-    | CustomIconComponentProps
-    | React.SVGProps<SVGSVGElement>
-) &
+
+export type XiconsProps<T extends RecordAnyOrNever = RecordNever> = AntdSvgProps &
     BaseIconProps<
         {
-            type?: `${IconType.SVG}`;
+            type?: `${IconType.XICONS}`;
         } & T
     >;
+
+export type SvgProps<T extends RecordAnyOrNever = RecordNever> =
+    | AntdSvgProps &
+          BaseIconProps<
+              {
+                  type?: `${IconType.SVG}`;
+              } & T
+          >;
 
 export type IconifyProps<T extends RecordAnyOrNever = RecordNever> = BaseIconProps<
     Omit<IconifyIconProps, 'icon'> & {
@@ -49,4 +55,9 @@ export type IconFontProps<T extends RecordAnyOrNever = RecordNever> = BaseIconPr
     Omit<DefaultIconFontProps, 'type'> & {
         type: `${IconType.ICONFONT}`;
     } & T
+>;
+
+export type AntdSvgProps = Omit<
+    AntdIconProps & RefAttributes<HTMLSpanElement> & React.SVGProps<SVGSVGElement>,
+    'className' | 'style'
 >;

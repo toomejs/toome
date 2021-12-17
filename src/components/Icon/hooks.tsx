@@ -30,19 +30,24 @@ export const useSetupIcon = <T extends RecordAnyOrNever = RecordNever>(config?: 
         },
     });
 };
-export const useIcon = <U extends BaseIconProps<T>, T extends RecordAny>(
+export const useIcon = <
+    U extends BaseIconProps<{ type?: `${IconType}` } & T>,
+    T extends RecordAnyOrNever = RecordNever,
+>(
     args: U,
 ): IconComputed<T> => {
     const config = IconStore((state) => ({ ...state }));
-    let { name } = args;
+    let name: string;
     let { iconfont } = config;
     if (args.type === IconType.ICONFONT) {
         name = `${config.prefix.iconfont}-${args.name}`;
-    } else if (args.type === IconType.SVG) {
+    } else if (args.type === IconType.XICONS) {
+        name = `@sicons/${args.name.replaceAll(':', '/')}.svg`;
+    } else {
         name = `${config.prefix.svg}-${args.name}`;
     }
     if (args.type !== IconType.ICONFONT) iconfont = undefined;
-    const style = { fontSize: args.size ?? config.size, ...(args.style ?? {}) };
+    const style = { fontSize: args.style?.fontSize ?? config.size, ...(args.style ?? {}) };
     return omit(
         deepMerge(config, {
             ...args,
