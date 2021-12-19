@@ -1,96 +1,45 @@
-import { useDeepCompareEffect } from 'ahooks';
-import { Button } from 'antd';
-import type { FC } from 'react';
-import { Link } from 'react-router-dom';
-import { BarChart } from 'echarts/charts';
+import { FC, useEffect, useState } from 'react';
+import type * as echarts from 'echarts/core';
+import { GaugeChart } from 'echarts/charts';
+import type { GaugeSeriesOption } from 'echarts/charts';
 
-import { Icon } from '@/components/Icon';
-import { useStorage, useStorageStore } from '@/components/Storage';
-import { useThemeDispatch } from '@/components/Theme';
+import produce from 'immer';
+
+import { isArray } from 'lodash-es';
 
 import { Chart } from '@/components/Charts';
 
-import IconAccountBox from '~icons/mdi/account-box';
+import { cpuOptions } from './data';
 
-const DoF: FC = () => {
-    const config = useStorageStore.useConfig();
-    useDeepCompareEffect(() => {
-        // console.log(config);
-    }, [config]);
-    // console.log('渲染变量1');
-    return <div>fff</div>;
-};
-const DoK: FC = () => {
-    const doF = useStorageStore.useDoF();
-    // console.log('渲染变量2');
-    return <div>{doF.toString()}</div>;
-};
-const DoQ: FC = () => {
-    const { addTable } = useStorage();
-    // console.log('渲染操作1');
-    return (
-        <Button
-            type="primary"
-            onClick={() => {
-                addTable({ name: 'test' });
-            }}
-        >
-            Change Config
-        </Button>
-    );
-};
-const DoIn: FC = () => {
-    const { toggleTheme } = useThemeDispatch();
-    // console.log('渲染操作2');
-    return (
-        <>
-            <Link to="/auth/signup">Link</Link>
-            <Button type="primary" onClick={() => toggleTheme()} icon={<Icon name="if:biji" />}>
-                Change Theme1
-            </Button>
-            <Button
-                type="primary"
-                onClick={() => toggleTheme()}
-                icon={<Icon component={IconAccountBox} rotate={122} />}
-            >
-                Change Theme2
-            </Button>
-            <Button
-                type="primary"
-                onClick={() => toggleTheme()}
-                icon={<Icon name="fy:la:bacon" spin />}
-            >
-                Change Theme3
-            </Button>
-            <Chart
-                exts={[BarChart]}
-                options={{
-                    xAxis: {
-                        type: 'category',
-                        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    },
-                    yAxis: {
-                        type: 'value',
-                    },
-                    series: [
-                        {
-                            data: [120, 200, 150, 80, 70, 110, 130],
-                            type: 'bar',
-                        },
-                    ],
-                }}
-            />
-        </>
-    );
-};
 const Dashboard: FC = () => {
+    const random = +(Math.random() * 60).toFixed(2);
+    const [cpuData, setCpuData] = useState<echarts.ComposeOption<GaugeSeriesOption>>(cpuOptions);
+    useEffect(() => {
+        setTimeout(() => {
+            setCpuData(
+                produce((state) => {
+                    isArray(state.series) &&
+                        state.series.forEach((s) => {
+                            s.data = [{ value: random }];
+                        });
+                }),
+            );
+        }, 1000);
+    }, []);
     return (
-        <div>
-            Dashboard
-            <DoF />
-            <DoQ />
-            <DoIn />
-            {/* <DoK /> */}
+        <div className="md:container md:mx-auto">
+            <div className="flex">
+                <div>
+                    <Chart
+                        options={cpuData}
+                        exts={[GaugeChart]}
+                        style={{ width: '330px', height: '300px' }}
+                    />
+                </div>
+                <div>memory</div>
+                <div>disk</div>
+                <div>network</div>
+            </div>
         </div>
     );
 };
