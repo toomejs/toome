@@ -1,47 +1,48 @@
 import classNames from 'classnames';
-import type { FC } from 'react';
 
+import { memo, useEffect, useState } from 'react';
 import AntdIcon from '@ant-design/icons';
-
 import { Icon as Iconify } from '@iconify/react';
 
-import { IconType } from './constants';
-import { useIcon } from './hooks';
-import type { IconFontProps, IconifyProps, SvgProps, XiconsProps } from './types';
+import produce from 'immer';
 
-const Svg: FC<Omit<SvgProps, 'classes' | 'style' | 'type'>> = ({ name, ...rest }) => {
-    return (
-        <svg aria-hidden="true" {...rest}>
+import { IconType } from './constants';
+import { Setuped, useIcon } from './hooks';
+import type { IconComputed, IconProps } from './types';
+
+const getAntdSvgIcon = ({ config }: { config: IconComputed }) => {
+    if ('component' in config) {
+        const { component, classes, style, spin, rotate, ...rest } = config;
+        return config.component({ className: classNames(classes), style, ...rest });
+    }
+    const { name, iconfont, inline, type, spin, rotate, classes, ...rest } = config;
+    return type === IconType.IONIFY ? (
+        <Iconify icon={name} className={classNames(classes)} {...rest} />
+    ) : (
+        <svg aria-hidden="true" className={classNames(classes)} {...rest}>
             <use xlinkHref={name} />
         </svg>
     );
 };
-const XIcon: FC<{ name: string }> = ({ name }) => <img src={name} alt={name} />;
-const Icon: FC<IconifyProps | IconFontProps | SvgProps | XiconsProps> = (props) => {
+const Icon = memo((props: IconProps) => {
     const config = useIcon(props);
-    const { name, classes, style, iconfont: FontIcon, type, ...rest } = config;
-    if (type === IconType.ICONFONT) {
-        return FontIcon ? <FontIcon {...rest} type={name} className={classNames(classes)} /> : null;
+    const isSetuped = Setuped((state) => state.setuped);
+    const [setuped, setSetuped] = useState(isSetuped);
+    useEffect(() => {
+        setSetuped(isSetuped);
+    }, [isSetuped]);
+    if (!setuped) return null;
+    if ('type' in config && config.iconfont && config.type === IconType.ICONFONT) {
+        const { name, classes, iconfont: FontIcon, inline, type, style, ...rest } = config;
+        return <FontIcon type={name} className={classNames(classes)} style={style} {...rest} />;
     }
-    if (type === IconType.XICONS) {
-        console.log(name);
-        return (
-            <AntdIcon
-                component={() => XIcon({ name })}
-                className={classNames(classes)}
-                style={style}
-            />
-        );
-    }
-    if (props.type === IconType.IONIFY) {
-        return <Iconify icon={name} className={classNames(classes)} {...rest} />;
-    }
-    return (
-        <AntdIcon
-            component={() => Svg({ name, ...rest })}
-            className={classNames(classes)}
-            style={style}
-        />
-    );
-};
+    const options = produce(config, (draft) => {
+        if (draft.spin) draft.classes.push('anticon-spin');
+        if (draft.rotate)
+            draft.style.transform = draft.style.transform
+                ? `${draft.style.transform} rotate(${draft.rotate}deg)`
+                : `rotate(${draft.rotate}deg)`;
+    });
+    return <AntdIcon component={() => getAntdSvgIcon({ config: options })} />;
+});
 export default Icon;

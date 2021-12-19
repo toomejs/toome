@@ -31,7 +31,8 @@
         "baseUrl": "./",
         "paths": {
             "@/*": ["src/*"]
-        }
+        },
+        "types": ["unplugin-icons/types/react"]
     },
     "include": ["./src", "./typings/**/*.d.ts"]
 }

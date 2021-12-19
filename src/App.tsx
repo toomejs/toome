@@ -1,5 +1,6 @@
 import './App.css';
 import { useSetupAuth } from './components/Auth';
+import { useSetupCharts } from './components/Charts';
 import { useSetupIcon } from './components/Icon';
 import { useSetupMenu } from './components/Menu';
 
@@ -26,6 +27,8 @@ const App = () => {
     useSetupIcon({
         iconfont_urls: ['//at.alicdn.com/t/font_2497975_4zt848h920t.js'],
     });
+
+    useSetupCharts();
     // 加载路由页面
     return <Router />;
 };

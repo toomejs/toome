@@ -1,13 +1,12 @@
-import type { IconComponentProps as AntdIconProps } from '@ant-design/icons/es/components/Icon';
 import type { IconFontProps as DefaultIconFontProps } from '@ant-design/icons/lib/components/IconFont';
-import type { IconProps as IconifyIconProps } from '@iconify/react';
-import type { CSSProperties, FC, RefAttributes } from 'react';
+// import type { IconProps as IconifyIconProps } from '@iconify/react';
+import type { CSSProperties, FC, RefAttributes, SVGProps } from 'react';
 
-import type { IconType } from './constants';
+import type { IconPrefixType, IconType } from './constants';
 
 export type IconConfig<T extends RecordAnyOrNever = RecordNever> = RecordScalable<
     {
-        size?: number;
+        size?: number | string;
         classes?: string[];
         style?: CSSProperties;
         prefix?: { svg?: string; iconfont?: string };
@@ -21,43 +20,46 @@ export type IconState<T extends RecordAnyOrNever = RecordNever> = RecordScalable
     },
     T
 >;
-export type IconComputed<T extends RecordAnyOrNever = RecordNever> = Omit<
-    IconState<T>,
-    'prefix' | 'size'
-> & { name: string; type: `${IconType}` };
-export type BaseIconProps<T extends RecordAnyOrNever = RecordNever> = RecordScalable<
-    Omit<IconConfig, 'iconfont_urls' | 'size' | 'prefix'> & { name: string },
-    T
->;
+export type IconComputed = {
+    spin?: boolean;
+    rotate?: number;
+    classes: string[];
+    style: CSSProperties;
+} & (
+    | {
+          name: string;
+          type: `${IconType}`;
+          inline?: boolean;
+          iconfont?: FC<DefaultIconFontProps<string>>;
+      }
+    | {
+          component: FC<BaseElementProps>;
+      }
+);
+export interface BaseIconProps extends Omit<BaseElementProps, 'className' | 'name' | 'inline'> {
+    classNames?: string[];
+    spin?: boolean;
+    rotate?: number;
+}
+export interface IconFontProps extends BaseIconProps {
+    name: `${IconPrefixType.ICONFONT}:${string}`;
+    component?: never;
+}
+export interface SvgProps extends BaseIconProps {
+    name: `${IconPrefixType.SVG}:${string}`;
+    component?: never;
+}
+export interface IconifyProps extends BaseIconProps {
+    name: `${IconPrefixType.IONIFY}:${string}`;
+    component?: never;
+    inline?: boolean;
+}
+export interface ComponentProps extends BaseIconProps {
+    name?: never;
+    component: FC<BaseElementProps>;
+}
+// const ddd: IconProps = { component: () => <div>, inline: true };
 
-export type XiconsProps<T extends RecordAnyOrNever = RecordNever> = AntdSvgProps &
-    BaseIconProps<
-        {
-            type?: `${IconType.XICONS}`;
-        } & T
-    >;
+export type IconProps = SvgProps | IconifyProps | IconFontProps | ComponentProps;
 
-export type SvgProps<T extends RecordAnyOrNever = RecordNever> =
-    | AntdSvgProps &
-          BaseIconProps<
-              {
-                  type?: `${IconType.SVG}`;
-              } & T
-          >;
-
-export type IconifyProps<T extends RecordAnyOrNever = RecordNever> = BaseIconProps<
-    Omit<IconifyIconProps, 'icon'> & {
-        type: `${IconType.IONIFY}`;
-    } & T
->;
-
-export type IconFontProps<T extends RecordAnyOrNever = RecordNever> = BaseIconProps<
-    Omit<DefaultIconFontProps, 'type'> & {
-        type: `${IconType.ICONFONT}`;
-    } & T
->;
-
-export type AntdSvgProps = Omit<
-    AntdIconProps & RefAttributes<HTMLSpanElement> & React.SVGProps<SVGSVGElement>,
-    'className' | 'style'
->;
+type BaseElementProps = RefAttributes<HTMLSpanElement> & SVGProps<SVGSVGElement>;

@@ -1,6 +1,11 @@
+export enum IconPrefixType {
+    SVG = 'svg',
+    ICONFONT = 'if',
+    IONIFY = 'fy',
+}
 export enum IconType {
     SVG = 'svg',
-    XICONS = 'xicons',
     ICONFONT = 'iconfont',
-    IONIFY = 'ionify',
+    IONIFY = 'iconify',
+    COMPONENT = 'component',
 }

@@ -1,3 +1,22 @@
+/**
+ * 获取数组中元素的类型
+ */
+declare type ArrayItem<A> = A extends readonly (infer T)[] ? T : never;
+/**
+ * 过滤类型,去除U中T不包含的类型
+ */
+declare type Filter<T, U> = T extends U ? T : never;
+
+/**
+ * 反向过滤类型,去除U中T包含的类型
+ */
+declare type Diff<T, U> = T extends U ? never : T;
+
+/**
+ * 获取一个对象的值类型
+ */
+declare type ValueOf<T> = T[keyof T];
+
 declare type RePartial<T> = {
     [P in keyof T]?: T[P] extends (infer U)[] | undefined
         ? RePartial<U>[]

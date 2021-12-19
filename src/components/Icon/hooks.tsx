@@ -1,60 +1,67 @@
 import { createFromIconfontCN } from '@ant-design/icons';
 import { omit } from 'lodash-es';
-
 import create from 'zustand';
 
 import { useStoreSetuped, createImmer, deepMerge } from '@/utils';
 
 import { getDefaultIconConfig } from './_default.config';
-import { IconType } from './constants';
-import type { BaseIconProps, IconComputed, IconConfig, IconState } from './types';
+import type { IconComputed, IconConfig, IconProps, IconState } from './types';
+import type { IconType } from './constants';
 
-const Setuped = create(() => ({}));
+export const Setuped = create<{ setuped?: true }>(() => ({}));
 
 const IconStore = createImmer<IconState>(() => getDefaultIconConfig());
 export const useSetupIcon = <T extends RecordAnyOrNever = RecordNever>(config?: IconConfig<T>) => {
     useStoreSetuped({
         store: Setuped,
         callback: () => {
-            if (config) {
-                IconStore.setState((state) => {
-                    const newState = deepMerge(state, omit(config, ['iconfont']) as any);
-                    if (config.iconfont_urls) {
-                        newState.iconfont = createFromIconfontCN({
-                            scriptUrl: config.iconfont_urls,
-                        });
-                    }
-                    return newState;
-                });
-            }
+            const options: IconConfig = config ?? {};
+            IconStore.setState((state) => {
+                const newState = deepMerge(state, omit(config, ['iconfont']) as any);
+                if (options.iconfont_urls) {
+                    newState.iconfont = createFromIconfontCN({
+                        scriptUrl: options.iconfont_urls,
+                    });
+                }
+                return newState;
+            });
         },
     });
 };
-export const useIcon = <
-    U extends BaseIconProps<{ type?: `${IconType}` } & T>,
-    T extends RecordAnyOrNever = RecordNever,
->(
-    args: U,
-): IconComputed<T> => {
+export const useIcon = (args: IconProps) => {
     const config = IconStore((state) => ({ ...state }));
-    let name: string;
-    let { iconfont } = config;
-    if (args.type === IconType.ICONFONT) {
-        name = `${config.prefix.iconfont}-${args.name}`;
-    } else if (args.type === IconType.XICONS) {
-        name = `@sicons/${args.name.replaceAll(':', '/')}.svg`;
-    } else {
-        name = `${config.prefix.svg}-${args.name}`;
-    }
-    if (args.type !== IconType.ICONFONT) iconfont = undefined;
-    const style = { fontSize: args.style?.fontSize ?? config.size, ...(args.style ?? {}) };
-    return omit(
-        deepMerge(config, {
+    const params = omit(config, ['size', 'prefix', 'iconfont_urls']);
+    const csize = typeof config.size === 'number' ? `${config.size}px` : config.size;
+    const style = { fontSize: args.style?.fontSize ?? csize, ...(args.style ?? {}) };
+    const classes = [...config.classes, ...(args.classNames ?? [])];
+    if ('component' in args) {
+        return deepMerge<RecordAny, RecordAny>(params, {
             ...args,
-            name,
-            iconfont,
+            type: 'component',
             style,
-        }),
-        ['size', 'prefix', 'iconfont_urls'],
-    ) as any;
+            classes,
+        }) as IconComputed;
+    }
+    let name: string;
+    let type: `${IconType}` = 'svg';
+    const [prefix, ...names] = args.name.split(':');
+    if (prefix === 'if') {
+        name = `${config.prefix.iconfont}-${names.join(':')}`;
+        type = 'iconfont';
+    } else if (prefix === 'fy') {
+        name = names.join(':');
+        type = 'iconify';
+    } else {
+        name = `${config.prefix.svg}-${names.join(':')}`;
+        type = 'svg';
+    }
+    return deepMerge(config, {
+        ...args,
+        name,
+        type,
+        inline: prefix === 'fy' ? (args as any).inline : undefined,
+        iconfont: prefix === 'if' ? config.iconfont : undefined,
+        style,
+        classes,
+    }) as IconComputed;
 };

@@ -1,12 +1,16 @@
 import { useDeepCompareEffect } from 'ahooks';
 import { Button } from 'antd';
 import type { FC } from 'react';
-
 import { Link } from 'react-router-dom';
+import { BarChart } from 'echarts/charts';
 
 import { Icon } from '@/components/Icon';
 import { useStorage, useStorageStore } from '@/components/Storage';
 import { useThemeDispatch } from '@/components/Theme';
+
+import { Chart } from '@/components/Charts';
+
+import IconAccountBox from '~icons/mdi/account-box';
 
 const DoF: FC = () => {
     const config = useStorageStore.useConfig();
@@ -41,12 +45,41 @@ const DoIn: FC = () => {
     return (
         <>
             <Link to="/auth/signup">Link</Link>
-            <Button type="primary" onClick={() => toggleTheme()}>
-                Change Theme
-                <Icon type="ionify" name="la:bacon" style={{ color: 'blue', fontSize: '1em' }} />
+            <Button type="primary" onClick={() => toggleTheme()} icon={<Icon name="if:biji" />}>
+                Change Theme1
             </Button>
-            <span>xicons</span>
-            <Icon type="xicons" name="carbon:Sunny" style={{ color: 'blue', fontSize: '1rem' }} />
+            <Button
+                type="primary"
+                onClick={() => toggleTheme()}
+                icon={<Icon component={IconAccountBox} rotate={122} />}
+            >
+                Change Theme2
+            </Button>
+            <Button
+                type="primary"
+                onClick={() => toggleTheme()}
+                icon={<Icon name="fy:la:bacon" spin />}
+            >
+                Change Theme3
+            </Button>
+            <Chart
+                exts={[BarChart]}
+                options={{
+                    xAxis: {
+                        type: 'category',
+                        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    },
+                    yAxis: {
+                        type: 'value',
+                    },
+                    series: [
+                        {
+                            data: [120, 200, 150, 80, 70, 110, 130],
+                            type: 'bar',
+                        },
+                    ],
+                }}
+            />
         </>
     );
 };
@@ -57,7 +90,7 @@ const Dashboard: FC = () => {
             <DoF />
             <DoQ />
             <DoIn />
-            <DoK />
+            {/* <DoK /> */}
         </div>
     );
 };

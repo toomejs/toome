@@ -19,6 +19,7 @@
         "classnames": "^2.3.1",
         "deepmerge": "^4.2.2",
         "dequal": "^2.0.2",
+        "echarts": "^5.2.2",
         "history": "^5.1.0",
         "immer": "^9.0.7",
         "localforage": "^1.10.0",
@@ -33,13 +34,8 @@
     },
     "devDependencies": {
         "@ant-design/colors": "^6.0.0",
-        "@sicons/antd": "^0.11.0",
-        "@sicons/carbon": "^0.11.0",
-        "@sicons/fa": "^0.11.0",
-        "@sicons/fluent": "^0.11.0",
-        "@sicons/ionicons5": "^0.11.0",
-        "@sicons/material": "^0.11.0",
-        "@sicons/tabler": "^0.11.0",
+        "@iconify/json": "^1.1.444",
+        "@svgr/core": "^6.1.2",
         "@types/loadable__component": "^5.13.4",
         "@types/lodash-es": "^4.17.5",
         "@types/react": "^17.0.37",
@@ -64,6 +60,7 @@
         "prettier": "^2.5.1",
         "rollup": "^2.61.1",
         "typescript": "^4.5.4",
+        "unplugin-icons": "^0.12.23",
         "vite": "^2.7.3",
         "vite-plugin-mock": "^2.9.6",
         "vite-plugin-style-import": "^1.4.0",
@@ -74,7 +71,8 @@
     },
     "pnpm": {
         "overrides": {
-            "postcss": "^8.4.5"
+            "postcss": "^8.4.5",
+            "@svgr/core": "^5.5.0"
         }
     }
 }

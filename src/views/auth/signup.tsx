@@ -13,7 +13,7 @@ const SingUp: FC = () => {
             User SingUdp
             <ul>
                 {sss.map((m) => (
-                    <li key={m.id}>{(m.name ?? m.id) as any}</li>
+                    <li key={m.id}>{(m.text ?? m.id) as any}</li>
                 ))}
             </ul>
         </div>
