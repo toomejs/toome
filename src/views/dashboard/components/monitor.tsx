@@ -92,19 +92,53 @@ export const CpuMonitor = () => {
 export const DiskMonitor = () => {
     const [data, setData] = useState<NonNullable<GaugeSeriesOption['data']>>([
         {
-            name: '磁盘剩余',
+            name: '磁盘使用率',
             value: 0,
         },
     ]);
     const changeData = useCallback((v: number) => {
         setData(data.map((item) => ({ ...(item as any), value: v })));
     }, []);
+    const maxRand = randomArray(100, 1024);
+    const getPercent = useCallback(() => Math.random() * (maxRand - 1) + 1, []);
+    const [max, setMax] = useState<number>(0);
     useEffect(() => {
-        changeData(random());
-        const clear = setInterval(() => changeData(random()), 5500);
-        return () => clearInterval(clear);
+        setTimeout(() => {
+            setMax(maxRand);
+            setTimeout(() => changeData(getPercent()), 500);
+        }, 500);
     }, []);
-    return <PercentGaugeChart data={data} style={{ height: '200px' }} />;
+    return max > 0 ? (
+        <PercentGaugeChart
+            config={{
+                min: 0,
+                max,
+                axisLabel: {
+                    show: true,
+                    distance: 20,
+                    // color: 'inherit',
+                },
+                splitLine: {
+                    show: true,
+                    distance: -30,
+                    length: 30,
+                    lineStyle: {
+                        color: '#fff',
+                        width: 4,
+                    },
+                },
+                detail: {
+                    width: 180,
+                    formatter: (value) => {
+                        const percent = `${((value / max) * 100).toFixed(2)}%`;
+                        return `已用[${Math.ceil(value)}/GB,${percent}]`;
+                    },
+                },
+            }}
+            data={data}
+            style={{ height: '200px' }}
+        />
+    ) : null;
 };
 
 // export const NetLoadMonitor = () => {
