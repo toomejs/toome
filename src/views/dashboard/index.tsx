@@ -1,44 +1,27 @@
-import { FC, useEffect, useState } from 'react';
-import type * as echarts from 'echarts/core';
-import { GaugeChart } from 'echarts/charts';
-import type { GaugeSeriesOption } from 'echarts/charts';
+import { Card } from 'antd';
 
-import produce from 'immer';
+import { CpuMonitor, DiskMonitor, MemoryMonitor } from './components';
 
-import { isArray } from 'lodash-es';
-
-import { Chart } from '@/components/Charts';
-
-import { cpuOptions } from './data';
-
-const Dashboard: FC = () => {
-    const random = +(Math.random() * 60).toFixed(2);
-    const [cpuData, setCpuData] = useState<echarts.ComposeOption<GaugeSeriesOption>>(cpuOptions);
-    useEffect(() => {
-        setTimeout(() => {
-            setCpuData(
-                produce((state) => {
-                    isArray(state.series) &&
-                        state.series.forEach((s) => {
-                            s.data = [{ value: random }];
-                        });
-                }),
-            );
-        }, 1000);
-    }, []);
+const Dashboard = () => {
     return (
         <div className="md:container md:mx-auto">
-            <div className="flex">
-                <div>
-                    <Chart
-                        options={cpuData}
-                        exts={[GaugeChart]}
-                        style={{ width: '330px', height: '300px' }}
+            <div className="w-full grid grid-cols-4">
+                <Card>
+                    <CpuMonitor />
+                </Card>
+                <Card>
+                    <MemoryMonitor />
+                </Card>
+                <Card>
+                    <DiskMonitor />
+                </Card>
+                {/* <Card>
+                    <PercentGaugeChart
+                        config={{ name: '网络' }}
+                        value={networkValue}
+                        style={{ height: '200px' }}
                     />
-                </div>
-                <div>memory</div>
-                <div>disk</div>
-                <div>network</div>
+                </Card> */}
             </div>
         </div>
     );

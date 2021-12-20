@@ -28,6 +28,7 @@ specifiers:
   deepmerge: ^4.2.2
   dequal: ^2.0.2
   echarts: ^5.2.2
+  echarts-liquidfill: ^3.1.0
   eslint: ^8.4.1
   eslint-config-airbnb: 19.0.0
   eslint-config-airbnb-typescript: ^16.1.0
@@ -79,6 +80,7 @@ dependencies:
   deepmerge: registry.nlark.com/deepmerge/4.2.2
   dequal: registry.npmmirror.com/dequal/2.0.2
   echarts: 5.2.2
+  echarts-liquidfill: 3.1.0_echarts@5.2.2
   history: registry.npmmirror.com/history/5.1.0
   immer: registry.npmmirror.com/immer/9.0.7
   localforage: registry.npmmirror.com/localforage/1.10.0
@@ -646,6 +648,14 @@ packages:
     dependencies:
       ms: 2.1.2
     dev: true
+
+  /echarts-liquidfill/3.1.0_echarts@5.2.2:
+    resolution: {integrity: sha512-5Dlqs/jTsdTUAsd+K5LPLLTgrbbNORUSBQyk8PSy1Mg2zgHDWm83FmvA4s0ooNepCJojFYRITTQ4GU1UUSKYLw==}
+    peerDependencies:
+      echarts: ^5.0.1
+    dependencies:
+      echarts: 5.2.2
+    dev: false
 
   /echarts/5.2.2:
     resolution: {integrity: sha512-yxuBfeIH5c+0FsoRP60w4De6omXhA06c7eUYBsC1ykB6Ys2yK5fSteIYWvkJ4xJVLQgCvAdO8C4mN6MLeJpBaw==}

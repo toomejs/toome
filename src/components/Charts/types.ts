@@ -14,4 +14,5 @@ export interface ChartProps<T extends ECBasicOption> extends ChartConfig {
     options: T;
     className?: string;
     style?: CSSProperties;
+    create?: (inc: echarts.ECharts) => void;
 }

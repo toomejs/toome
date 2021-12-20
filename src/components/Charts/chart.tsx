@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useDebounceFn, useDeepCompareEffect } from 'ahooks';
 import * as echarts from 'echarts/core';
+import 'echarts-liquidfill';
 import type { ECBasicOption } from 'echarts/types/dist/shared';
 
 import { CanvasRenderer, SVGRenderer } from 'echarts/renderers';
@@ -13,8 +14,8 @@ import { ChartSetuped, ChartStore } from './hooks';
 import type { ChartProps, EChartExt } from './types';
 
 export const Chart = <T extends ECBasicOption>(props: ChartProps<T>) => {
-    const chart = useRef<HTMLInputElement | null>(null);
     const instance = useRef<echarts.ECharts | null>(null);
+    const chart = useRef<HTMLInputElement | null>(null);
     const setuped = ChartSetuped((state) => state.setuped);
     const { run } = useDebounceFn(() => instance.current && instance.current.resize(), {
         wait: 500,
@@ -25,7 +26,7 @@ export const Chart = <T extends ECBasicOption>(props: ChartProps<T>) => {
     );
     const resize = useCallback(run, []);
     useDeepCompareEffect(() => {
-        if (setuped && chart.current) {
+        if (setuped && chart && 'current' in chart && chart.current) {
             const exts: EChartExt[] = [
                 ...ChartStore.getState().exts,
                 ...(props.exts ?? []).filter((e) => !ChartStore.getState().exts.includes(e)),
@@ -39,6 +40,7 @@ export const Chart = <T extends ECBasicOption>(props: ChartProps<T>) => {
                 instance.current = echarts.init(chart.current);
             }
             instance.current.setOption(props.options);
+            if (props.create) props.create(instance.current);
         }
     }, [setuped, props]);
     useEffect(() => {
