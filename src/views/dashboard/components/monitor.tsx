@@ -6,7 +6,7 @@ import type { GaugeSeriesOption } from 'echarts/charts';
 
 import { PercentGaugeChart } from '@/components/Charts';
 
-import { random, randomIntFrom } from '../utils';
+import { random, randomArray, randomIntFrom } from '../utils';
 
 export const MemoryMonitor = () => {
     const [data, setData] = useState<NonNullable<GaugeSeriesOption['data']>>([
@@ -99,7 +99,7 @@ export const DiskMonitor = () => {
     const changeData = useCallback((v: number) => {
         setData(data.map((item) => ({ ...(item as any), value: v })));
     }, []);
-    const maxRand = randomArray(100, 1024);
+    const maxRand = randomArray(100, 200, 500, 1024, 2048);
     const getPercent = useCallback(() => Math.random() * (maxRand - 1) + 1, []);
     const [max, setMax] = useState<number>(0);
     useEffect(() => {
