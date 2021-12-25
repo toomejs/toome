@@ -7,7 +7,7 @@ import create from 'zustand';
 import { createHookSelectors, createImmer, useStoreSetuped } from '@/utils';
 import type { SetupedState } from '@/utils';
 
-import { useFetcher } from '../Request';
+import { useFetcher } from '../Fetcher';
 
 import { useRouterReset } from '../Router/hooks/store';
 import { useStorage, useStorageStore } from '../Storage';
@@ -15,7 +15,11 @@ import { useStorage, useStorageStore } from '../Storage';
 import type { AuthStore, User } from './types';
 
 const AuthSetuped = create<SetupedState>(() => ({}));
-const useAuthStore = createImmer<AuthStore>(() => ({ token: null, user: null, inited: false }));
+export const useAuthStore = createImmer<AuthStore>(() => ({
+    token: null,
+    user: null,
+    inited: false,
+}));
 export const useAuth = createHookSelectors(useAuthStore);
 export const useAuthInited = () => useAuth.useInited();
 export const useToken = () => useAuth.useToken();
@@ -65,7 +69,7 @@ export const useSetupAuth = (accout_api?: string) => {
     useAsyncEffect(async () => {
         if (token && api) {
             try {
-                const { data } = await fetcher().get(api);
+                const { data } = await fetcher.get(api);
                 if (data) {
                     useAuthStore.setState((state) => {
                         state.user = data;
@@ -83,6 +87,7 @@ export const useSetupAuth = (accout_api?: string) => {
 
 export const useAuthDispatch = () => {
     const { getInstance } = useStorage();
+    const resetRouter = useRouterReset();
     const setToken = useCallback(async (value: string) => {
         const storage = getInstance('auth');
         if (storage) await storage.setItem('token', value);
@@ -95,7 +100,9 @@ export const useAuthDispatch = () => {
         if (storage) await storage.setItem('token', null);
         useAuthStore.setState((draft) => {
             draft.token = null;
+            draft.user = null;
         });
+        resetRouter();
     }, []);
     return { setToken, clearToken };
 };

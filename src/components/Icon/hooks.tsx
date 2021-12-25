@@ -30,17 +30,18 @@ export const useSetupIcon = <T extends RecordAnyOrNever = RecordNever>(config?: 
 };
 export const useIcon = (args: IconProps) => {
     const config = IconStore((state) => ({ ...state }));
-    const params = omit(config, ['size', 'prefix', 'iconfont_urls']);
+    const params = omit(config, ['size', 'prefix', 'classes', 'iconfont_urls']);
     const csize = typeof config.size === 'number' ? `${config.size}px` : config.size;
     const style = { fontSize: args.style?.fontSize ?? csize, ...(args.style ?? {}) };
-    const classes = [...config.classes, ...(args.classNames ?? [])];
+    const className = [...config.classes, args.className];
     if ('component' in args) {
-        return deepMerge<RecordAny, RecordAny>(params, {
+        const result = deepMerge<RecordAny, RecordAny>(params, {
             ...args,
             type: 'component',
             style,
-            classes,
-        }) as IconComputed;
+            className,
+        });
+        return omit(result, ['iconfont']) as IconComputed;
     }
     let name: string;
     let type: `${IconType}` = 'svg';
@@ -55,13 +56,12 @@ export const useIcon = (args: IconProps) => {
         name = `${config.prefix.svg}-${names.join(':')}`;
         type = 'svg';
     }
-    return deepMerge(config, {
+    const result = deepMerge(config, {
         ...args,
         name,
         type,
-        inline: prefix === 'fy' ? (args as any).inline : undefined,
-        iconfont: prefix === 'if' ? config.iconfont : undefined,
         style,
-        classes,
-    }) as IconComputed;
+        className,
+    });
+    return (prefix !== 'if' ? omit(result, ['iconfont']) : result) as IconComputed;
 };

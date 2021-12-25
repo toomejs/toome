@@ -129,7 +129,7 @@ export const filteAccessRoutes = (
         });
 };
 
-export const factoryRoutes = async (fetcher: (...args: any[]) => AxiosInstance) => {
+export const factoryRoutes = async (fetcher: AxiosInstance) => {
     const user = getUser();
     const { config } = useRouterStore.getState();
     useRouterStore.setState((state) => {
@@ -162,7 +162,7 @@ export const factoryRoutes = async (fetcher: (...args: any[]) => AxiosInstance) 
             });
         } else {
             try {
-                const { data } = await fetcher().get<RouteOption[]>(config.server);
+                const { data } = await fetcher.get<RouteOption[]>(config.server);
                 if (isArray(data)) {
                     useRouterStore.setState((state) => {
                         state.routes = [...state.routes, ...data];

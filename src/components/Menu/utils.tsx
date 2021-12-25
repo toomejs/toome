@@ -1,12 +1,52 @@
-import { omit } from 'lodash-es';
+import { isArray, omit } from 'lodash-es';
+
+import type { AxiosInstance } from 'axios';
 
 import { isUrl } from '@/utils';
 
 import type { BaseRouteMenuMeta, ParentRouteProps, RouteOption } from '../Router/types';
 import { formatPath } from '../Router/utils';
 
-import type { AntdMenuOption, MenuOption } from './types';
+import { useRouterStore } from '../Router';
 
+import { useAuthStore } from '../Auth';
+
+import type { AntdMenuOption, MenuOption } from './types';
+import { MenuStore } from './store';
+
+export const changeMenus = async (shouldChange: boolean, fetcher: AxiosInstance) => {
+    if (shouldChange) {
+        const { config } = MenuStore.getState();
+        const { user } = useAuthStore.getState();
+        const {
+            routes,
+            config: { basePath },
+        } = useRouterStore.getState();
+        if (config.type === 'router') {
+            MenuStore.setState((state) => {
+                state.data = getRouteMenus(routes, { basePath });
+            });
+        } else if (config.type === 'server' && config.server && user) {
+            try {
+                const { data } = await fetcher.get<MenuOption[]>(config.server);
+                if (isArray(data)) {
+                    MenuStore.setState((state) => {
+                        state.data = data;
+                    });
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        } else {
+            MenuStore.setState((state) => {
+                state.data = [];
+            });
+        }
+        MenuStore.setState((state) => {
+            state.shouldChange = false;
+        });
+    }
+};
 export const getRouteMenus = (routes: RouteOption[], parent: ParentRouteProps): MenuOption[] =>
     routes
         .map((route, index) => {

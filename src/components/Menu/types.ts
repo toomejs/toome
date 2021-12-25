@@ -22,7 +22,7 @@ export type AntdMenuOption<T extends RecordAnyOrNever = RecordNever> = MenuOptio
     AntdRouteMenuMeta<T>
 >;
 
-export interface MenuStore<T extends RecordAnyOrNever = RecordNever> {
+export interface MenuStoreType<T extends RecordAnyOrNever = RecordNever> {
     shouldChange: boolean;
     // generated: boolean;
     config: MenuState<T>;

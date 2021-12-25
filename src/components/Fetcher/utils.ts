@@ -5,7 +5,7 @@ import produce from 'immer';
 
 import { deepMerge } from '@/utils';
 
-import type { RequestConfig, RequestOption } from './types';
+import type { AxiosConfig, FetchOption } from './types';
 
 function getPendingKey(config: AxiosRequestConfig) {
     const { url, method, params } = config;
@@ -39,18 +39,18 @@ function removePending(config: AxiosRequestConfig, maps: Map<string, any>) {
 }
 
 export const createRequest: (
-    config?: RequestConfig,
-    options?: RePartial<RequestOption>,
+    config?: AxiosConfig,
+    options?: RePartial<FetchOption>,
 ) => AxiosInstance = (config, options) => {
     let pendingMap = new Map();
-    const configed: RequestConfig = deepMerge(
+    const configed: AxiosConfig = deepMerge(
         {
             baseURL: '/api/',
             timeout: 10000,
         },
         config ?? {},
     );
-    const optioned: RequestOption = deepMerge(
+    const optioned: FetchOption = deepMerge(
         { token: null, withToken: false, interceptors: {} },
         options ?? {},
     );
@@ -59,12 +59,12 @@ export const createRequest: (
         optioned.interceptors.request(instance.interceptors.request);
     } else {
         instance.interceptors.request.use(
-            (params: RequestConfig) => {
+            (params: AxiosConfig) => {
                 pendingMap = removePending(params, pendingMap);
                 if (params.cancel_repeat) {
                     pendingMap = addPending(params, pendingMap);
                 }
-                if (optioned.withToken && optioned.token && typeof window !== 'undefined') {
+                if (optioned.token && typeof window !== 'undefined') {
                     params.headers = { ...(params.headers ?? {}), Authorization: optioned.token };
                 }
                 return params;
@@ -80,11 +80,9 @@ export const createRequest: (
     } else {
         instance.interceptors.response.use(
             async (response) => {
-                if (optioned.withToken) {
-                    const resToken = response.headers.authorization;
-                    if (resToken && optioned.withToken && optioned.setToken) {
-                        await optioned.setToken(resToken);
-                    }
+                const resToken = response.headers.authorization;
+                if (resToken && optioned.setToken) {
+                    await optioned.setToken(resToken);
                 }
                 pendingMap = removePending(response.config, pendingMap);
                 return response;
@@ -94,7 +92,7 @@ export const createRequest: (
                 if (import.meta.env.DEV) console.log(error);
                 switch (error.response.status) {
                     case 401: {
-                        if (optioned.withToken && optioned.token && optioned.clearToken) {
+                        if (optioned.token && optioned.clearToken) {
                             await optioned.clearToken();
                         }
                         break;

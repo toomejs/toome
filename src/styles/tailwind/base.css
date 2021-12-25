@@ -1,0 +1,10 @@
+/* 添加自定义tailwind基础层样式,一般用于覆盖一些tailwind中默认的基础样式*/
+/* 如果要引用tailwind自带的值或tailwind.config.js的theme中配置的值,可以通过 "@apply"指令或"theme"函数获取 */
+/* 在"@layer"中添加的样式如果在程序中没有用到会在编译后被清除,如果需要强制存在于编译后的样式表,请在"@layer"外定义 */
+/* 示例:
+h1 {
+    @apply text-2xl;
+} */
+
+@layer base {
+}

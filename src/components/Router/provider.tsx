@@ -29,8 +29,5 @@ const RouterRender: FC = () => {
 };
 export const Router = () => {
     const { generated } = useRouter.useSignal();
-    // useEffect(() => {
-    //     console.log(generated);
-    // }, [generated]);
     return generated ? <RouterRender /> : <div>加载中{`${generated}`}</div>;
 };

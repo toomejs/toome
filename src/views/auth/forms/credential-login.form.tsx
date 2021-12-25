@@ -6,7 +6,7 @@ import { FC, useCallback, useEffect } from 'react';
 
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import { useFetcher } from '@/components/Request';
+import { useFetcher } from '@/components/Fetcher';
 import { useRouter } from '@/components/Router';
 import { getUser, useAuthDispatch } from '@/components/Auth';
 
@@ -42,7 +42,7 @@ const CredentialLoginForm: FC = () => {
                     try {
                         const {
                             data: { token },
-                        } = await fetcher().post('/user/auth/login', values);
+                        } = await fetcher.post('/user/auth/login', values);
                         if (token) await setToken(token);
                         message.success('登录成功');
                         // waitTime();

@@ -8,7 +8,7 @@ import { useLocation } from 'react-router-dom';
 
 import { useAntdMenus } from '../Menu';
 
-import { HeaderRight } from './header';
+import HeaderRight from './header';
 import { MenuItem, SubMenuItem } from './menu';
 import { SideFooter } from './sidebar';
 
@@ -18,12 +18,11 @@ const BasicLayout: FC = ({ children }) => {
     });
     const location = useLocation();
     const menus = useAntdMenus();
-
     return (
         <div
             id="app-layout"
             style={{
-                height: '100vh',
+                height: '100%',
             }}
         >
             <ProLayout
@@ -41,8 +40,7 @@ const BasicLayout: FC = ({ children }) => {
                 {...settings}
             >
                 {children}
-                {/* <PageContainer content={children} /> */}
-                {/* <Link to="/auth/signup">test</Link> */}
+                {/* <PageContainer className="h-full" content={children} /> */}
             </ProLayout>
         </div>
     );

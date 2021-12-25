@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import type { CSSProperties, FC } from 'react';
+import type { FC } from 'react';
 import type * as echarts from 'echarts/core';
 import type { GaugeSeriesOption } from 'echarts/charts';
 import { produce } from 'immer';
@@ -11,16 +11,10 @@ import { omit } from 'lodash-es';
 import { deepMerge } from '@/utils';
 
 import { Chart } from '../chart';
+import type { GaugeChartProps } from '../types';
 
 type EChartsOption = echarts.ComposeOption<GaugeSeriesOption>;
-type ChartProps = {
-    config?: Omit<GaugeSeriesOption, 'data'> & {
-        click?: (chart: echarts.ECharts) => void;
-    };
-    style?: CSSProperties;
-    data: NonNullable<GaugeSeriesOption['data']>;
-};
-export const PercentGaugeChart: FC<ChartProps> = ({ config, data = [], style = {} }) => {
+export const PercentGaugeChart: FC<GaugeChartProps> = ({ config, data = [], style = {} }) => {
     const [options, setOptions] = useState<EChartsOption>(defaultOptions);
     const [chart, setChart] = useState<echarts.ECharts>();
     useEffectOnce(() => {
@@ -38,10 +32,23 @@ export const PercentGaugeChart: FC<ChartProps> = ({ config, data = [], style = {
         );
     });
     useUpdateEffect(() => {
-        if (chart && config?.click) {
-            chart.getZr().off('click');
-            chart.getZr().on('click', () => config.click && config.click(chart));
+        if (chart && config?.click && chart.getZr()) {
+            const zr = chart.getZr();
+            zr.off('click');
+            zr.off('mouseover');
+            zr.on('click', () => config.click && config.click(chart));
+            zr.on('mouseover', () => {
+                const canvas = chart.getDom().querySelectorAll('canvas');
+                if (canvas.length > 0) canvas[0].style.cursor = 'pointer';
+            });
         }
+        return () => {
+            if (chart && config?.click && chart.getZr()) {
+                const zr = chart.getZr();
+                zr.off('click');
+                zr.off('mouseover');
+            }
+        };
     }, [chart]);
     useUpdateEffect(() => {
         if (data.length > 0) {
@@ -69,17 +76,13 @@ const defaultOptions: EChartsOption = {
             name: 'PercentGauge',
             type: 'gauge',
             center: ['50%', '50%'],
-            radius: '100%',
-            // startAngle: 90,
-            // endAngle: -270,
+            radius: '85%',
             splitNumber: 1,
-            itemStyle: {
-                color: '#FFAB91',
-            },
             progress: {
                 show: true,
                 overlap: true,
                 roundCap: true,
+                width: 10,
             },
 
             title: {
@@ -92,7 +95,7 @@ const defaultOptions: EChartsOption = {
             },
             axisLine: {
                 lineStyle: {
-                    width: 15,
+                    width: 10,
                 },
             },
             splitLine: {
@@ -107,12 +110,13 @@ const defaultOptions: EChartsOption = {
             detail: {
                 width: 40,
                 height: 14,
-                fontSize: 14,
+                fontSize: 12,
                 color: '#fff',
                 backgroundColor: 'inherit',
                 borderRadius: 3,
-                offsetCenter: ['0', '90%'],
+                offsetCenter: ['0', '100%'],
                 formatter: '{value}%',
+                valueAnimation: true,
             },
             data: [],
         },

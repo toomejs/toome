@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 /**
  * 获取数组中元素的类型
  */
@@ -16,6 +17,14 @@ declare type Diff<T, U> = T extends U ? never : T;
  * 获取一个对象的值类型
  */
 declare type ValueOf<T> = T[keyof T];
+/**
+ * React组件简写
+ */
+declare type FC<P = {}> = React.FunctionComponent<P>;
+/**
+ * 获取一个React组件的props类型
+ */
+declare type ReactProps<T> = T extends FC<infer C> ? C : never;
 
 declare type RePartial<T> = {
     [P in keyof T]?: T[P] extends (infer U)[] | undefined

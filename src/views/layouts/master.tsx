@@ -11,16 +11,6 @@ const MasterLayout: FC = () => {
         <BasicLayout>
             <Outlet />
         </BasicLayout>
-        // <article>
-        //     <AppSidebar />
-        //     <main>
-        //         <AppHeader />
-        //         <div className="content">
-        //             <Outlet />
-        //         </div>
-        //         <AppFooter />
-        //     </main>
-        // </article>
     );
 };
 export default MasterLayout;

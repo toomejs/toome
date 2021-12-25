@@ -4,6 +4,8 @@ import type { CSSProperties, FC, RefAttributes, SVGProps } from 'react';
 
 import type { IconPrefixType, IconType } from './constants';
 
+export type IconName = `${IconPrefixType}:${string}`;
+export type IconComponent = FC<BaseElementProps>;
 export type IconConfig<T extends RecordAnyOrNever = RecordNever> = RecordScalable<
     {
         size?: number | string;
@@ -23,7 +25,7 @@ export type IconState<T extends RecordAnyOrNever = RecordNever> = RecordScalable
 export type IconComputed = {
     spin?: boolean;
     rotate?: number;
-    classes: string[];
+    className: string[];
     style: CSSProperties;
 } & (
     | {
@@ -37,29 +39,20 @@ export type IconComputed = {
       }
 );
 export interface BaseIconProps extends Omit<BaseElementProps, 'className' | 'name' | 'inline'> {
-    classNames?: string[];
+    className?: string;
     spin?: boolean;
     rotate?: number;
 }
-export interface IconFontProps extends BaseIconProps {
-    name: `${IconPrefixType.ICONFONT}:${string}`;
-    component?: never;
-}
 export interface SvgProps extends BaseIconProps {
-    name: `${IconPrefixType.SVG}:${string}`;
-    component?: never;
-}
-export interface IconifyProps extends BaseIconProps {
-    name: `${IconPrefixType.IONIFY}:${string}`;
+    name: IconName;
     component?: never;
     inline?: boolean;
 }
 export interface ComponentProps extends BaseIconProps {
     name?: never;
-    component: FC<BaseElementProps>;
+    component: IconComponent;
 }
-// const ddd: IconProps = { component: () => <div>, inline: true };
 
-export type IconProps = SvgProps | IconifyProps | IconFontProps | ComponentProps;
+export type IconProps = SvgProps | ComponentProps;
 
 type BaseElementProps = RefAttributes<HTMLSpanElement> & SVGProps<SVGSVGElement>;

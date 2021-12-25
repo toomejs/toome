@@ -1,7 +1,17 @@
-import { createSelectorFunctions, createSelectorHooks } from 'auto-zustand-selectors-hook';
+import {
+    createSelectorFunctions,
+    createSelectorHooks,
+} from 'auto-zustand-selectors-hook';
 import produce from 'immer';
 import type { Draft } from 'immer';
-import type { State, GetState, SetState, StoreApi, UseBoundStore, StateCreator } from 'zustand';
+import type {
+    State,
+    GetState,
+    SetState,
+    StoreApi,
+    UseBoundStore,
+    StateCreator,
+} from 'zustand';
 
 import create from 'zustand';
 
@@ -33,8 +43,18 @@ const setImmerStateWithGet = <T extends State>(
 ): ZSImmerSetState<T> => setImmerState(set);
 
 const ImmerMiddleware =
-    <T extends State, CS extends SetState<T>, CG extends GetState<T>, CA extends StoreApi<T>>(
-        config: ZSImmberStateCreator<T, ZSImmerSetState<T>, CG, ZSImmerStoreApi<T>>,
+    <
+        T extends State,
+        CS extends SetState<T>,
+        CG extends GetState<T>,
+        CA extends StoreApi<T>,
+    >(
+        config: ZSImmberStateCreator<
+            T,
+            ZSImmerSetState<T>,
+            CG,
+            ZSImmerStoreApi<T>
+        >,
     ): ZSImmberStateCreator<T, CS, CG, CA> =>
     (set, get, api) => {
         return config(setImmerStateWithGet(set, get), get, {
@@ -45,7 +65,12 @@ const ImmerMiddleware =
 
 export function createImmer<T extends State>(
     createState:
-        | ZSImmberStateCreator<T, ZSImmerSetState<T>, GetState<T>, ZSImmerStoreApi<T>>
+        | ZSImmberStateCreator<
+              T,
+              ZSImmerSetState<T>,
+              GetState<T>,
+              ZSImmerStoreApi<T>
+          >
         | ZSImmerStoreApi<T>,
 ): ZSImmberUseBoundStore<T, ZSImmerStoreApi<T>> {
     const store = create(ImmerMiddleware(createState as any));
@@ -61,13 +86,20 @@ export function createSubsciberImmer<T extends State>(
         ZSImmberSelectorStoreApi<T>
     >,
 ): ZSImmberUseBoundStore<T, ZSImmberSelectorStoreApi<T>> {
-    const store = create(subscribeWithSelector(ImmerMiddleware(createState as any)));
+    const store = create(
+        subscribeWithSelector(ImmerMiddleware(createState as any)),
+    );
     store.setState = setImmerState(store.setState) as any;
     return store as any;
 }
 
 export function createSubsciber<T extends State>(
-    createState: StateCreator<T, SetState<T>, GetState<T>, StoreApiWithSubscribeWithSelector<T>>,
+    createState: StateCreator<
+        T,
+        SetState<T>,
+        GetState<T>,
+        StoreApiWithSubscribeWithSelector<T>
+    >,
 ): UseBoundStore<T, StoreApiWithSubscribeWithSelector<T>> {
     return create(subscribeWithSelector(createState as any));
 }

@@ -50,6 +50,6 @@ export function useStoreSetuped<T extends RecordAnyOrNever>(
             }
         },
         depends,
-        { wait: wait ?? 10 },
+        { wait: wait ?? 10, leading: true },
     );
 }

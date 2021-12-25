@@ -34,5 +34,5 @@
         },
         "types": ["unplugin-icons/types/react"]
     },
-    "include": ["./src", "./typings/**/*.d.ts"]
+    "include": ["./src", "./mock", "./typings/**/*.d.ts"]
 }

@@ -1,4 +1,4 @@
-import type { MockMethod } from 'vite-plugin-mock';
+import type { MockItem } from './types';
 
 import type { RequestParams } from './_util';
 import { resultError, resultSuccess, getRequestToken } from './_util';
@@ -53,7 +53,7 @@ export default [
         url: '/api/user/auth/login',
         timeout: 200,
         method: 'post',
-        response({ body }) {
+        response({ body }: { body: any }) {
             const { credential, password } = body;
             const checkUser = createFakeUserList().find(
                 (item) =>
@@ -111,4 +111,4 @@ export default [
             return resultSuccess(undefined, { message: 'Token has been destroyed' });
         },
     },
-] as MockMethod[];
+] as MockItem[];

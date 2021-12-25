@@ -64,3 +64,10 @@ export interface RequestParams {
 export function getRequestToken({ headers }: RequestParams): string | undefined {
     return headers?.authorization;
 }
+
+export const randomIntFrom = (min: number, max: number) => {
+    const minc = Math.ceil(min);
+    const maxc = Math.floor(max);
+    return Math.floor(Math.random() * (maxc - minc + 1)) + minc; // 含最大值，含最小值
+};
+export const randomArray = (...some: number[]) => some[randomIntFrom(0, some.length - 1)];

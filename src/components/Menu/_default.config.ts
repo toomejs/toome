@@ -1,6 +1,6 @@
-import type { MenuStore } from './types';
+import type { MenuStoreType } from './types';
 
-export const getDefaultMenuStore = (): MenuStore => ({
+export const getDefaultMenuStore = (): MenuStoreType => ({
     shouldChange: false,
     config: {
         type: 'router',

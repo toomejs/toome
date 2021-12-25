@@ -2,7 +2,7 @@ import { useRef } from 'react';
 
 import { useStoreSetuped, debounceRun, deepMerge } from '@/utils';
 
-import { useFetcher } from '../../Request';
+import { useFetcher } from '../../Fetcher';
 
 import type { RouterConfig } from '../types';
 import { factoryRoutes, generateFinalRoutes } from '../utils';
@@ -13,7 +13,7 @@ import { RouterSetup, useRouterStore } from './store';
  * @param {RouterConfig<T>} config - 路由配置,(*)必填
  */
 export const useSetupRouter = <T extends RecordAnyOrNever>(config: RouterConfig<T>) => {
-    const fecher = useFetcher();
+    const fetcher = useFetcher();
     const changing = useRef();
     const generating = useRef();
 
@@ -29,7 +29,7 @@ export const useSetupRouter = <T extends RecordAnyOrNever>(config: RouterConfig<
                 useRouterStore.subscribe(
                     (state) => state.signal.shouldChange,
                     (shouldChange) => {
-                        if (shouldChange) debounceRun(changing, () => factoryRoutes(fecher));
+                        if (shouldChange) debounceRun(changing, () => factoryRoutes(fetcher));
                     },
                 );
                 useRouterStore.subscribe(
