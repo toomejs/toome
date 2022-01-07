@@ -1,9 +1,9 @@
-import { useDebounceEffect } from 'ahooks';
 import type { DependencyList, MutableRefObject } from 'react';
+import { useDebounce } from 'react-use';
 
 import { isAsyncFn } from './helpers';
 import { useDeepCompareMemoize } from './memoize';
-import type { SetupedEffectProps } from './types';
+import type { SetupedEffectProps, SetupedState } from './types';
 
 export const debounceRun = (
     ref: MutableRefObject<true | undefined>,
@@ -25,13 +25,13 @@ export const debounceRun = (
     }
 };
 
-export function useStoreSetuped<T extends RecordAnyOrNever>(
-    { store, callback, wait }: SetupedEffectProps<T>,
+export function useStoreSetuped<T extends SetupedState>(
+    { store, callback, clear, wait }: SetupedEffectProps<T>,
     deps: DependencyList = [],
 ) {
     const depends = useDeepCompareMemoize(deps);
 
-    useDebounceEffect(
+    useDebounce(
         () => {
             if (
                 depends.every((d) => !!d) &&
@@ -48,8 +48,11 @@ export function useStoreSetuped<T extends RecordAnyOrNever>(
                     store.setState((state: any) => ({ ...state, setuped: true }));
                 }
             }
+            return () => {
+                if (clear) clear();
+            };
         },
+        wait ?? 10,
         depends,
-        { wait: wait ?? 10, leading: true },
     );
 }

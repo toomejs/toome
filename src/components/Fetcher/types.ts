@@ -20,5 +20,10 @@ export interface FetchOption {
 }
 export interface FetcherConfig<D = any, E = any> {
     axios?: AxiosConfig;
-    swr?: PublicConfiguration<D, E, BareFetcher<AxiosResponse<any, any>>>;
+    swr?: Partial<PublicConfiguration<D, E, BareFetcher<AxiosResponse<any, any>>>>;
+}
+
+export interface FetcherState<D = any, E = any> {
+    axios: AxiosConfig;
+    swr: Partial<PublicConfiguration<D, E, BareFetcher<AxiosResponse<any, any>>>>;
 }

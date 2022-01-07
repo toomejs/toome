@@ -1,0 +1,33 @@
+.container {
+    --size: 30px;
+    --speed: 2s;
+    --color: #00adb5;
+    position: relative;
+    width: calc(var(--size) * 4);
+    height: calc(var(--size) * 4);
+    perspective: calc(var(--size) * 4);
+
+    & > div {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: var(--size);
+        height: var(--size);
+        margin: auto;
+        background: var(--color);
+        transform: rotate(0);
+        animation: var(--speed) animate infinite;
+    }
+}
+
+@keyframes animate {
+    50% {
+        transform: rotateY(-180deg);
+    }
+
+    100% {
+        transform: rotateY(-180deg) rotateX(-180deg);
+    }
+}

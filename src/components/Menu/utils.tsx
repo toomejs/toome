@@ -7,21 +7,21 @@ import { isUrl } from '@/utils';
 import type { BaseRouteMenuMeta, ParentRouteProps, RouteOption } from '../Router/types';
 import { formatPath } from '../Router/utils';
 
-import { useRouterStore } from '../Router';
+import { RouterStore } from '../Router';
 
-import { useAuthStore } from '../Auth';
+import { AuthStore } from '../Auth';
 
 import type { AntdMenuOption, MenuOption } from './types';
-import { MenuStore } from './store';
+import { MenuStore, MenuStatus } from './store';
 
-export const changeMenus = async (shouldChange: boolean, fetcher: AxiosInstance) => {
-    if (shouldChange) {
+export const changeMenus = async (next: boolean, fetcher: AxiosInstance) => {
+    if (next) {
         const { config } = MenuStore.getState();
-        const { user } = useAuthStore.getState();
+        const { user } = AuthStore.getState();
         const {
             routes,
             config: { basePath },
-        } = useRouterStore.getState();
+        } = RouterStore.getState();
         if (config.type === 'router') {
             MenuStore.setState((state) => {
                 state.data = getRouteMenus(routes, { basePath });
@@ -42,8 +42,8 @@ export const changeMenus = async (shouldChange: boolean, fetcher: AxiosInstance)
                 state.data = [];
             });
         }
-        MenuStore.setState((state) => {
-            state.shouldChange = false;
+        MenuStatus.setState((state) => {
+            state.next = false;
         });
     }
 };

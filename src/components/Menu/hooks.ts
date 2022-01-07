@@ -1,72 +1,66 @@
-import { useDeepCompareEffect } from 'ahooks';
-
 import { useCallback } from 'react';
 
-import shallow from 'zustand/shallow';
+import { useUnmount } from 'react-use';
 
-import { deepMerge, useStoreSetuped } from '@/utils';
+import { createHookSelectors, deepMerge, useStoreSetuped } from '@/utils';
 
-import { useUser } from '../Auth';
+import { AuthStore } from '../Auth';
 
-import { useFetcher } from '../Fetcher';
+import { useFetcherGetter } from '../Fetcher';
 
-import { useRouterStore } from '../Router/hooks/store';
+import { RouterStore } from '../Router/store';
 
-import type { MenuConfig, MenuOption } from './types';
+import type { MenuConfig, MenuOption, MenuStatusType } from './types';
 import { changeMenus, getAntdMenus } from './utils';
-import { MenuSetuped, MenuStore } from './store';
+import { MenuStatus, MenuStore } from './store';
 
+export const useMenu = createHookSelectors(MenuStore);
+export const useMenus = () => MenuStore(useCallback((state) => state.data, []));
 export const useAntdMenus = () => MenuStore(useCallback((state) => getAntdMenus(state.data), []));
 
 export const useSetupMenu = <T extends RecordAnyOrNever = RecordNever, M = MenuOption<T>>(
     config?: MenuConfig<M>,
 ) => {
-    const user = useUser();
-    const fecher = useFetcher();
-    const { routes } = useRouterStore(
-        (state) => ({
-            routes: state.routes,
-            basePath: state.config.basePath,
-        }),
-        shallow,
+    const fecher = useFetcherGetter();
+    const unMenuSub = MenuStatus.subscribe(
+        (state) => state.next,
+        (next) => changeMenus(next, fecher()),
     );
-
-    useStoreSetuped({
-        store: MenuSetuped,
+    const unAuthSub = AuthStore.subscribe(
+        (state) => state.user,
+        () => {
+            const { setuped } = MenuStatus.getState();
+            const { type } = MenuStore.getState().config;
+            if (setuped && type !== 'router') {
+                MenuStatus.setState((state) => {
+                    state.next = true;
+                });
+            }
+        },
+    );
+    const unRouterSub = RouterStore.subscribe(
+        (state) => state.routes,
+        () => {
+            const { setuped } = MenuStatus.getState();
+            const { type } = MenuStore.getState().config;
+            if (setuped && type === 'router') {
+                MenuStatus.setState((state) => {
+                    state.next = true;
+                });
+            }
+        },
+    );
+    useUnmount(() => {
+        unRouterSub();
+        unAuthSub();
+        unMenuSub();
+    });
+    useStoreSetuped<MenuStatusType>({
+        store: MenuStatus,
         callback: () => {
             MenuStore.setState((state) => {
                 state.config = deepMerge(state.config, config ?? {});
             });
-            MenuStore.subscribe(
-                (state) => state.shouldChange,
-                (shouldChange) => {
-                    // if (shouldChange) {
-                    //     const routesList = useRouterStore.getState().routes;
-                    //     MenuStore.setState((data) => {
-                    //         data.data = [{ text: routesList.length.toString(), id: 'fff' }];
-                    //     });
-                    // }
-                    changeMenus(shouldChange, fecher);
-                },
-            );
         },
     });
-    useDeepCompareEffect(() => {
-        const { setuped } = MenuSetuped.getState();
-        const { type } = MenuStore.getState().config;
-        if (setuped && type !== 'router') {
-            MenuStore.setState((state) => {
-                state.shouldChange = true;
-            });
-        }
-    }, [user]);
-    useDeepCompareEffect(() => {
-        const { setuped } = MenuSetuped.getState();
-        const { type } = MenuStore.getState().config;
-        if (setuped && type === 'router') {
-            MenuStore.setState((state) => {
-                state.shouldChange = true;
-            });
-        }
-    }, [routes]);
 };

@@ -68,3 +68,15 @@ export function useAsyncEffectAll(
         })();
     }, [effect, prevDeps, deps]);
 }
+
+export const useDeepCompareUpdateEffect = (effect: EffectCallback, deps: DependencyList) => {
+    const isFirst = useRef(true);
+
+    // eslint-disable-next-line consistent-return
+    useDeepCompareEffect(() => {
+        if (!isFirst.current) {
+            return effect();
+        }
+        isFirst.current = false;
+    }, deps);
+};

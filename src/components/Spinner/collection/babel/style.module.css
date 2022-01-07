@@ -1,0 +1,27 @@
+.container {
+    --size: 30px;
+    --speed: 2s;
+    --color: #00adb5;
+    width: var(--size);
+    height: var(--size);
+    background: var(--color);
+    border-radius: calc(var(--size) / 2);
+    animation: var(--speed) animate linear infinite;
+}
+
+@keyframes animate {
+    0% {
+        opacity: 1;
+        transform: scale(0.1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 0.1;
+        transform: scale(1.5);
+    }
+}

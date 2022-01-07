@@ -68,7 +68,6 @@ export interface StorageConfig extends IConfig<DbConfig> {}
 export interface StorageState extends Required<IConfig<DbItem<TableItem>>> {}
 export interface StorageDispatch extends Dispatch<DbAction> {}
 export type DbAction =
-    | { type: DbActionType.SETUP; config?: StorageConfig }
     | { type: DbActionType.ADD_DB; config: DbConfig }
     | { type: DbActionType.SET_DEFAULT_DB; name: string }
     | { type: DbActionType.DELETE_DB; name: string }
@@ -77,8 +76,7 @@ export type DbAction =
     | { type: DbActionType.DELETE_TABLE; name: string; dbname?: string }
     | { type: DbActionType.FIX };
 
-export interface StorageStore {
-    setuped: boolean;
-    doF: boolean;
+export interface StorageStoreType {
+    //     setuped: boolean;
     config: StorageState;
 }

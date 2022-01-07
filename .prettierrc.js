@@ -7,6 +7,8 @@ module.exports = {
     endOfLine: 'auto',
     semi: true,
     tabWidth: 4,
+    vueIndentScriptAndStyle: true,
+    htmlWhitespaceSensitivity: 'strict',
     overrides: [
         {
             files: '.prettierrc',

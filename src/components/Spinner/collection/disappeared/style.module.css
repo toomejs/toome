@@ -1,0 +1,37 @@
+.container {
+    --size: 30px;
+    --speed: 0.8s;
+    --color: #00adb5;
+    display: flex;
+    flex-flow: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    width: calc(var(--size) * 2);
+    height: calc(var(--size) * 2);
+
+    & > div:nth-of-type(1) {
+        animation-delay: calc(var(--speed) / 2 * -1);
+    }
+
+    & > div:nth-of-type(2) {
+        animation-delay: calc(var(--speed) / 4 * -1);
+    }
+
+    & > div {
+        width: var(--size);
+        height: var(--size);
+        background: var(--color);
+        border-radius: 50%;
+        animation: var(--speed) animate ease-in-out alternate infinite;
+    }
+}
+
+@keyframes animate {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}

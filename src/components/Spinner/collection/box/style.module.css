@@ -1,0 +1,66 @@
+.container {
+    --size: 30px;
+    --speed: 1.5s;
+    --color: #00adb5;
+    width: var(--size);
+    height: var(--size);
+
+    &::before {
+        position: absolute;
+        top: calc(var(--size) + 10px);
+        left: 0;
+        width: var(--size);
+        height: calc(var(--size) / 6);
+        content: '';
+        background: #000;
+        border-radius: 50%;
+        opacity: 0.1;
+        animation: var(--speed) animate linear infinite;
+    }
+
+    &::after {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: var(--size);
+        height: var(--size);
+        content: '';
+        background: var(--color);
+        border-radius: calc(var(--size) / 10);
+        animation: var(--speed) shadow linear infinite;
+    }
+}
+
+@keyframes shadow {
+    17% {
+        border-bottom-right-radius: calc(var(--size) / 10);
+    }
+
+    25% {
+        transform: translateY(calc(var(--size) / 10 * 3)) rotate(22.5deg);
+    }
+
+    50% {
+        border-bottom-right-radius: calc(var(--size) / 3 * 4);
+        transform: translateY(calc(var(--size) / 5 * 3)) scale(1, 0.9) rotate(45deg);
+    }
+
+    75% {
+        transform: translateY(9px) rotate(67.5deg);
+    }
+
+    100% {
+        transform: translateY(0) rotate(90deg);
+    }
+}
+
+@keyframes animate {
+    0%,
+    100% {
+        transform: scale(1, 1);
+    }
+
+    50% {
+        transform: scale(1.2, 1);
+    }
+}

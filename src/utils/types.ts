@@ -4,7 +4,7 @@ import type {
     GetState,
     State,
     StateListener,
-    StateSelector,
+    StateSelector as ZSSelector,
     StateSliceListener,
     StoreApi,
     UseBoundStore,
@@ -13,18 +13,18 @@ import type {
 import type { StoreApiWithSubscribeWithSelector } from 'zustand/middleware';
 
 /** ********************** zustand *************************** */
-export type ZSImmerSetState<T extends State> = (
+export type ImmerSetState<T extends State> = (
     partial: ((draft: Draft<T>) => void) | T,
     replace?: boolean,
 ) => void;
-export type ZSImmerStoreApi<T extends State> = Omit<StoreApi<T>, 'setState'> & {
-    setState: ZSImmerSetState<T>;
+export type ImmerStoreApi<T extends State> = Omit<StoreApi<T>, 'setState'> & {
+    setState: ImmerSetState<T>;
 };
-export type ZSImmberSelectorStoreApi<T extends State> = Omit<ZSImmerStoreApi<T>, 'subscribe'> & {
+export type ImmberSelectorStoreApi<T extends State> = Omit<ImmerStoreApi<T>, 'subscribe'> & {
     subscribe: {
         (listener: StateListener<T>): () => void;
         <StateSlice>(
-            selector: StateSelector<T, StateSlice>,
+            selector: ZSSelector<T, StateSlice>,
             listener: StateSliceListener<StateSlice>,
             options?: {
                 equalityFn?: EqualityChecker<StateSlice>;
@@ -33,26 +33,26 @@ export type ZSImmberSelectorStoreApi<T extends State> = Omit<ZSImmerStoreApi<T>,
         ): () => void;
     };
 };
-export type ZSImmberStateCreator<
+export type ImmberStateCreator<
     T extends State,
-    CustomSetState = ZSImmerSetState<T>,
+    CustomSetState = ImmerSetState<T>,
     CustomGetState = GetState<T>,
-    CustomStoreApi extends ZSImmerStoreApi<T> = ZSImmerStoreApi<T>,
+    CustomStoreApi extends ImmerStoreApi<T> = ImmerStoreApi<T>,
 > = (set: CustomSetState, get: CustomGetState, api: CustomStoreApi) => T;
 
-export type ZSImmberUseBoundStore<
+export type ImmberUseBoundStore<
     T extends State,
-    CustomStoreApi extends ZSImmerStoreApi<T> = ZSImmerStoreApi<T>,
+    CustomStoreApi extends ImmerStoreApi<T> = ImmerStoreApi<T>,
 > = {
     (): T;
-    <U>(selector: StateSelector<T, U>, equalityFn?: EqualityChecker<U>): U;
+    <U>(selector: ZSSelector<T, U>, equalityFn?: EqualityChecker<U>): U;
 } & CustomStoreApi;
-export type ZSSelector<StoreType> = {
+export type StateSelector<StoreType> = {
     use: {
         [key in keyof StoreType]: () => StoreType[key];
     };
 };
-export type ZSHookSelector<StoreType> = {
+export type HookSelector<StoreType> = {
     [Key in keyof StoreType as `use${Capitalize<string & Key>}`]: () => StoreType[Key];
 };
 
@@ -66,19 +66,16 @@ export type SetupedState<T extends RecordAnyOrNever = RecordNever> = RecordScala
     { created?: true; setuped?: true },
     T
 >;
-export type SetupedStore<T extends RecordAnyOrNever = RecordNever> = UseBoundStore<
-    { created?: true; setuped?: true } & T,
-    StoreApi<{ created?: true; setuped?: true } & T>
->;
-export type SetupedEffectProps<T extends RecordAnyOrNever = RecordNever> = {
-    store: SetupedStore<T>;
+
+export type SetupedEffectProps<T extends SetupedState> = {
+    store: UseBoundStore<T> | ImmberUseBoundStore<T> | SubsciberDebounceStore<T>;
     callback: () => void | Promise<void>;
     clear?: () => any;
     wait?: number;
 };
 export type SubsciberDebounceStore<T extends State> =
     | UseBoundStore<T, StoreApiWithSubscribeWithSelector<T>>
-    | ZSImmberUseBoundStore<T, ZSImmberSelectorStoreApi<T>>;
+    | ImmberUseBoundStore<T, ImmberSelectorStoreApi<T>>;
 export type SubsciberDebounceProps<T extends State, K extends keyof T> = {
     store: SubsciberDebounceStore<T>;
     select: string;

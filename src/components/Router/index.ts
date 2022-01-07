@@ -1,4 +1,4 @@
 export * from './types';
-export * from './hooks/store';
-export * from './hooks/setup';
+export * from './store';
 export * from './provider';
+export * from './hooks';

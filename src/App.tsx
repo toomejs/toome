@@ -1,21 +1,18 @@
-import './App.css';
 import { useSetupAuth } from './components/Auth';
-import { useSetupCharts } from './components/Charts';
+import { useSetupConfig } from './components/Config';
+
 import { SWRFetcher, useSetupFetcher } from './components/Fetcher';
 import { useSetupIcon } from './components/Icon';
 import { useSetupMenu } from './components/Menu';
-
-import { useSetupRouter } from './components/Router';
-import { Router } from './components/Router/provider';
+import { Router, useSetupRouter } from './components/Router';
 
 import { useSetupStorage } from './components/Storage';
-import { useSetupTheme } from './components/Theme';
-import { router } from './config';
+import { config, router } from './config';
 
-const App = () => {
-    // useConfigInit(config);
+const useSetup = () => {
     // 初始化本地存储
     useSetupStorage();
+    useSetupConfig(config);
     // 初始化请求库和SWR,如果不需要自定义全局配置可不写
     useSetupFetcher();
     // 通过本地存储的Token获取远程用户信息
@@ -24,16 +21,14 @@ const App = () => {
     useSetupRouter(router);
     // 通过路由或用户信息初始化菜单
     useSetupMenu();
-    // useSetupMenu();
-    // 初始化主题和颜色
-    useSetupTheme();
     // 初始化图标配置
     useSetupIcon({
         iconfont_urls: ['//at.alicdn.com/t/font_2497975_4zt848h920t.js'],
     });
-
-    useSetupCharts();
-    // 加载路由页面
+    // useSetupChart();
+};
+const App = () => {
+    useSetup();
     return (
         <SWRFetcher>
             <Router />

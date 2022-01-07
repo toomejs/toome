@@ -1,0 +1,194 @@
+.layout-mode,
+.layout-theme {
+    display: flex;
+    justify-content: space-around;
+
+    :global {
+        & .item {
+            position: relative;
+            width: 56px;
+            height: 48px;
+            margin-right: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            background-color: #f0f2f5;
+            border-radius: 4px;
+            box-shadow: 0 1px 2.5px 0 rgb(0 0 0 / 18%);
+
+            &::before,
+            &::after {
+                position: absolute;
+                content: '';
+            }
+
+            &:hover,
+            &.active {
+                padding: 12px;
+                border: 2px solid @primary-color;
+
+                &::before,
+                &::after {
+                    border-radius: 0;
+                }
+            }
+
+            &.side,
+            &.dark-light,
+            &.light-dark,
+            &.light-light,
+            &.dark-dark {
+                &::before {
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
+                    width: 33%;
+                    height: 100%;
+                    border-radius: 4px 0 0 4px;
+                }
+
+                &::after {
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 25%;
+                }
+            }
+
+            &.side,
+            &.dark-light {
+                &::before {
+                    background-color: #273352;
+                }
+
+                &::after {
+                    background-color: #fff;
+                }
+            }
+
+            &.light-dark {
+                &::before {
+                    background-color: #fff;
+                }
+
+                &::after {
+                    background-color: #273352;
+                }
+            }
+
+            &.light-light {
+                &::before {
+                    background-color: #fff;
+                }
+
+                &::after {
+                    background-color: #fff;
+                }
+            }
+
+            &.dark-dark {
+                &::before {
+                    background-color: #273352;
+                }
+
+                &::after {
+                    background-color: #273352;
+                }
+            }
+
+            &.content {
+                &::before {
+                    top: 0;
+                    left: 0;
+                    width: 33%;
+                    height: 100%;
+                    background-color: #273352;
+                    border-radius: 4px 0 0 4px;
+                }
+
+                &::after {
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
+                    width: 100%;
+                    height: 25%;
+                    background-color: #fff;
+                }
+            }
+
+            &.top {
+                &::after {
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 25%;
+                    background-color: #273352;
+                }
+            }
+
+            &.embed {
+                &::before {
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
+                    width: 15%;
+                    height: 100%;
+                    background-color: #273352;
+                    border-radius: 4px 0 0 4px;
+                }
+
+                &::after {
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 25%;
+                    background-color: #fff;
+                }
+
+                & > .content-sidebar {
+                    position: absolute;
+                    left: 15%;
+                    width: 20%;
+                    height: 100%;
+                    background-color: #fff;
+                }
+            }
+        }
+    }
+}
+
+.color-setting {
+    display: flex;
+    justify-content: space-around;
+
+    :global {
+        & .item {
+            & > .swatch {
+                display: inline-block;
+                padding: 5px;
+                cursor: pointer;
+                background-color: #fff;
+                border-radius: 1px;
+                box-shadow: 0 0 0 1px rgb(0 0 0 / 10%);
+
+                & > .swatch-color {
+                    width: 36px;
+                    height: 14px;
+                    border-radius: 2px;
+                }
+            }
+
+            & > .picker-popover {
+                position: absolute;
+                z-index: 2;
+
+                & > .picker-cover {
+                    position: fixed;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    left: 0;
+                }
+            }
+        }
+    }
+}

@@ -9,13 +9,13 @@ export const dashboard: RouteOption<AntdRouteMenuMeta>[] = [
     },
     {
         name: 'dashboard',
-        meta: { text: '仪表盘' },
+        meta: { text: '仪表盘', icon: <SmileOutlined /> },
         children: [
             {
                 name: 'dashboard.monitor',
                 path: 'dashboard/monitor',
                 page: 'dashboard/monitor/index',
-                meta: { text: '监控页', icon: <SmileOutlined /> },
+                meta: { text: '监控页' },
             },
         ],
     },

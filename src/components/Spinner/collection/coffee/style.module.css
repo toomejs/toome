@@ -1,0 +1,46 @@
+.container {
+    --size: 30px;
+    --speed: 2s;
+    --color: #00adb5;
+    position: relative;
+    width: var(--size);
+    height: var(--size);
+    border: calc(var(--size) / 30) var(--color, #00adb5) solid;
+    border-radius: 0 0 calc(var(--size) / 6) calc(var(--size) / 6);
+
+    &::before {
+        position: absolute;
+        top: calc(var(--size) / 3 * -1);
+        left: calc(var(--size) / 15 * 4);
+        width: calc(var(--size) / 30);
+        height: calc(var(--size) / 5);
+        content: '';
+        background-color: var(--color);
+        box-shadow: calc(var(--size) / 6) 0 0 0 var(--color),
+            calc(var(--size) / 6) calc(var(--size) / 6 * -1) 0 0 var(--color),
+            calc(var(--size) / 3) 0 0 0 var(--color);
+        animation: var(--speed) animate linear infinite alternate;
+    }
+
+    &::after {
+        position: absolute;
+        top: calc(var(--size) / 15 * 2);
+        left: var(--size);
+        width: calc(var(--size) / 6);
+        height: calc(var(--size) / 5 * 2);
+        content: '';
+        border: calc(var(--size) / 30) solid var(--color);
+        border-left: none;
+        border-radius: 0 var(--size) var(--size) 0;
+    }
+}
+
+@keyframes animate {
+    0% {
+        height: 0;
+    }
+
+    100% {
+        height: calc(var(--size) / 5);
+    }
+}

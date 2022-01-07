@@ -24,4 +24,4 @@ export type User<
     },
     T
 >;
-export type AuthStore = { inited: boolean; token: null | string; user: User | null };
+export type AuthStoreType = { inited: boolean; token: null | string; user: User | null };

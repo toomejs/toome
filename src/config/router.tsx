@@ -6,8 +6,9 @@ const constants: RouteOption<AntdRouteMenuMeta>[] = [...auth, ...errors];
 const dynamic: RouteOption<AntdRouteMenuMeta>[] = [
     {
         path: '/',
-        page: 'layouts/master',
+        page: 'master',
         access: true,
+        layout: true,
         children: [...dashboard, ...content],
     },
 ];

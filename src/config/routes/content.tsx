@@ -17,8 +17,21 @@ export const content: RouteOption<AntdRouteMenuMeta>[] = [
             {
                 name: 'articles',
                 path: 'articles',
-                page: 'content/articles/index',
                 meta: { text: '文章管理', icon: <SmileOutlined /> },
+                children: [
+                    {
+                        index: true,
+                        name: 'articles.list',
+                        page: 'content/articles/list',
+                        meta: { text: '文章列表', icon: <SmileOutlined /> },
+                    },
+                    {
+                        name: 'articles.create',
+                        path: 'create',
+                        page: 'content/articles/create',
+                        meta: { text: '新增文章', icon: <SmileOutlined /> },
+                    },
+                ],
             },
             {
                 name: 'categories',

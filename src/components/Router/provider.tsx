@@ -1,4 +1,3 @@
-import type { FC } from 'react';
 import {
     BrowserRouter,
     HashRouter,
@@ -8,7 +7,7 @@ import {
 } from 'react-router-dom';
 import type { RouteObject } from 'react-router-dom';
 
-import { useRouter } from './hooks/store';
+import { useRouter, useRouterStatus } from './hooks';
 
 const RoutesList: FC<{ routes: RouteObject[]; basename: string }> = ({ routes, basename }) => {
     const location = useLocation();
@@ -28,6 +27,6 @@ const RouterRender: FC = () => {
     );
 };
 export const Router = () => {
-    const { generated } = useRouter.useSignal();
-    return generated ? <RouterRender /> : <div>加载中{`${generated}`}</div>;
+    const success = useRouterStatus.useSuccess();
+    return success ? <RouterRender /> : null;
 };

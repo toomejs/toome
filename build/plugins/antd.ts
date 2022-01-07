@@ -1,7 +1,7 @@
 import styleImport from 'vite-plugin-style-import';
 
 export function configAntdPlugin(isBuild: boolean) {
-    if (!isBuild) return [];
+    // if (!isBuild) return [];
     const antdPlugin = styleImport({
         libs: [
             {

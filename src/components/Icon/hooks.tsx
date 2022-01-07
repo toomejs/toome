@@ -1,19 +1,15 @@
 import { createFromIconfontCN } from '@ant-design/icons';
 import { omit } from 'lodash-es';
-import create from 'zustand';
 
-import { useStoreSetuped, createImmer, deepMerge } from '@/utils';
+import { useStoreSetuped, deepMerge } from '@/utils';
 
-import { getDefaultIconConfig } from './_default.config';
-import type { IconComputed, IconConfig, IconProps, IconState } from './types';
+import type { IconComputed, IconConfig, IconProps } from './types';
 import type { IconType } from './constants';
+import { IconSetup, IconStore } from './store';
 
-export const Setuped = create<{ setuped?: true }>(() => ({}));
-
-const IconStore = createImmer<IconState>(() => getDefaultIconConfig());
 export const useSetupIcon = <T extends RecordAnyOrNever = RecordNever>(config?: IconConfig<T>) => {
     useStoreSetuped({
-        store: Setuped,
+        store: IconSetup,
         callback: () => {
             const options: IconConfig = config ?? {};
             IconStore.setState((state) => {

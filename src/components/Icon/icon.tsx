@@ -7,8 +7,9 @@ import produce from 'immer';
 import classNames from 'classnames';
 
 import { IconType } from './constants';
-import { Setuped, useIcon } from './hooks';
+import { useIcon } from './hooks';
 import type { IconComputed, IconProps } from './types';
+import { IconSetup } from './store';
 
 const getAntdSvgIcon = ({ config }: { config: IconComputed }) => {
     if ('component' in config) {
@@ -26,7 +27,7 @@ const getAntdSvgIcon = ({ config }: { config: IconComputed }) => {
 };
 const Icon = (props: IconProps) => {
     const config = useIcon(props);
-    const isSetuped = Setuped((state) => state.setuped);
+    const isSetuped = IconSetup((state) => state.setuped);
     const [setuped, setSetuped] = useState(isSetuped);
     useEffect(() => {
         setSetuped(isSetuped);

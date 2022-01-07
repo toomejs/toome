@@ -1,26 +1,19 @@
-import { useAsyncEffect, useSafeState } from 'ahooks';
-
 import { useCallback } from 'react';
 
-import create from 'zustand';
+import { useUnmount } from 'react-use';
 
-import { createHookSelectors, createImmer, useStoreSetuped } from '@/utils';
-import type { SetupedState } from '@/utils';
+import { createHookSelectors } from '@/utils';
 
-import { useFetcher } from '../Fetcher';
+import { StorageSetup, useStorageDispatch } from '../Storage';
 
-import { useRouterReset } from '../Router/hooks/store';
-import { useStorage, useStorageStore } from '../Storage';
+import { useRouterReset } from '../Router/hooks';
 
-import type { AuthStore, User } from './types';
+import { useFetcherGetter } from '../Fetcher';
 
-const AuthSetuped = create<SetupedState>(() => ({}));
-export const useAuthStore = createImmer<AuthStore>(() => ({
-    token: null,
-    user: null,
-    inited: false,
-}));
-export const useAuth = createHookSelectors(useAuthStore);
+import type { User } from './types';
+import { AuthStore } from './store';
+
+export const useAuth = createHookSelectors(AuthStore);
 export const useAuthInited = () => useAuth.useInited();
 export const useToken = () => useAuth.useToken();
 export const useUser = <
@@ -29,78 +22,85 @@ export const useUser = <
     P extends RecordAnyOrNever = RecordNever,
 >() => useAuth.useUser() as User<T, R, P>;
 
-export const getToken = () => useAuthStore.getState().token;
-export const getUser = () => useAuthStore.getState().user;
-export const useSetupAuth = (accout_api?: string) => {
-    const fetcher = useFetcher();
-    const storageSetuped = useStorageStore.useSetuped();
-    const { addTable, getInstance } = useStorage();
+export const getToken = () => AuthStore.getState().token;
+export const getUser = () => AuthStore.getState().user;
+export const useSetupAuth = (api?: string) => {
+    const fetcher = useFetcherGetter();
+    const { addTable, getInstance } = useStorageDispatch();
     const resetRouter = useRouterReset();
-    const token = useToken();
-    const [api, setApi] = useSafeState<string | undefined>();
-    useStoreSetuped(
-        {
-            store: AuthSetuped,
-            callback: async () => {
-                addTable({ name: 'auth' });
-                const storage = getInstance('auth');
-                if (storage) {
-                    if (accout_api !== undefined) setApi(accout_api);
-                    const storgeToken = await storage.getItem<string | null>('token');
-                    useAuthStore.setState((state) => {
-                        state.token = storgeToken ?? null;
-                        state.inited = true;
-                    });
-                    if (!storgeToken) {
-                        await storage.setItem('token', null);
-                        resetRouter();
-                    } else {
-                        await storage.setItem('token', storgeToken);
-                    }
-                }
-            },
-            clear: () => {
-                // 组件卸载清除监听
-                AuthSetuped.destroy();
-            },
+    const unStorageSub = StorageSetup.subscribe(
+        (state) => state.setuped,
+        async (setuped) => {
+            if (!setuped) return;
+            addTable({ name: 'auth' });
+            const storage = getInstance('auth');
+            if (!storage) return;
+            const storgeToken = await storage.getItem<string | null>('token');
+            AuthStore.setState((state) => {
+                state.token = storgeToken ?? null;
+                state.inited = true;
+            });
+            if (!storgeToken) {
+                await storage.setItem('token', null);
+                resetRouter();
+            } else {
+                await storage.setItem('token', storgeToken);
+            }
         },
-        [storageSetuped],
     );
-    useAsyncEffect(async () => {
-        if (token && api) {
+    const unAuthSub = AuthStore.subscribe(
+        (state) => state.token,
+        async (token) => {
+            if (!token || !api) return;
             try {
-                const { data } = await fetcher.get(api);
+                const { data } = await fetcher().get(api);
                 if (data) {
-                    useAuthStore.setState((state) => {
+                    AuthStore.setState((state) => {
                         state.user = data;
                     });
                 }
             } catch (error) {
-                useAuthStore.setState((state) => {
+                AuthStore.setState((state) => {
                     state.user = null;
                 });
             }
             resetRouter();
-        }
-    }, [api, token]);
+        },
+    );
+    useUnmount(() => {
+        unStorageSub();
+        unAuthSub();
+    });
 };
 
 export const useAuthDispatch = () => {
-    const { getInstance } = useStorage();
+    const { getInstance } = useStorageDispatch();
     const resetRouter = useRouterReset();
     const setToken = useCallback(async (value: string) => {
+        if (!AuthStore.getState().inited) return;
+        AuthStore.setState((state) => {
+            state.inited = false;
+        });
         const storage = getInstance('auth');
-        if (storage) await storage.setItem('token', value);
-        useAuthStore.setState((draft) => {
-            draft.token = value;
+        if (!storage) return;
+        await storage.setItem('token', value);
+        AuthStore.setState((state) => {
+            state.token = value;
+            state.inited = true;
         });
     }, []);
     const clearToken = useCallback(async () => {
+        if (!AuthStore.getState().inited) return;
+        AuthStore.setState((state) => {
+            state.inited = false;
+        });
         const storage = getInstance('auth');
-        if (storage) await storage.setItem('token', null);
-        useAuthStore.setState((draft) => {
-            draft.token = null;
-            draft.user = null;
+        if (!storage) return;
+        await storage.setItem('token', null);
+        AuthStore.setState((state) => {
+            state.token = null;
+            state.user = null;
+            state.inited = true;
         });
         resetRouter();
     }, []);

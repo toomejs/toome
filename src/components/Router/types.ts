@@ -2,6 +2,8 @@ import type { MenuDataItem } from '@ant-design/pro-layout';
 import type { ReactElement, ReactNode } from 'react';
 import type { BrowserRouterProps, NavigateProps, RouteObject } from 'react-router-dom';
 
+import type { SetupedState } from '@/utils';
+
 export type WhiteRoute = string | { name: string } | { path: string };
 
 export type BaseRouteMenuMeta<T extends RecordAnyOrNever = RecordNever> = RecordScalable<
@@ -37,12 +39,14 @@ interface PathRouteProps<T extends RecordAnyOrNever = RecordNever> extends BaseR
     caseSensitive?: boolean;
     path: string;
     page?: React.ReactNode | string;
+    layout?: boolean;
     loading?: JSX.Element | false;
 }
 interface IndexRouteProps<T extends RecordAnyOrNever = RecordNever> extends BaseRouteProps<T> {
     name?: string;
     index: true;
     page?: React.ReactNode | string;
+    layout?: boolean;
     loading?: JSX.Element | false;
 }
 interface NavigateRouteProps<T extends RecordAnyOrNever = RecordNever>
@@ -70,6 +74,7 @@ export interface RouterConfig<T extends RecordAnyOrNever = RecordNever> {
     basePath?: string;
     hash?: boolean;
     window?: Window;
+    loading?: JSX.Element | false;
     render?: (basename: string, route: RouteOption<T>, element: ReactElement) => ReactNode;
     server?: string | null;
     auth?: {
@@ -95,15 +100,16 @@ export interface ParentRouteProps<T extends RecordAnyOrNever = RecordNever> {
     render?: (basename: string, route: RouteOption<T>, element: ReactElement) => ReactNode;
     index?: string;
     path?: string;
+    loading?: JSX.Element | false;
 }
-export type RouterStore<T extends RecordAnyOrNever = RecordNever> = {
+export type RouterStatusType = SetupedState<{
+    next: boolean;
+    ready: boolean;
+    success: boolean;
+}>;
+export type RouterStoreType<T extends RecordAnyOrNever = RecordNever> = {
     routes: RouteOption[];
     renders: RouteObject[];
     names: Record<string, string>;
     config: RouterState<T>;
-    signal: {
-        shouldChange: boolean;
-        canGenerate: boolean;
-        generated: boolean;
-    };
 };

@@ -1,0 +1,113 @@
+.container {
+    --size: 30px;
+    --speed: 1s;
+    --color: #f8b26a;
+    --item-color: #e15b64;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(var(--size) * 2);
+    height: calc(var(--size) * 2);
+
+    & > div:first-child {
+        display: block;
+
+        & > div {
+            position: absolute;
+            top: calc(50% - var(--size) * 1 / 5);
+            width: calc(var(--size) * 2 / 5);
+            height: calc(var(--size) * 2 / 5);
+            background: var(--item-color);
+            border-radius: 50%;
+            animation: var(--speed) animate3 linear infinite;
+        }
+
+        & > div:nth-child(1) {
+            animation-delay: -0.67s;
+        }
+
+        & > div:nth-child(2) {
+            animation-delay: -0.33s;
+        }
+
+        & > div:nth-child(3) {
+            animation-delay: 0s;
+        }
+    }
+
+    & > div:last-child {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+
+        & > div {
+            position: absolute;
+            top: calc(50% - var(--size));
+            width: calc(var(--size) * 2);
+            height: var(--size);
+            background: var(--color);
+            border-radius: calc(var(--size) * 2) calc(var(--size) * 2) 0 0;
+            transform-origin: 50% 100%;
+        }
+
+        & > div:first-child {
+            animation: var(--speed, 1s) animate1 linear infinite;
+        }
+
+        & > div:nth-child(2) {
+            animation: var(--speed, 1s) animate2 linear infinite;
+        }
+
+        & > div:last-child {
+            transform: rotate(-90deg);
+            animation: none;
+        }
+    }
+}
+
+@keyframes animate1 {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    50% {
+        transform: rotate(-45deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+@keyframes animate2 {
+    0% {
+        transform: rotate(180deg);
+    }
+
+    50% {
+        transform: rotate(225deg);
+    }
+
+    100% {
+        transform: rotate(180deg);
+    }
+}
+
+@keyframes animate3 {
+    0% {
+        opacity: 0;
+        transform: translate(calc(var(--size) * 3), 0);
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(calc(var(--size) * 2 / 3), 0);
+    }
+}

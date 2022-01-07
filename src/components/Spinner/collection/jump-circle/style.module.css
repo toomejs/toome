@@ -1,0 +1,44 @@
+.container {
+    --size: 30px;
+    --speed: 0.5s;
+    --color: #00adb5;
+    --circle-color: #f9c094;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: var(--size);
+    height: var(--size);
+
+    & > div:first-child {
+        width: calc(var(--size) / 2);
+        height: calc(var(--size) / 2);
+        background-color: var(--color);
+        border-radius: 50%;
+        animation: var(--speed) animate ease-out infinite alternate;
+    }
+
+    & > div:last-child {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: var(--size);
+        height: calc(var(--size) * 2 / 15);
+        background-color: var(--color);
+    }
+}
+
+@keyframes animate {
+    0% {
+        transform: translateY(0) scaleX(1.2) scaleY(0.8);
+    }
+
+    25% {
+        transform: translateY(calc(var(--size) / 3 * -1)) scaleX(1) scaleY(1);
+    }
+
+    100% {
+        background-color: var(--circle-color);
+        transform: translateY(calc(var(--size) / 3 * -4));
+    }
+}

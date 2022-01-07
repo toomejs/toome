@@ -1,0 +1,16 @@
+.header {
+    width: 100%;
+
+    :global {
+        & .logo {
+            width: var(--sidebar-width);
+        }
+    }
+}
+
+.header-fixed {
+    position: fixed;
+    right: 0;
+    z-index: 1;
+    width: calc(100% - var(--sidebar-width));
+}

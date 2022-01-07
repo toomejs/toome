@@ -1,6 +1,10 @@
 import loadable from '@loadable/component';
+import pMinDelay from 'p-min-delay';
 import type { FC } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { timeout } from 'promise-timeout';
+
+import { Spinner } from '@/components/Spinner';
 
 const getAsyncImports = (imports: Record<string, () => Promise<any>>, reg: RegExp) => {
     return Object.keys(imports)
@@ -14,8 +18,12 @@ const getAsyncImports = (imports: Record<string, () => Promise<any>>, reg: RegEx
         .reduce((o, n) => ({ ...o, ...n }), []) as unknown as Record<string, () => Promise<any>>;
 };
 export const pages = getAsyncImports(
-    import.meta.glob('../../../views/**/*.{tsx,jsx}'),
-    /..\/..\/\..\/views\/([\w+.?/?]+).tsx|.jsx/i,
+    import.meta.glob('../../../pages/**/*.blade.{tsx,jsx}'),
+    /..\/..\/\..\/pages\/([\w+.?/?]+)(.blade.tsx)|(.blade.jsx)/i,
+);
+export const layouts = getAsyncImports(
+    import.meta.glob('../../../layouts/**/*.blade.{tsx,jsx}'),
+    /..\/..\/\..\/layouts\/([\w+.?/?]+)(.blade.tsx)|(.blade.jsx)/i,
 );
 
 export const AuthRedirect: FC<{
@@ -31,20 +39,16 @@ export const getAsyncPage = (props: {
     cacheKey: string;
     loading?: JSX.Element | boolean;
     page: string;
+    layout?: boolean;
 }) => {
-    const { cacheKey, loading, page } = props;
+    const { cacheKey, loading = true, page, layout } = props;
     let fallback: JSX.Element | undefined;
     if (loading) {
-        fallback = typeof loading === 'boolean' ? <Loading /> : loading;
+        fallback = typeof loading === 'boolean' ? <Spinner name="Box" /> : loading;
     }
-    return loadable(pages[page], {
+    const view = layout ? layouts[page] : pages[page];
+    return loadable(() => timeout(pMinDelay(view(), 3), 220000), {
         cacheKey: () => cacheKey,
         fallback,
     });
 };
-
-export const Loading: FC = () => (
-    <div className="fixed w-full h-full top-0 left-0 dark:bg-white bg-gray-800 bg-opacity-25 flex items-center justify-center">
-        <span>加载中</span>
-    </div>
-);

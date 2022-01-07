@@ -1,6 +1,7 @@
-import { UserConfig, ConfigEnv } from 'vite';
+import { UserConfig, ConfigEnv, defineConfig } from 'vite';
 
 import { getConfig } from './build';
 
 // https://vitejs.dev/config/
-export default (params: ConfigEnv): UserConfig => getConfig(params);
+
+export default defineConfig((params: ConfigEnv): UserConfig => getConfig(params));

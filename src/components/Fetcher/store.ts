@@ -2,7 +2,7 @@ import create from 'zustand';
 
 import { createSubsciberImmer } from '@/utils';
 
-import type { FetcherConfig } from './types';
+import type { FetcherState } from './types';
 
-export const FetcherSetuped = create<{ setuped?: true }>(() => ({}));
-export const FetcherStore = createSubsciberImmer<FetcherConfig>(() => ({}));
+export const FetcherSetup = create<{ setuped?: true }>(() => ({}));
+export const FetcherStore = createSubsciberImmer<FetcherState>(() => ({ axios: {}, swr: {} }));

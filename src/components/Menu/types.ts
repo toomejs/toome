@@ -1,3 +1,5 @@
+import type { SetupedState } from '@/utils';
+
 import type { AntdRouteMenuMeta, BaseRouteMenuMeta } from '../Router';
 
 export interface MenuConfig<T extends RecordAnyOrNever = RecordNever> {
@@ -21,10 +23,10 @@ export type MenuOption<T extends RecordAnyOrNever = RecordNever> = BaseRouteMenu
 export type AntdMenuOption<T extends RecordAnyOrNever = RecordNever> = MenuOption<
     AntdRouteMenuMeta<T>
 >;
-
+export type MenuStatusType = SetupedState<{
+    next: boolean;
+}>;
 export interface MenuStoreType<T extends RecordAnyOrNever = RecordNever> {
-    shouldChange: boolean;
-    // generated: boolean;
     config: MenuState<T>;
     data: MenuOption<T>[];
 }

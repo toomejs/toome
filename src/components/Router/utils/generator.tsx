@@ -9,7 +9,7 @@ import { isUrl } from '@/utils';
 import type { Permission, User } from '@/components/Auth';
 import { getUser } from '@/components/Auth';
 
-import { useRouterStore } from '../hooks/store';
+import { RouterStatus, RouterStore } from '../store';
 
 import type { ParentRouteProps, RouteOption, RouterState, WhiteRoute } from '../types';
 
@@ -131,25 +131,23 @@ export const filteAccessRoutes = (
 
 export const factoryRoutes = async (fetcher: AxiosInstance) => {
     const user = getUser();
-    const { config } = useRouterStore.getState();
-    useRouterStore.setState((state) => {
-        state.signal.shouldChange = false;
-        state.signal.canGenerate = false;
-        state.signal.generated = false;
-    });
+    const { config } = RouterStore.getState();
+    RouterStatus.setState((state) => ({ ...state, next: false, ready: false, success: false }));
     if (!config.auth.enabled) {
-        useRouterStore.setState((state) => {
+        RouterStore.setState((state) => {
             state.routes = [...state.config.routes.constants, ...state.config.routes.dynamic];
-            state.signal.canGenerate = true;
+        });
+        RouterStatus.setState((state) => {
+            state.ready = true;
         });
     } else if (user) {
-        useRouterStore.setState((state) => {
+        RouterStore.setState((state) => {
             state.routes = filteAccessRoutes(user, state.config.routes.constants, config.auth, {
                 basePath: config.basePath,
             });
         });
         if (!config.server) {
-            useRouterStore.setState((state) => {
+            RouterStore.setState((state) => {
                 state.routes = filteAccessRoutes(
                     user,
                     [...state.routes, ...state.config.routes.dynamic],
@@ -158,15 +156,19 @@ export const factoryRoutes = async (fetcher: AxiosInstance) => {
                         basePath: config.basePath,
                     },
                 );
-                state.signal.canGenerate = true;
+            });
+            RouterStatus.setState((state) => {
+                state.ready = true;
             });
         } else {
             try {
                 const { data } = await fetcher.get<RouteOption[]>(config.server);
                 if (isArray(data)) {
-                    useRouterStore.setState((state) => {
+                    RouterStore.setState((state) => {
                         state.routes = [...state.routes, ...data];
-                        state.signal.canGenerate = true;
+                    });
+                    RouterStatus.setState((state) => {
+                        state.ready = true;
                     });
                 }
             } catch (error) {
@@ -174,7 +176,7 @@ export const factoryRoutes = async (fetcher: AxiosInstance) => {
             }
         }
     } else {
-        useRouterStore.setState((state) => {
+        RouterStore.setState((state) => {
             state.routes = [
                 ...filteWhiteList(state.config.routes.constants, config.auth, {
                     basePath: config.basePath,
@@ -183,9 +185,8 @@ export const factoryRoutes = async (fetcher: AxiosInstance) => {
                     basePath: config.basePath,
                 }),
             ];
-            state.signal.shouldChange = false;
-            state.signal.canGenerate = true;
         });
+        RouterStatus.setState((state) => ({ ...state, next: false, ready: true }));
     }
 };
 
@@ -196,7 +197,6 @@ export const generateRoutes = (children: RouteOption[], parent: ParentRouteProps
             const route: RouteObject = { ...omit(item, ['page', 'children']) };
             const current: ParentRouteProps = {
                 ...parent,
-                basePath: parent.basePath,
                 index: parent.index ? `${parent.index}.${index.toString()}` : index.toString(),
             };
             const isRoute =
@@ -218,7 +218,8 @@ export const generateRoutes = (children: RouteOption[], parent: ParentRouteProps
                         const AsyncPage = getAsyncPage({
                             page: item.page as string,
                             cacheKey: item.cacheKey ?? item.name ?? current.index!,
-                            loading: item.loading,
+                            loading: parent.loading ?? item.loading,
+                            layout: item.layout,
                         });
                         route.element = <AsyncPage />;
                     } else {
@@ -250,12 +251,12 @@ export const generateRoutes = (children: RouteOption[], parent: ParentRouteProps
 
 export const generateFinalRoutes = () => {
     const user = getUser();
-    const { config, routes } = useRouterStore.getState();
+    const { config, routes } = RouterStore.getState();
     const { nameMaps, routes: renders } = generateRoutes(routes, {
         basePath: config.basePath,
         render: config.render,
     });
-    useRouterStore.setState((state) => {
+    RouterStore.setState((state) => {
         state.names = nameMaps;
         state.renders = renders;
         if (state.config.auth.enabled && !user && state.config.auth.redirect === 'login') {
@@ -264,7 +265,6 @@ export const generateFinalRoutes = () => {
                 element: <AuthRedirect loginPath={state.config.auth.login_path} />,
             });
         }
-        state.signal.canGenerate = false;
-        state.signal.generated = true;
     });
+    RouterStatus.setState((state) => ({ ...state, next: false, ready: false, success: true }));
 };

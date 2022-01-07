@@ -10,7 +10,7 @@ import type {
     TableItem,
     StorageState,
     TableConfig,
-    StorageStore,
+    StorageStoreType,
 } from './types';
 
 /**
@@ -79,65 +79,59 @@ const getTable = (state: StorageState, dbname: string, name: string) => {
  * @param        {*} produce
  * @return       {*}
  */
-export const storageReducer: Reducer<StorageStore, DbAction> = produce((draft, action) => {
+export const storageReducer: Reducer<StorageStoreType, DbAction> = produce((state, action) => {
     switch (action.type) {
-        case DbActionType.SETUP:
-            if (!draft.setuped) {
-                draft.config = fixStorage(action.config ?? {});
-                draft.setuped = true;
-            }
-            break;
         case DbActionType.ADD_DB:
-            if (!getDb(draft.config, action.config.name)) {
-                draft.config.dbs = [...draft.config.dbs, action.config as DbItem<TableItem>];
-                fixStorage(draft.config);
+            if (!getDb(state.config, action.config.name)) {
+                state.config.dbs = [...state.config.dbs, action.config as DbItem<TableItem>];
+                fixStorage(state.config);
             }
             break;
         case DbActionType.SET_DEFAULT_DB:
-            if (draft.config.default !== action.name && getDb(draft.config, action.name))
-                draft.config.default = action.name;
+            if (state.config.default !== action.name && getDb(state.config, action.name))
+                state.config.default = action.name;
             break;
         case DbActionType.DELETE_DB:
-            draft.config.dbs = draft.config.dbs.filter((d) => d.name === action.name);
-            fixStorage(draft.config);
+            state.config.dbs = state.config.dbs.filter((d) => d.name === action.name);
+            fixStorage(state.config);
             break;
         case DbActionType.ADD_TABLE: {
-            const dbname = action.dbname ?? draft.config.default;
-            draft.config.dbs.forEach((db, index) => {
-                if (db.name === dbname && !getTable(draft.config, dbname, action.config.name)) {
-                    draft.config.dbs[index].tables.push(action.config as TableItem);
+            const dbname = action.dbname ?? state.config.default;
+            state.config.dbs.forEach((db, index) => {
+                if (db.name === dbname && !getTable(state.config, dbname, action.config.name)) {
+                    state.config.dbs[index].tables.push(action.config as TableItem);
                 }
             });
-            fixStorage(draft.config);
+            fixStorage(state.config);
             break;
         }
         case DbActionType.DELETE_TABLE: {
-            const dbname = action.dbname ?? draft.config.default;
-            draft.config.dbs.forEach((db, index) => {
-                if (getTable(draft.config, dbname, action.name)) {
-                    draft.config.dbs[index].tables = db.tables.filter(
+            const dbname = action.dbname ?? state.config.default;
+            state.config.dbs.forEach((db, index) => {
+                if (getTable(state.config, dbname, action.name)) {
+                    state.config.dbs[index].tables = db.tables.filter(
                         (t) => t.name !== action.name,
                     );
                 }
             });
-            fixStorage(draft.config);
+            fixStorage(state.config);
             break;
         }
         case DbActionType.SET_DEFAULT_TABLE: {
-            const dbname = action.dbname ?? draft.config.default;
-            draft.config.dbs.forEach((db, index) => {
+            const dbname = action.dbname ?? state.config.default;
+            state.config.dbs.forEach((db, index) => {
                 if (
                     db.defaultTable !== action.name &&
-                    getTable(draft.config, dbname, action.name)
+                    getTable(state.config, dbname, action.name)
                 ) {
-                    draft.config.dbs[index].defaultTable = action.name;
+                    state.config.dbs[index].defaultTable = action.name;
                 }
             });
-            fixStorage(draft.config);
+            fixStorage(state.config);
             break;
         }
         default:
-            fixStorage(draft.config);
+            fixStorage(state.config);
             break;
     }
 });

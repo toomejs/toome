@@ -1,15 +1,18 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import merge from 'deepmerge';
 import { ConfigEnv, UserConfig } from 'vite';
+import { getThemeVariables } from 'antd/dist/theme';
 
 import { getPlugins } from './plugins';
 import { createProxy } from './proxy';
 
 import { Configure } from './types';
-import { generateModifyVars, pathResolve } from './utils';
+import { pathResolve } from './utils';
 
 export const getConfig = (params: ConfigEnv, configure?: Configure): UserConfig => {
     const isBuild = params.command === 'build';
+    const modifyVars = getThemeVariables();
+    console.log(modifyVars.hack);
     return merge<UserConfig>(
         {
             resolve: {
@@ -26,7 +29,11 @@ export const getConfig = (params: ConfigEnv, configure?: Configure): UserConfig 
                 preprocessorOptions: {
                     less: {
                         javascriptEnabled: true,
-                        modifyVars: generateModifyVars(),
+                        modifyVars: {
+                            hack: `true;@import (reference) "${pathResolve(
+                                'src/styles/antd.less',
+                            )}";`,
+                        },
                     },
                 },
             },
