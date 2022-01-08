@@ -6,9 +6,11 @@ export enum LayoutActionType {
     CHANGE_VARS = 'change_vars',
     CHANGE_MODE = 'change_mode',
     CHANGE_MENU = 'change_menu',
-    CHANGE_COLLAPSE = 'change_collapse',
     CHANGE_THEME = 'change_theme',
+    CHANGE_COLLAPSE = 'change_collapse',
     TOGGLE_COLLAPSE = 'toggle_collapse',
+    CHANGE_MOBILE_SIDE = 'change_mobile_side',
+    TOGGLE_MOBILE_SIDE = 'toggle_mobile_side',
 }
 export interface LayoutVarsConfig {
     sidebarWidth?: string | number;
@@ -17,6 +19,7 @@ export interface LayoutVarsConfig {
     headerLightColor?: string;
 }
 export interface LayoutState extends ReRequired<LayoutConfig> {
+    mobileSide: boolean;
     menu: LayoutMenuState;
     vars: Required<LayoutVarsConfig>;
 }
@@ -43,9 +46,11 @@ export type LayoutAction =
           type: LayoutActionType.CHANGE_MENU;
           value: RePartial<LayoutMenuState>;
       }
-    | { type: LayoutActionType.CHANGE_COLLAPSE; value: boolean }
-    | { type: LayoutActionType.TOGGLE_COLLAPSE }
     | {
           type: LayoutActionType.CHANGE_THEME;
           value: Partial<LayoutTheme>;
-      };
+      }
+    | { type: LayoutActionType.CHANGE_COLLAPSE; value: boolean }
+    | { type: LayoutActionType.TOGGLE_COLLAPSE }
+    | { type: LayoutActionType.CHANGE_MOBILE_SIDE; value: boolean }
+    | { type: LayoutActionType.TOGGLE_MOBILE_SIDE };

@@ -1,82 +1,140 @@
-import type { createInstance } from 'localforage';
-import type { Dispatch } from 'react';
-
-import type { DbActionType } from './constants';
-
+import { createInstance } from 'localforage';
+import { Dispatch } from 'react';
 /**
- * @description 外部传入的存储配置
- * @interface IConfig
- * @template T
+ * Storage的状态管理store
  */
-interface IConfig<T extends DbConfig> {
-    default?: string;
-    dbs?: T[];
+export interface StorageStoreType {
+    /** 当前数据池状态 */
+    config: StorageState;
+}
+/**
+ * Storage初始化配置
+ */
+export interface StorageConfig extends IConfig<DbConfig> {}
+/**
+ * Storage的状态
+ */
+export interface StorageState extends Required<IConfig<DbItem<TableItem>>> {}
+/**
+ * Storage的操作
+ */
+export interface StorageDispatch extends Dispatch<DbAction> {}
+/**
+ * 数据池操作类型
+ */
+export enum DbActionType {
+    /** 初始化数据池 */
+    SETUP = 'setup',
+    /** 添加数据库 */
+    ADD_DB = 'add_db',
+    /** 删除数据库 */
+    DELETE_DB = 'delete_db',
+    /** 设置默认数据库 */
+    SET_DEFAULT_DB = 'set_default_db',
+    /** 给一个数据库添加数据表 */
+    ADD_TABLE = 'add_table',
+    /** 设置一个数据库的默认数据表 */
+    SET_DEFAULT_TABLE = 'change_table',
+    /** 删除数据表 */
+    DELETE_TABLE = 'delete_table',
+    /** 修复构建数据池 */
+    FIX = 'fix',
 }
 
 /**
- * @description 数据表配置
- * @export
- * @interface TableConfig
+ * 数据库配置接口
+ */
+export interface DbConfig {
+    /** 名称 */
+    name: string;
+    /** 默认数据表 */
+    defaultTable?: string;
+    /** 数据表 */
+    tables?: Array<TableConfig>;
+    /** 驱动 */
+    driver?: string | string[];
+    /** 大小 */
+    size?: number;
+    /** 版本 */
+    version?: number;
+    /** 描述 */
+    description?: string;
+}
+
+/**
+ * 数据库状态
+ */
+export interface DbItem<T extends TableConfig> extends Omit<DbConfig, 'defaultTable' | 'tables'> {
+    /** 默认数据表 */
+    defaultTable: string;
+    /** 数据表状态列表 */
+    tables: Array<T>;
+}
+
+/**
+ * 数据表配置
  */
 export interface TableConfig {
-    // 表名称
+    /** 表名称 */
     name: string;
-    // 描述
+    /** 描述 */
     description?: string;
-    // 所属的数据库实例
+    /** 所属的数据库实例 */
     instance?: ReturnType<typeof createInstance>;
 }
 
 /**
- * @description 数据表配置参数
- * @export
- * @interface TableItem
- * @extends {Omit<TableConfig, 'instance'>}
+ * 数据表状态
  */
 export interface TableItem extends Omit<TableConfig, 'instance'> {
+    /** 所属的数据库实例 */
     instance: ReturnType<typeof createInstance>;
 }
 
-/**
- * @description 数据库配置
- * @export
- * @interface DbConfig
- */
-export interface DbConfig {
-    name: string;
-    defaultTable?: string;
-    tables?: Array<TableConfig>;
-    driver?: string | string[];
-    size?: number;
-    version?: number;
-    description?: string;
-}
-
-/**
- * @description 数据库实例配置
- * @export
- * @interface DbItem
- * @extends {(Omit<DbConfig, 'defaultTable' | 'tables'>)}
- * @template T
- */
-export interface DbItem<T extends TableConfig> extends Omit<DbConfig, 'defaultTable' | 'tables'> {
-    defaultTable: string;
-    tables: Array<T>;
-}
-
-export interface StorageConfig extends IConfig<DbConfig> {}
-export interface StorageState extends Required<IConfig<DbItem<TableItem>>> {}
-export interface StorageDispatch extends Dispatch<DbAction> {}
 export type DbAction =
-    | { type: DbActionType.ADD_DB; config: DbConfig }
-    | { type: DbActionType.SET_DEFAULT_DB; name: string }
-    | { type: DbActionType.DELETE_DB; name: string }
-    | { type: DbActionType.ADD_TABLE; config: TableConfig; dbname?: string }
-    | { type: DbActionType.SET_DEFAULT_TABLE; name: string; dbname?: string }
-    | { type: DbActionType.DELETE_TABLE; name: string; dbname?: string }
+    | {
+          type: DbActionType.ADD_DB;
+          /** 数据库配置 */
+          config: DbConfig;
+      }
+    | {
+          type: DbActionType.SET_DEFAULT_DB;
+          /** 数据库名 */
+          name: string;
+      }
+    | {
+          type: DbActionType.DELETE_DB;
+          /** 数据表名 */
+          name: string;
+      }
+    | {
+          type: DbActionType.ADD_TABLE;
+          /** 数据表配置 */
+          config: TableConfig;
+          /** 数据库名 */
+          dbname?: string;
+      }
+    | {
+          type: DbActionType.SET_DEFAULT_TABLE;
+          /** 数据表名 */
+          name: string;
+          /** 数据库名 */
+          dbname?: string;
+      }
+    | {
+          type: DbActionType.DELETE_TABLE;
+          /** 数据表名 */
+          name: string;
+          /** 数据库名 */
+          dbname?: string;
+      }
     | { type: DbActionType.FIX };
-
-export interface StorageStoreType {
-    //     setuped: boolean;
-    config: StorageState;
+/**
+ * Storage的配置参数
+ */
+interface IConfig<T extends DbConfig> {
+    /** 默认数据库 */
+    default?: string;
+    /** 数据库列表 */
+    dbs?: T[];
 }

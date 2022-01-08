@@ -2,7 +2,7 @@ import { Drawer, Layout } from 'antd';
 
 import { useCallback } from 'react';
 
-import { useResponsiveMobileCheck } from '@/utils/device';
+import { useResponsiveMobileCheck } from '@/utils';
 
 import '../../style.css';
 
@@ -16,15 +16,15 @@ import { Logo } from './logo';
 export const Sidebar = () => {
     const { Sider } = Layout;
     const isMobile = useResponsiveMobileCheck();
-    const { menu, theme, mode, collapsed } = useLayout();
+    const { menu, theme, mode, collapsed, mobileSide } = useLayout();
     const { vars } = useLayout();
-    const { changeCollapse } = useLayoutDispatch();
+    const { changeCollapse, changeMobileSide } = useLayoutDispatch();
     const breakPointChange = useCallback((broken: boolean) => {
         if (broken) changeCollapse(true);
     }, []);
-    const closeDrawer = useCallback(() => changeCollapse(true), []);
+    const closeDrawer = useCallback(() => changeMobileSide(false), []);
     if (mode === 'top') return null;
-    if (mode === 'embed')
+    if (mode === 'embed' && !isMobile)
         return (
             <Sider
                 collapsible
@@ -58,7 +58,7 @@ export const Sidebar = () => {
     return (
         <Drawer
             placement="left"
-            visible={!collapsed}
+            visible={mobileSide}
             onClose={closeDrawer}
             width={vars.sidebarWidth}
             closable={false}

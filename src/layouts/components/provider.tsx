@@ -8,7 +8,7 @@ import { useChangeLayoutConfig, useLayoutConfig, useTheme } from '@/components/C
 
 import { useMenus } from '@/components/Menu';
 
-import { useResponsiveMobileCheck } from '@/utils/device';
+import { useResponsiveMobileCheck } from '@/utils';
 
 import { LayoutActionType, LayoutVarsConfig } from './types';
 import { LayoutContext, LayoutDispatchContext, layoutReducer } from './hooks';

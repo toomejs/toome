@@ -1,9 +1,9 @@
 import { produce } from 'immer';
 import { createInstance } from 'localforage';
-import type { Reducer } from 'react';
+import { Reducer } from 'react';
 
-import { DbActionType } from './constants';
-import type {
+import {
+    DbActionType,
     DbAction,
     StorageConfig,
     DbItem,
@@ -14,29 +14,9 @@ import type {
 } from './types';
 
 /**
- * @description 根据传入的配置生成一个正确的配置
- * @param        {DbItem<TableConfig>} db
- * @return       {DbItem<TableItem>}
+ * 根据配置初始化或修复数据池
+ * @param state Storage配置
  */
-const createDb = produce<DbItem<TableConfig>>((db) => {
-    const { tables, defaultTable, ...options } = db;
-    db.tables = tables.map((t) => {
-        if (t.instance) return t as TableItem;
-        // 没有指定数据表所属实例则创建一个新的实例
-        const instance = createInstance({
-            name: db.name,
-            storeName: t.name,
-            description: t.description ?? db.description,
-        });
-        instance.config(options);
-        return {
-            ...t,
-            instance,
-        };
-    });
-    return db;
-}) as (db: DbItem<TableConfig>) => DbItem<TableItem>;
-
 export const fixStorage = (state: StorageConfig) => {
     if (!state.dbs) {
         state.dbs = [
@@ -57,27 +37,49 @@ export const fixStorage = (state: StorageConfig) => {
     return state as StorageState;
 };
 /**
- * @description 获取数据库配置
- * @param        {StorageState} state
- * @param        {string} name
- * @return       {*}
+ * 创建一个数据库,如果存在则忽略
+ * @param  db
+ * @return {DbItem<TableItem>} 返回数据库配置
+ */
+const createDb = produce<DbItem<TableConfig>>((db) => {
+    const { tables, defaultTable, ...options } = db;
+    db.tables = tables.map((t) => {
+        if (t.instance) return t as TableItem;
+        // 没有指定数据表所属实例则创建一个新的实例
+        const instance = createInstance({
+            name: db.name,
+            storeName: t.name,
+            description: t.description ?? db.description,
+        });
+        instance.config(options);
+        return {
+            ...t,
+            instance,
+        };
+    });
+    return db;
+}) as (db: DbItem<TableConfig>) => DbItem<TableItem>;
+
+/**
+ * 获取数据库配置
+ * @param state 当前数据池状态
+ * @param name 数据库名称
  */
 const getDb = (state: StorageState, name: string) => state.dbs.find((db) => db.name === name);
+
 /**
- * @description 获取数据表配置
- * @param        {StorageState} state
- * @param        {string} dbname
- * @param        {string} name
- * @return       {*}
+ * 获取数据表配置
+ * @param state 当前数据池状态
+ * @param dbname 数据库名称
+ * @param name 数据表名称
  */
 const getTable = (state: StorageState, dbname: string, name: string) => {
     const db = getDb(state, dbname);
     return db && db.tables.find((t) => t.name === name);
 };
+
 /**
- * @description  操作数据表
- * @param        {*} produce
- * @return       {*}
+ * 数据池操作
  */
 export const storageReducer: Reducer<StorageStoreType, DbAction> = produce((state, action) => {
     switch (action.type) {

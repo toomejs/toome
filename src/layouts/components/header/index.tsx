@@ -10,6 +10,8 @@ import { useTheme, useThemeDispatch } from '@/components/Config';
 
 import { Icon } from '@/components/Icon';
 
+import { useResponsiveMobileCheck } from '@/utils';
+
 import { SideMenu } from '../sidebar/menu';
 
 import { useDrawer, useDrawerChange } from '../drawer/hooks';
@@ -44,10 +46,15 @@ const Setting = () => {
 const defaultClasses = ['flex', 'content-between', '!px-[15px]'];
 export const LayoutHeader = () => {
     const { Header } = Layout;
+    const isMobile = useResponsiveMobileCheck();
     const { mode, theme, menu, fixed, collapsed } = useLayout();
-    const { toggleCollapse } = useLayoutDispatch();
+    const { toggleCollapse, toggleMobileSide } = useLayoutDispatch();
     const [classes, setClasses] = useState<string>('');
     const { vars } = useLayout();
+    const sideCtrol = useCallback(
+        () => (isMobile ? toggleMobileSide() : toggleCollapse()),
+        [isMobile],
+    );
     useEffect(() => {
         setClasses(
             produce(() => {
@@ -72,7 +79,7 @@ export const LayoutHeader = () => {
                 <Icon
                     component={collapsed ? MenuUnFold : MenuFold}
                     className="cursor-pointer"
-                    onClick={toggleCollapse}
+                    onClick={sideCtrol}
                 />
             </Space>
             <div className="flex-auto">

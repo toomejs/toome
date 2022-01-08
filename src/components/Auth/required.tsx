@@ -3,7 +3,10 @@ import type { FC, ReactElement } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 
 import { useAuthInited, useToken } from './hooks';
-
+/**
+ * 该组件已废弃
+ * @param param0
+ */
 export const RequirdAuth: FC<{
     basename: string;
     path?: string;

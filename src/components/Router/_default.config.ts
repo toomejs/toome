@@ -21,10 +21,10 @@ export const getDefaultStore: <M extends RecordNever>() => RouterStoreType<M> = 
             permission_column: 'name',
             redirect: 'login',
         },
-        permission: {
-            enabled: true,
-            column: 'name',
-        },
+        // permission: {
+        //     enabled: true,
+        //     column: 'name',
+        // },
         routes: {
             constants: [],
             dynamic: [],

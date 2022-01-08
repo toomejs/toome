@@ -30,7 +30,7 @@ export const initLayoutConfig = (params: {
     isMobile: boolean;
 }): LayoutState => {
     const { config, menu, systemTheme, vars, isMobile } = params;
-    const data: LayoutState = { ...config, menu, vars };
+    const data: LayoutState = { ...config, menu, vars, mobileSide: false };
     if (systemTheme === 'dark') data.theme = layoutDarkTheme;
     if (isMobile) data.vars.sidebarCollapseWidth = 0;
     return data;

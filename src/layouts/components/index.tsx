@@ -2,7 +2,7 @@ import { Layout } from 'antd';
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { useResponsiveMobileCheck } from '@/utils/device';
+import { useResponsiveMobileCheck } from '@/utils';
 
 import { ConfigDrawer } from './drawer';
 
@@ -90,9 +90,9 @@ const LayoutWrapper: FC = ({ children }) => {
     const Main = useMemo(() => {
         if (mode === 'top') return <TopLayout>{children}</TopLayout>;
         if (mode === 'content') return <ContentLayout>{children}</ContentLayout>;
-        if (mode === 'embed') return <EmbedLayout>{children}</EmbedLayout>;
+        if (mode === 'embed' && !isMobile) return <EmbedLayout>{children}</EmbedLayout>;
         return <SideLayout>{children}</SideLayout>;
-    }, [mode]);
+    }, [mode, isMobile]);
     return (
         <Layout className={classes} style={getLayoutCssStyle(vars)}>
             {Main}

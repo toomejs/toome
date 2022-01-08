@@ -9,5 +9,6 @@
     },
     "stylelint.validate": ["css", "scss", "less", "postcss"],
     "javascript.preferences.importModuleSpecifier": "project-relative",
-    "less.lint.unknownAtRules": "ignore"
+    "less.lint.unknownAtRules": "ignore",
+    "typescript.suggest.jsdoc.generateReturns": false
 }

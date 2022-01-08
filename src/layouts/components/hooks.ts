@@ -6,9 +6,7 @@ import produce from 'immer';
 
 import { LayoutFixed, LayoutMode, LayoutTheme } from '@/components/Config';
 
-import { deepMerge } from '@/utils';
-
-import { useResponsiveMobileCheck } from '@/utils/device';
+import { deepMerge, useResponsiveMobileCheck } from '@/utils';
 
 import type { LayoutAction, LayoutState, LayoutVarsConfig } from './types';
 import { LayoutActionType } from './types';
@@ -38,6 +36,14 @@ export const layoutReducer: Reducer<LayoutState, LayoutAction> = produce((state,
         }
         case LayoutActionType.TOGGLE_COLLAPSE: {
             state.collapsed = !state.collapsed;
+            break;
+        }
+        case LayoutActionType.CHANGE_MOBILE_SIDE: {
+            state.mobileSide = action.value;
+            break;
+        }
+        case LayoutActionType.TOGGLE_MOBILE_SIDE: {
+            state.mobileSide = !state.mobileSide;
             break;
         }
         case LayoutActionType.CHANGE_THEME: {
@@ -76,6 +82,11 @@ export const useLayoutDispatch = () => {
             dispatch({ type: LayoutActionType.CHANGE_FIXED, key, value }),
         [],
     );
+    const changeTheme = useCallback(
+        (theme: Partial<LayoutTheme>) =>
+            dispatch({ type: LayoutActionType.CHANGE_THEME, value: theme }),
+        [],
+    );
     const changeCollapse = useCallback(
         (collapsed: boolean) =>
             dispatch({ type: LayoutActionType.CHANGE_COLLAPSE, value: collapsed }),
@@ -85,18 +96,23 @@ export const useLayoutDispatch = () => {
         () => dispatch({ type: LayoutActionType.TOGGLE_COLLAPSE }),
         [],
     );
-    const changeTheme = useCallback(
-        (theme: Partial<LayoutTheme>) =>
-            dispatch({ type: LayoutActionType.CHANGE_THEME, value: theme }),
+    const changeMobileSide = useCallback(
+        (collapsed: boolean) =>
+            dispatch({ type: LayoutActionType.CHANGE_MOBILE_SIDE, value: collapsed }),
+        [],
+    );
+    const toggleMobileSide = useCallback(
+        () => dispatch({ type: LayoutActionType.TOGGLE_MOBILE_SIDE }),
         [],
     );
     return {
         changeVars,
         changeMode,
         changeFixed,
+        changeTheme,
         changeCollapse,
         toggleCollapse,
-        changeTheme,
-        dispatch,
+        changeMobileSide,
+        toggleMobileSide,
     };
 };

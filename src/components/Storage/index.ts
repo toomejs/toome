@@ -1,4 +1,3 @@
-export * from './hooks';
-
-export type { StorageConfig } from './types';
+export * from './types';
 export * from './store';
+export * from './hooks';

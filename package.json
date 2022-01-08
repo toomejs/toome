@@ -4,7 +4,8 @@
     "scripts": {
         "dev": "vite",
         "build": "tsc && vite build",
-        "serve": "vite preview"
+        "serve": "vite preview",
+        "lint": "eslint \"{src,test}/**/*.ts\" --fix"
     },
     "dependencies": {
         "@ant-design/icons": "^4.7.0",

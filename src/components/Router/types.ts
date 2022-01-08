@@ -107,6 +107,9 @@ export type RouterStatusType = SetupedState<{
     ready: boolean;
     success: boolean;
 }>;
+/**
+ *
+ */
 export type RouterStoreType<T extends RecordAnyOrNever = RecordNever> = {
     routes: RouteOption[];
     renders: RouteObject[];
