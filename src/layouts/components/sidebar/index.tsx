@@ -1,6 +1,6 @@
 import { Drawer, Layout } from 'antd';
 
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 
 import { useResponsiveMobileCheck } from '@/utils/device';
 
@@ -22,9 +22,21 @@ export const Sidebar = () => {
     const breakPointChange = useCallback((broken: boolean) => {
         if (broken) changeCollapse(true);
     }, []);
-    const closeDrawer = useCallback(() => changeCollapse(false), []);
+    const closeDrawer = useCallback(() => changeCollapse(true), []);
     if (mode === 'top') return null;
-    if (mode === 'embed') return <EmbedMenu />;
+    if (mode === 'embed')
+        return (
+            <Sider
+                collapsible
+                collapsed
+                style={getLayoutCssStyle(vars)}
+                theme={theme.sidebar}
+                collapsedWidth={vars.sidebarCollapseWidth}
+                trigger={null}
+            >
+                <EmbedMenu />
+            </Sider>
+        );
     if (!isMobile)
         return (
             <Sider
@@ -44,25 +56,37 @@ export const Sidebar = () => {
         );
 
     return (
-        <Drawer placement="left" visible={!collapsed} onClose={closeDrawer}>
-            {mode !== 'content' ? <Logo style={{ backgroundColor: '#000' }} /> : null}
-            <SideMenu theme={theme.sidebar} menu={menu} />
+        <Drawer
+            placement="left"
+            visible={!collapsed}
+            onClose={closeDrawer}
+            width={vars.sidebarWidth}
+            closable={false}
+            bodyStyle={{ padding: 0 }}
+        >
+            <Sider
+                collapsible={false}
+                theme={theme.sidebar}
+                width="100%"
+                style={{ height: '100%' }}
+                trigger={null}
+            >
+                {mode !== 'content' ? <Logo style={{ backgroundColor: '#000' }} /> : null}
+                <SideMenu theme={theme.sidebar} menu={menu} />
+            </Sider>
         </Drawer>
     );
 };
 export const EmbedSidebar = () => {
     const { Sider } = Layout;
-    const { menu } = useLayout();
-    const [collapse] = useState(false);
+    const { menu, collapsed, vars } = useLayout();
     return (
         <Sider
             collapsible
             theme="light"
-            collapsed={collapse}
-            breakpoint="lg"
+            collapsed={collapsed}
+            collapsedWidth={vars.sidebarCollapseWidth}
             trigger={null}
-            onBreakpoint={(broken) => {}}
-            onCollapse={(collapsed, type) => {}}
         >
             <SideMenu theme="light" menu={menu} />
         </Sider>

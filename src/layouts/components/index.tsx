@@ -2,6 +2,8 @@ import { Layout } from 'antd';
 
 import { useEffect, useMemo, useState } from 'react';
 
+import { useResponsiveMobileCheck } from '@/utils/device';
+
 import { ConfigDrawer } from './drawer';
 
 import { LayoutHeader } from './header';
@@ -9,7 +11,7 @@ import { useLayout } from './hooks';
 import { LayoutProvider } from './provider';
 import { EmbedSidebar, Sidebar } from './sidebar';
 import type { LayoutVarsConfig } from './types';
-import style from './index.module.less';
+import style from './styles/index.module.less';
 import { getLayoutClasses, getLayoutCssStyle } from './utils';
 
 const SideLayout: FC = ({ children }) => {
@@ -73,17 +75,18 @@ const EmbedLayout: FC = ({ children }) => {
     );
 };
 const ProviderWrapper: FC<{ vars?: LayoutVarsConfig }> = ({ children, vars }) => (
-    <LayoutProvider>
+    <LayoutProvider vars={vars}>
         <ConfigDrawer>{children}</ConfigDrawer>
     </LayoutProvider>
 );
 const LayoutWrapper: FC = ({ children }) => {
     const [classes, setClasses] = useState<string>('');
+    const isMobile = useResponsiveMobileCheck();
     const { fixed, mode } = useLayout();
     const { vars } = useLayout();
     useEffect(() => {
-        setClasses(getLayoutClasses(fixed, mode, style));
-    }, [fixed, mode]);
+        setClasses(getLayoutClasses(fixed, mode, style, isMobile));
+    }, [fixed, mode, isMobile]);
     const Main = useMemo(() => {
         if (mode === 'top') return <TopLayout>{children}</TopLayout>;
         if (mode === 'content') return <ContentLayout>{children}</ContentLayout>;

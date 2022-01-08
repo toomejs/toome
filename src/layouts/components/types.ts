@@ -1,4 +1,4 @@
-import type { LayoutComponent, LayoutConfig, LayoutMode, LayoutTheme } from '@/components/Config';
+import type { LayoutConfig, LayoutFixed, LayoutMode, LayoutTheme } from '@/components/Config';
 import type { MenuOption } from '@/components/Menu';
 
 export enum LayoutActionType {
@@ -33,7 +33,7 @@ export interface LayoutEmbedMenuState {
 }
 
 export type LayoutAction =
-    | { type: LayoutActionType.CHANGE_FIXED; key: `${LayoutComponent}`; value: boolean }
+    | { type: LayoutActionType.CHANGE_FIXED; key: keyof LayoutFixed; value: boolean }
     | { type: LayoutActionType.CHANGE_VARS; vars: Required<LayoutVarsConfig>; isMobile: boolean }
     | {
           type: LayoutActionType.CHANGE_MODE;

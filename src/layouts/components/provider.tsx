@@ -1,15 +1,10 @@
 import { useLocation } from 'react-router-dom';
 
-import { useReducer } from 'react';
+import { useEffect, useReducer } from 'react';
 
 import { useUpdateEffect } from 'react-use';
 
-import {
-    LayoutComponent,
-    useLayoutConfig,
-    useLayoutConfigDispatch,
-    useTheme,
-} from '@/components/Config';
+import { useChangeLayoutConfig, useLayoutConfig, useTheme } from '@/components/Config';
 
 import { useMenus } from '@/components/Menu';
 
@@ -17,16 +12,16 @@ import { useResponsiveMobileCheck } from '@/utils/device';
 
 import { LayoutActionType, LayoutVarsConfig } from './types';
 import { LayoutContext, LayoutDispatchContext, layoutReducer } from './hooks';
-import { getMenuData, initLayoutConfig } from './utils';
+import { getMenuData, getVars, initLayoutConfig } from './utils';
 import { defaultVars } from './default.vars';
 
 export const LayoutProvider: FC<{ vars?: LayoutVarsConfig }> = (props) => {
     const systemTheme = useTheme();
     const config = useLayoutConfig();
+    const changeConfig = useChangeLayoutConfig();
     const menus = useMenus();
     const location = useLocation();
     const isMobile = useResponsiveMobileCheck();
-    const { changeCollapse, changeLayoutTheme, changeFixed } = useLayoutConfigDispatch();
     const [data, dispatch] = useReducer(
         layoutReducer,
         initLayoutConfig({
@@ -34,7 +29,7 @@ export const LayoutProvider: FC<{ vars?: LayoutVarsConfig }> = (props) => {
             config,
             menu: getMenuData(menus, location, config.mode),
             systemTheme,
-            vars: { ...defaultVars, ...(props.vars ?? {}) },
+            vars: getVars({ ...defaultVars, ...(props.vars ?? {}) }, isMobile),
         }),
     );
     useUpdateEffect(() => {
@@ -45,21 +40,22 @@ export const LayoutProvider: FC<{ vars?: LayoutVarsConfig }> = (props) => {
         });
     }, [props.vars, isMobile]);
     useUpdateEffect(() => {
+        changeConfig((state) => ({ ...state, mode: data.mode }));
+    }, [data.mode]);
+    useUpdateEffect(() => {
         dispatch({
             type: LayoutActionType.CHANGE_MENU,
             value: getMenuData(menus, location, data.mode),
         });
     }, [data.mode, menus, location]);
     useUpdateEffect(() => {
-        if (!isMobile) changeCollapse(data.collapsed);
+        if (!isMobile) changeConfig((state) => ({ ...state, collapsed: data.collapsed }));
     }, [data.collapsed]);
     useUpdateEffect(() => {
-        if (systemTheme !== 'dark') changeLayoutTheme(data.theme);
+        if (systemTheme !== 'dark') changeConfig((state) => ({ ...state, theme: data.theme }));
     }, [data.theme]);
-    useUpdateEffect(() => {
-        Object.keys(data.fixed).forEach((key) =>
-            changeFixed(key as LayoutComponent, data.fixed[key]),
-        );
+    useEffect(() => {
+        changeConfig((state) => ({ ...state, fixed: data.fixed }));
     }, [data.fixed]);
 
     return (

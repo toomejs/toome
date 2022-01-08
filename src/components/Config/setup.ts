@@ -8,15 +8,7 @@ import { StorageSetup, useStorageDispatch } from '../Storage';
 
 import type { ConfigProps, ConfigStoreType } from './types';
 import { ConfigSetup, ConfigStore } from './store';
-import {
-    createThemeWatcher,
-    subscribeColors,
-    subscribeLayoutEmbedFixed,
-    subscribeLayoutHeaderFixed,
-    subscribeLayoutMode,
-    subscribeLayoutSidebarFixed,
-    subscribeThemeMode,
-} from './utils';
+import { createThemeWatcher, subscribeColors, subscribeThemeMode } from './utils';
 
 export const useSetupConfig = (config?: ConfigProps) => {
     const { addTable, getInstance } = useStorageDispatch();
@@ -57,7 +49,7 @@ export const initConfigState = async (storage: LocalForage) => {
     createThemeWatcher();
     subscribeThemeMode(config.theme.mode);
     subscribeColors(config.colors);
-    subscribeLayoutMode(config.layout.mode);
+    // subscribeLayoutMode(config.layout.mode);
 };
 export const useConfigSubscriber = async () => {
     const { getInstance } = useStorageDispatch();
@@ -82,22 +74,6 @@ export const useConfigSubscriber = async () => {
     ConfigStore.subscribe(
         (state) => state.config.colors,
         (colors) => subsciber(() => subscribeColors(colors)),
-    );
-    ConfigStore.subscribe(
-        (state) => state.config.layout.mode,
-        (mode) => subsciber(() => subscribeLayoutMode(mode)),
-    );
-    ConfigStore.subscribe(
-        (state) => state.config.layout.fixed.header,
-        (fixed) => subsciber(() => subscribeLayoutHeaderFixed(fixed)),
-    );
-    ConfigStore.subscribe(
-        (state) => state.config.layout.fixed.sidebar,
-        (fixed) => subsciber(() => subscribeLayoutSidebarFixed(fixed)),
-    );
-    ConfigStore.subscribe(
-        (state) => state.config.layout.fixed.embed,
-        (fixed) => subsciber(() => subscribeLayoutEmbedFixed(fixed)),
     );
     ConfigStore.subscribe(
         (state) => state.config,

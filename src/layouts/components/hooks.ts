@@ -4,7 +4,7 @@ import type { Dispatch, Reducer } from 'react';
 
 import produce from 'immer';
 
-import { LayoutComponent, LayoutMode, LayoutTheme } from '@/components/Config';
+import { LayoutFixed, LayoutMode, LayoutTheme } from '@/components/Config';
 
 import { deepMerge } from '@/utils';
 
@@ -12,15 +12,14 @@ import { useResponsiveMobileCheck } from '@/utils/device';
 
 import type { LayoutAction, LayoutState, LayoutVarsConfig } from './types';
 import { LayoutActionType } from './types';
+import { getLayoutFixed, getVars } from './utils';
 
 export const LayoutContext = createContext<LayoutState | null>(null);
 export const LayoutDispatchContext = createContext<Dispatch<LayoutAction> | null>(null);
 export const layoutReducer: Reducer<LayoutState, LayoutAction> = produce((state, action) => {
     switch (action.type) {
         case LayoutActionType.CHANGE_VARS: {
-            const current = { ...state.vars, ...action.vars };
-            current.sidebarCollapseWidth = action.isMobile ? 0 : action.vars.sidebarCollapseWidth;
-            state.vars = current;
+            state.vars = getVars({ ...state.vars, ...action.vars }, action.isMobile);
             break;
         }
         case LayoutActionType.CHANGE_MODE: {
@@ -29,7 +28,8 @@ export const layoutReducer: Reducer<LayoutState, LayoutAction> = produce((state,
             break;
         }
         case LayoutActionType.CHANGE_FIXED: {
-            state.fixed[action.key] = action.value;
+            const newFixed = { [action.key]: action.value };
+            state.fixed = getLayoutFixed(state.mode, { ...state.fixed, ...newFixed }, newFixed);
             break;
         }
         case LayoutActionType.CHANGE_COLLAPSE: {
@@ -72,8 +72,8 @@ export const useLayoutDispatch = () => {
         [],
     );
     const changeFixed = useCallback(
-        (type: `${LayoutComponent}`, value: boolean) =>
-            dispatch({ type: LayoutActionType.CHANGE_FIXED, key: type, value }),
+        (key: keyof LayoutFixed, value: boolean) =>
+            dispatch({ type: LayoutActionType.CHANGE_FIXED, key, value }),
         [],
     );
     const changeCollapse = useCallback(

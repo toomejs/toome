@@ -40,6 +40,7 @@ export const getLayoutClasses = (
     fixed: LayoutFixed,
     mode: `${LayoutMode}`,
     style: CSSModuleClasses,
+    isMobile: boolean,
 ) => {
     const items = ['!min-h-screen'];
     if (fixed.header || fixed.sidebar || fixed.embed) {
@@ -66,7 +67,14 @@ export const getLayoutClasses = (
         default:
             break;
     }
+    if (isMobile) items.push(style.mobileLayout);
     return classNames(items);
+};
+export const getVars = (vars: Required<LayoutVarsConfig>, isMobile: boolean) => {
+    const current = { ...vars };
+    current.sidebarCollapseWidth = isMobile ? 0 : current.sidebarCollapseWidth;
+    // current.sidebarWidth = isMobile ? 0 : current.sidebarWidth;
+    return current;
 };
 export const getLayoutCssStyle = (style: Required<LayoutVarsConfig>): CSSProperties =>
     Object.fromEntries(
@@ -75,6 +83,33 @@ export const getLayoutCssStyle = (style: Required<LayoutVarsConfig>): CSSPropert
             typeof value === 'number' ? `${value}px` : value,
         ]),
     );
+
+export const getLayoutFixed = (
+    mode: `${LayoutMode}`,
+    fixed: LayoutFixed,
+    newFixed: Partial<LayoutFixed>,
+) => {
+    const current = { ...fixed, ...newFixed };
+    if (mode === 'side') {
+        if (newFixed.header) current.sidebar = true;
+        if (newFixed.sidebar !== undefined && !newFixed.sidebar) current.header = false;
+    } else if (mode === 'content') {
+        if (newFixed.sidebar) current.header = true;
+        if (newFixed.header !== undefined && !newFixed.header) current.sidebar = false;
+    } else if (mode === 'embed') {
+        if (newFixed.header) {
+            current.sidebar = true;
+            current.embed = true;
+        }
+        if (newFixed.sidebar !== undefined && !newFixed.sidebar) {
+            current.embed = false;
+            current.header = false;
+        }
+        if (newFixed.embed) current.sidebar = true;
+        if (newFixed.embed !== undefined && !newFixed.embed) current.header = false;
+    }
+    return current;
+};
 
 export const getMenuData = (
     menus: MenuOption[],

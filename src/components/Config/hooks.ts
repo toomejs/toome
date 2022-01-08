@@ -1,8 +1,14 @@
 import { useCallback } from 'react';
 
+import { isFunction } from 'lodash-es';
+
+import produce from 'immer';
+
+import { deepMerge } from '@/utils';
+
 import { ConfigStore } from './store';
-import type { ColorConfig, LayoutTheme, ThemeTimeRange } from './types';
-import type { ThemeDepend, ThemeMode, LayoutMode, LayoutComponent } from './constants';
+import type { ColorConfig, LayoutConfig, ThemeTimeRange } from './types';
+import type { ThemeDepend, ThemeMode } from './constants';
 
 export const useColors = () => ConfigStore(useCallback((state) => state.config.colors, []));
 export const useColor = (name: keyof ColorConfig) =>
@@ -45,30 +51,16 @@ export const useThemeDispatch = () => ({
     }, []),
 });
 export const useLayoutConfig = () => ConfigStore(useCallback((state) => state.config.layout, []));
-export const useLayoutConfigDispatch = () => ({
-    changeFixed: useCallback((type: `${LayoutComponent}`, fixed: boolean) => {
-        ConfigStore.setState((state) => {
-            state.config.layout.fixed[type] = fixed;
-        });
-    }, []),
-    changeLayoutTheme: useCallback((theme: LayoutTheme) => {
-        ConfigStore.setState((state) => {
-            state.config.layout.theme = { ...state.config.layout.theme, ...theme };
-        });
-    }, []),
-    changeLayoutMode: useCallback((mode: `${LayoutMode}`) => {
-        ConfigStore.setState((state) => {
-            state.config.layout.mode = mode;
-        });
-    }, []),
-    changeCollapse: useCallback((collapsed: boolean) => {
-        ConfigStore.setState((state) => {
-            state.config.layout.collapsed = collapsed;
-        });
-    }, []),
-    toggleCollapse: useCallback(() => {
-        ConfigStore.setState((state) => {
-            state.config.layout.collapsed = !state.config.layout.collapsed;
-        });
-    }, []),
-});
+export const useChangeLayoutConfig = () =>
+    useCallback(
+        (config: LayoutConfig | ((old: ReRequired<LayoutConfig>) => ReRequired<LayoutConfig>)) => {
+            ConfigStore.setState((state) => {
+                if (isFunction(config)) {
+                    state.config.layout = produce(state.config.layout, config);
+                } else {
+                    state.config.layout = deepMerge(state.config.layout, config, 'replace');
+                }
+            });
+        },
+        [],
+    );

@@ -8,5 +8,6 @@
         "postcss": "css"
     },
     "stylelint.validate": ["css", "scss", "less", "postcss"],
-    "javascript.preferences.importModuleSpecifier": "project-relative"
+    "javascript.preferences.importModuleSpecifier": "project-relative",
+    "less.lint.unknownAtRules": "ignore"
 }

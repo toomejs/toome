@@ -8,6 +8,7 @@ module.exports = {
         'stylelint-prettier/recommended',
     ],
     rules: {
+        'selector-type-no-unknown': null,
         'selector-class-pattern': null,
         'custom-property-pattern': null,
         'no-duplicate-selectors': null, // 取消禁止重复定义,这样可以在css module中单独定义变量

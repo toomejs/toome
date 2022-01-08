@@ -11,10 +11,11 @@ import type { ColorConfig } from '@/components/Config';
 
 import { useLayout, useLayoutDispatch } from '../hooks';
 
+import style from './index.module.less';
+
 import { ColorList, LayoutModeList, LayoutTheme, LayoutThemeList } from './constants';
 
 import { ChangeDrawerContext, DrawerContext, useDrawer, useDrawerChange } from './hooks';
-import style from './index.module.css';
 
 const LayoutSetting = () => {
     const { changeMode } = useLayoutDispatch();
