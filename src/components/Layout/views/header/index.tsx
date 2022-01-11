@@ -4,8 +4,6 @@ import { useCallback, useEffect, useState } from 'react';
 
 import classNames from 'classnames';
 
-import produce from 'immer';
-
 import { useTheme, useThemeDispatch } from '@/components/Config';
 
 import { Icon } from '@/components/Icon';
@@ -16,11 +14,11 @@ import { SideMenu } from '../sidebar/menu';
 
 import { useDrawer, useDrawerChange } from '../drawer/hooks';
 
-import { useLayout, useLayoutDispatch } from '../hooks';
+import { useLayout, useLayoutDispatch } from '../../hooks';
 
 import { Logo } from '../sidebar/logo';
 
-import { getLayoutCssStyle } from '../utils';
+import { getLayoutCssStyle } from '../../utils';
 
 import Sun from '~icons/carbon/sun';
 import Moon from '~icons/carbon/moon';
@@ -47,26 +45,26 @@ const defaultClasses = ['flex', 'content-between', '!px-[15px]'];
 export const LayoutHeader = () => {
     const { Header } = Layout;
     const isMobile = useResponsiveMobileCheck();
-    const { mode, theme, menu, fixed, collapsed } = useLayout();
+    const {
+        config: { mode, theme, fixed, collapsed, vars },
+        menu,
+    } = useLayout();
     const { toggleCollapse, toggleMobileSide } = useLayoutDispatch();
     const [classes, setClasses] = useState<string>('');
-    const { vars } = useLayout();
     const sideCtrol = useCallback(
         () => (isMobile ? toggleMobileSide() : toggleCollapse()),
         [isMobile],
     );
     useEffect(() => {
-        setClasses(
-            produce(() => {
-                const items = defaultClasses;
-                if (theme.header === 'dark') {
-                    items.push('!text-[rgba(255,255,255,0.65)]');
-                } else {
-                    items.push('!bg-white');
-                }
-                return classNames(items);
-            }),
-        );
+        setClasses(() => {
+            const items = [...defaultClasses];
+            if (theme.header === 'dark') {
+                items.push('!text-[rgba(255,255,255,0.65)]');
+            } else {
+                items.push('!bg-white');
+            }
+            return classNames(items);
+        });
     }, [theme.header, fixed.header]);
     return (
         <Header className={classes} style={getLayoutCssStyle(vars)}>

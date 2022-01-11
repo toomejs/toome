@@ -3,13 +3,11 @@ import classNames from 'classnames';
 import { useCallback, useState } from 'react';
 
 import produce from 'immer';
-import { SketchPicker } from 'react-color';
-import type { ColorResult } from 'react-color';
+import { SketchPicker, ColorResult } from 'react-color';
 
-import { useColorDispatch, useColors } from '@/components/Config';
-import type { ColorConfig } from '@/components/Config';
+import { useColorDispatch, useColors, ColorConfig } from '@/components/Config';
 
-import { useLayout, useLayoutDispatch } from '../hooks';
+import { useLayout, useLayoutDispatch } from '../../hooks';
 
 import style from './index.module.less';
 
@@ -121,7 +119,9 @@ const ColorSetting = () => {
 };
 
 const Feature: FC = () => {
-    const { mode, fixed, collapsed } = useLayout();
+    const {
+        config: { mode, fixed, collapsed },
+    } = useLayout();
     const { changeFixed, changeCollapse } = useLayoutDispatch();
     return (
         <>

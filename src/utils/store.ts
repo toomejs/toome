@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-16 05:55:08 +0800
- * @Updated_at     : 2022-01-08 13:53:58 +0800
+ * @Updated_at     : 2022-01-10 17:36:42 +0800
  * @Path           : /src/utils/store.ts
  * @Description    : 状态管理扩展(基于zustand)
  * @LastEditors    : pincman
@@ -22,40 +22,76 @@ import {
     ImmerSetState,
     ImmerStoreApi,
     HookSelector,
-    ImmerSelectorStoreApi,
     StateSelector,
+    ImmerSelectorStoreApi,
 } from './types';
+
+export function createImmer<
+    T extends State,
+    CustomSetState extends ImmerSetState<T>,
+    CustomGetState,
+    CustomStoreApi extends ImmerStoreApi<T>,
+>(
+    createState:
+        | ImmberStateCreator<T, CustomSetState, CustomGetState, CustomStoreApi>
+        | CustomStoreApi,
+): ImmberUseBoundStore<T, CustomStoreApi>;
+export function createImmer<T extends State>(
+    createState:
+        | ImmberStateCreator<T, ImmerSetState<T>, GetState<T>, ImmerStoreApi<T>>
+        | ImmerStoreApi<T>,
+): ImmberUseBoundStore<T, ImmerStoreApi<T>>;
 
 /**
  * 创建一个immber store
  * @param createState store创建函数
  */
-export function createImmer<T extends State>(
-    createState:
-        | ImmberStateCreator<T, ImmerSetState<T>, GetState<T>, ImmerStoreApi<T>>
-        | ImmerStoreApi<T>,
-): ImmberUseBoundStore<T, ImmerStoreApi<T>> {
+export function createImmer(createState: any) {
     const store = create(ImmerMiddleware(createState as any));
     store.setState = setImmerState(store.setState);
     return store as any;
 }
+
+export function createSubsciber<
+    T extends State,
+    CustomSetState,
+    CustomGetState,
+    CustomStoreApi extends StoreApiWithSubscribeWithSelector<T>,
+>(
+    createState: StateCreator<T, CustomSetState, CustomGetState, CustomStoreApi> | CustomStoreApi,
+): UseBoundStore<T, CustomStoreApi>;
+export function createSubsciber<T extends State>(
+    createState: StateCreator<T, SetState<T>, GetState<T>, StoreApiWithSubscribeWithSelector<T>>,
+): UseBoundStore<T, StoreApiWithSubscribeWithSelector<T>>;
+
 /**
  * 创建一个可供订阅的store
  * @param createState store创建函数
  */
-export function createSubsciber<T extends State>(
-    createState: StateCreator<T, SetState<T>, GetState<T>, StoreApiWithSubscribeWithSelector<T>>,
-): UseBoundStore<T, StoreApiWithSubscribeWithSelector<T>> {
+export function createSubsciber(createState: any) {
     return create(subscribeWithSelector(createState as any));
 }
+
+export function createImmberSubsciber<
+    T extends State,
+    CustomSetState extends ImmerSetState<T>,
+    CustomGetState,
+    CustomStoreApi extends ImmerSelectorStoreApi<T>,
+>(
+    createState:
+        | ImmberStateCreator<T, CustomSetState, CustomGetState, CustomStoreApi>
+        | CustomStoreApi,
+): ImmberUseBoundStore<T, CustomStoreApi>;
+
+export function createImmberSubsciber<T extends State>(
+    createState: ImmberStateCreator<T, ImmerSetState<T>, GetState<T>, ImmerSelectorStoreApi<T>>,
+): ImmberUseBoundStore<T, ImmerSelectorStoreApi<T>>;
 
 /**
  * 创建一个可供订阅的immber store
  * @param createState store创建函数
  */
-export function createSubsciberImmer<T extends State>(
-    createState: ImmberStateCreator<T, ImmerSetState<T>, GetState<T>, ImmerSelectorStoreApi<T>>,
-): ImmberUseBoundStore<T, ImmerSelectorStoreApi<T>> {
+export function createImmberSubsciber(createState: any) {
     const store = create(subscribeWithSelector(ImmerMiddleware(createState as any)));
     store.setState = setImmerState(store.setState) as any;
     return store as any;

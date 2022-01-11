@@ -1,6 +1,6 @@
-import type { AntdRouteMenuMeta, RouteOption } from '@/components/Router';
+import type { RouteOption } from '@/components/Router';
 
-export const auth: RouteOption<AntdRouteMenuMeta>[] = [
+export const auth: RouteOption[] = [
     {
         path: '/auth',
         children: [

@@ -1,41 +1,117 @@
 import { matchPath } from 'react-router-dom';
 
-import type { Location } from 'history';
+import { Location } from 'history';
 
-import type { CSSProperties } from 'react';
+import { CSSProperties, Reducer } from 'react';
 
 import { kebabCase } from 'lodash-es';
 
 import classNames from 'classnames';
 
-import { isUrl } from '@/utils';
-import type { MenuOption } from '@/components/Menu';
+import produce from 'immer';
 
-import type {
-    LayoutMode,
-    ThemeMode,
+import { deepMerge, isUrl } from '@/utils';
+import { MenuOption } from '@/components/Menu';
+
+import { ThemeMode } from '../Config';
+
+import { defaultConfig } from '../Config/_default.config';
+
+import {
+    LayoutAction,
     LayoutConfig,
+    LayoutContextType,
     LayoutFixed,
+    LayoutMenuState,
+    LayoutSplitMenuState,
     LayoutTheme,
-} from '@/components/Config';
-
-import type { LayoutEmbedMenuState, LayoutMenuState, LayoutState, LayoutVarsConfig } from './types';
-
-export const layoutDarkTheme: LayoutTheme = { header: 'dark', sidebar: 'light', embed: 'light' };
+    LayoutVarsConfig,
+} from './types';
+import { LayoutActionType, LayoutMode } from './constants';
+/**
+ * 暗黑模式下的组件背景色
+ */
+export const layoutDarkTheme: LayoutTheme = { header: 'light', sidebar: 'light', embed: 'light' };
+/**
+ * 初始化背景状态
+ * @param params
+ */
 export const initLayoutConfig = (params: {
-    config: ReRequired<LayoutConfig>;
+    /** 自定义布局配置 */
+    config?: LayoutConfig;
+    /** 菜单状态 */
     menu: LayoutMenuState;
+    /** 全局主题模式 */
     systemTheme: `${ThemeMode}`;
-    vars: Required<LayoutVarsConfig>;
-    isMobile: boolean;
-}): LayoutState => {
-    const { config, menu, systemTheme, vars, isMobile } = params;
-    const data: LayoutState = { ...config, menu, vars, mobileSide: false };
-    if (systemTheme === 'dark') data.theme = layoutDarkTheme;
-    if (isMobile) data.vars.sidebarCollapseWidth = 0;
+}): LayoutContextType => {
+    const { config, menu, systemTheme } = params;
+    const data: LayoutContextType = {
+        config: deepMerge(defaultConfig, config ?? {}, 'replace') as ReRequired<LayoutConfig>,
+        menu,
+        mobileSide: false,
+    };
+    // 如果全局主题为暗黑则设置默认组件背景
+    if (systemTheme === 'dark') data.config.theme = layoutDarkTheme;
+    // if (isMobile) data.config.vars.sidebarCollapseWidth = 0;
     return data;
 };
-
+/**
+ * 布局组件状态操作
+ */
+export const layoutReducer: Reducer<LayoutContextType, LayoutAction> = produce((state, action) => {
+    switch (action.type) {
+        case LayoutActionType.CHANGE_VARS: {
+            state.config.vars = { ...state.config.vars, ...action.vars };
+            break;
+        }
+        case LayoutActionType.CHANGE_MODE: {
+            state.config.mode = action.value;
+            break;
+        }
+        case LayoutActionType.CHANGE_FIXED: {
+            const newFixed = { [action.key]: action.value };
+            state.config.fixed = getLayoutFixed(
+                state.config.mode,
+                { ...state.config.fixed, ...newFixed },
+                newFixed,
+            );
+            break;
+        }
+        case LayoutActionType.CHANGE_COLLAPSE: {
+            state.config.collapsed = action.value;
+            break;
+        }
+        case LayoutActionType.TOGGLE_COLLAPSE: {
+            state.config.collapsed = !state.config.collapsed;
+            break;
+        }
+        case LayoutActionType.CHANGE_MOBILE_SIDE: {
+            state.mobileSide = action.value;
+            break;
+        }
+        case LayoutActionType.TOGGLE_MOBILE_SIDE: {
+            state.mobileSide = !state.mobileSide;
+            break;
+        }
+        case LayoutActionType.CHANGE_THEME: {
+            state.config.theme = { ...state.config.theme, ...action.value };
+            break;
+        }
+        case LayoutActionType.CHANGE_MENU: {
+            state.menu = deepMerge(state.menu, action.value, 'replace');
+            break;
+        }
+        default:
+            break;
+    }
+});
+/**
+ * 获取布局页面顶级CSS类
+ * @param fixed 子组件固定状态
+ * @param mode 布局模式
+ * @param style css module类
+ * @param isMobile 是否处于移动屏幕
+ */
 export const getLayoutClasses = (
     fixed: LayoutFixed,
     mode: `${LayoutMode}`,
@@ -70,12 +146,10 @@ export const getLayoutClasses = (
     if (isMobile) items.push(style.mobileLayout);
     return classNames(items);
 };
-export const getVars = (vars: Required<LayoutVarsConfig>, isMobile: boolean) => {
-    const current = { ...vars };
-    current.sidebarCollapseWidth = isMobile ? 0 : current.sidebarCollapseWidth;
-    // current.sidebarWidth = isMobile ? 0 : current.sidebarWidth;
-    return current;
-};
+/**
+ * 根据css变量状态生成真是css变量
+ * @param style css变量状态
+ */
 export const getLayoutCssStyle = (style: Required<LayoutVarsConfig>): CSSProperties =>
     Object.fromEntries(
         Object.entries(style).map(([key, value]) => [
@@ -83,7 +157,12 @@ export const getLayoutCssStyle = (style: Required<LayoutVarsConfig>): CSSPropert
             typeof value === 'number' ? `${value}px` : value,
         ]),
     );
-
+/**
+ * 更改子组件固定模式后生成的最终固定状态
+ * @param mode 布局模式
+ * @param fixed 旧状态
+ * @param newFixed 新状态
+ */
 export const getLayoutFixed = (
     mode: `${LayoutMode}`,
     fixed: LayoutFixed,
@@ -110,22 +189,30 @@ export const getLayoutFixed = (
     }
     return current;
 };
-
+/**
+ * 生成菜单状态
+ * @param menus 菜单数据(来自菜单组件)
+ * @param location 当前location对象
+ * @param layoutMode 布局模式
+ */
 export const getMenuData = (
     menus: MenuOption[],
     location: Location,
     layoutMode: `${LayoutMode}`,
-) => {
-    const embed: LayoutEmbedMenuState = {
+): LayoutMenuState => {
+    const split: LayoutSplitMenuState = {
         data: [],
         selects: [],
     };
     let data = menus;
+    // 获取选中的菜单ID
     let selects = diffKeys(getSelectMenus(data, location));
+    // 获取打开的菜单ID
     let opens = diffKeys(getOpenMenus(data, selects, []));
+    // 获取顶级菜单中拥有子菜单的菜单ID
     let rootSubKeys = diffKeys(data.filter((menu) => menu.children));
     if (layoutMode === 'embed') {
-        embed.data = menus.map((item) => {
+        split.data = menus.map((item) => {
             const { children, ...meta } = item;
             return meta;
         });
@@ -136,7 +223,7 @@ export const getMenuData = (
             data = [];
         }
         if (select) {
-            embed.selects = [select.id];
+            split.selects = [select.id];
             if (select.children) {
                 data = select.children;
                 selects = diffKeys(getSelectMenus(data, location));
@@ -146,12 +233,11 @@ export const getMenuData = (
         }
     }
     return {
-        mode: layoutMode,
         data,
         opens,
         selects,
         rootSubKeys,
-        embed,
+        split,
     };
 };
 const diffKeys = (menus: MenuOption[]) => menus.map((menu) => menu.id);

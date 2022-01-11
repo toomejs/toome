@@ -1,8 +1,8 @@
 import { SmileOutlined } from '@ant-design/icons';
 
-import type { AntdRouteMenuMeta, RouteOption } from '@/components/Router';
+import type { RouteOption } from '@/components/Router';
 
-export const dashboard: RouteOption<AntdRouteMenuMeta>[] = [
+export const dashboard: RouteOption[] = [
     {
         index: true,
         to: '/dashboard/monitor',

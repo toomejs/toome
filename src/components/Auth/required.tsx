@@ -1,5 +1,5 @@
 import { trim } from 'lodash-es';
-import type { FC, ReactElement } from 'react';
+import { FC, ReactElement } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 
 import { useAuthInited, useToken } from './hooks';

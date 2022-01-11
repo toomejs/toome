@@ -2,16 +2,16 @@ import { Menu } from 'antd';
 
 import { Link } from 'react-router-dom';
 
-import type { MenuProps } from 'antd/es/menu';
+import { MenuProps } from 'antd/es/menu';
 
 import { useCallback, useMemo, useState } from 'react';
 
-import type { MenuOption } from '@/components/Menu';
+import { MenuOption } from '@/components/Menu';
 import { isUrl } from '@/utils';
-import type { ThemeMode } from '@/components/Config';
+import { ThemeMode } from '@/components/Config';
 
-import type { LayoutMenuState } from '../types';
-import { useLayout } from '../hooks';
+import { LayoutMenuState } from '../../types';
+import { useLayout } from '../../hooks';
 
 const MenuItem: FC<{ menu: MenuOption; parent?: MenuOption }> = ({ menu, parent }) => {
     if (menu.hide) return null;
@@ -52,7 +52,9 @@ export const SideMenu: FC<{
     theme: `${ThemeMode}`;
     menu: LayoutMenuState;
 }> = ({ mode = 'inline', theme, menu }) => {
-    const { collapsed } = useLayout();
+    const {
+        config: { collapsed },
+    } = useLayout();
     const [opens, setOpens] = useState(mode === 'horizontal' ? [] : menu.opens);
     const onOpenChange = useCallback(
         (keys: string[]) => {
@@ -81,10 +83,10 @@ export const SideMenu: FC<{
 };
 
 export const EmbedMenu: FC = () => {
-    const { menu, theme } = useLayout();
+    const { menu, config } = useLayout();
     return (
-        <Menu theme={theme.sidebar} mode="inline" selectedKeys={menu.embed.selects}>
-            {menu.embed.data
+        <Menu theme={config.theme.sidebar} mode="inline" selectedKeys={menu.split.selects}>
+            {menu.split.data
                 .map((item) => MenuItem({ menu: item }))
                 .filter((child) => child !== null)}
         </Menu>

@@ -4,16 +4,21 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { useResponsiveMobileCheck } from '@/utils';
 
+import { useLayout } from '../hooks';
+
+import { LayoutProvider } from '../provider';
+
+import { LayoutConfig } from '../types';
+
+import { getLayoutClasses, getLayoutCssStyle } from '../utils';
+
 import { ConfigDrawer } from './drawer';
 
 import { LayoutHeader } from './header';
-import { useLayout } from './hooks';
-import { LayoutProvider } from './provider';
 import { EmbedSidebar, Sidebar } from './sidebar';
-import type { LayoutVarsConfig } from './types';
 import style from './styles/index.module.less';
-import { getLayoutClasses, getLayoutCssStyle } from './utils';
 
+const LayoutContent: FC = ({ children }) => <div className="p-2 h-full">{children}</div>;
 const SideLayout: FC = ({ children }) => {
     const { Content } = Layout;
     return (
@@ -22,7 +27,7 @@ const SideLayout: FC = ({ children }) => {
             <Layout>
                 <LayoutHeader />
                 <Content>
-                    <div style={{ padding: 12 }}>{children}</div>
+                    <LayoutContent>{children}</LayoutContent>
                 </Content>
             </Layout>
         </>
@@ -37,7 +42,7 @@ const ContentLayout: FC = ({ children }) => {
                 <Layout>
                     <Sidebar />
                     <Content>
-                        <div style={{ padding: 12 }}>{children}</div>
+                        <LayoutContent>{children}</LayoutContent>
                     </Content>
                 </Layout>
             </section>
@@ -50,7 +55,7 @@ const TopLayout: FC = ({ children }) => {
         <>
             <LayoutHeader />
             <Content>
-                <div style={{ padding: 12 }}>{children}</div>
+                <LayoutContent>{children}</LayoutContent>
             </Content>
         </>
     );
@@ -66,7 +71,7 @@ const EmbedLayout: FC = ({ children }) => {
                     <Layout>
                         <LayoutHeader />
                         <Content>
-                            <div style={{ padding: 12 }}>{children}</div>
+                            <LayoutContent>{children}</LayoutContent>
                         </Content>
                     </Layout>
                 </Layout>
@@ -74,16 +79,17 @@ const EmbedLayout: FC = ({ children }) => {
         </>
     );
 };
-const ProviderWrapper: FC<{ vars?: LayoutVarsConfig }> = ({ children, vars }) => (
-    <LayoutProvider vars={vars}>
+const ProviderWrapper: FC<LayoutConfig> = ({ children, ...rest }) => (
+    <LayoutProvider {...rest}>
         <ConfigDrawer>{children}</ConfigDrawer>
     </LayoutProvider>
 );
 const LayoutWrapper: FC = ({ children }) => {
     const [classes, setClasses] = useState<string>('');
     const isMobile = useResponsiveMobileCheck();
-    const { fixed, mode } = useLayout();
-    const { vars } = useLayout();
+    const {
+        config: { fixed, mode, vars },
+    } = useLayout();
     useEffect(() => {
         setClasses(getLayoutClasses(fixed, mode, style, isMobile));
     }, [fixed, mode, isMobile]);
@@ -99,9 +105,9 @@ const LayoutWrapper: FC = ({ children }) => {
         </Layout>
     );
 };
-export const BasicLayout: FC<{ vars?: LayoutVarsConfig }> = ({ children, vars }) => {
+export const BasicLayout: FC<LayoutConfig> = ({ children, ...rest }) => {
     return (
-        <ProviderWrapper vars={vars}>
+        <ProviderWrapper {...rest}>
             <LayoutWrapper>{children}</LayoutWrapper>
         </ProviderWrapper>
     );

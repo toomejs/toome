@@ -1,3 +1,15 @@
+/*
+ * @Author         : pincman
+ * @HomePage       : https://pincman.com
+ * @Support        : support@pincman.com
+ * @Created_at     : 2021-12-14 00:07:50 +0800
+ * @Updated_at     : 2022-01-09 14:28:55 +0800
+ * @Path           : /src/components/Auth/types.ts
+ * @Description    : Auth组件类型
+ * @LastEditors    : pincman
+ * Copyright 2022 pincman, All Rights Reserved.
+ *
+ */
 /**
  * 角色类型
  */

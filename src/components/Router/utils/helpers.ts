@@ -1,13 +1,24 @@
+/*
+ * @Author         : pincman
+ * @HomePage       : https://pincman.com
+ * @Support        : support@pincman.com
+ * @Created_at     : 2021-12-14 00:07:50 +0800
+ * @Updated_at     : 2022-01-09 14:31:13 +0800
+ * @Path           : /src/components/Router/utils/helpers.ts
+ * @Description    : 工具函数
+ * @LastEditors    : pincman
+ * Copyright 2022 pincman, All Rights Reserved.
+ *
+ */
 import { trim } from 'lodash-es';
 
-import type { RouteOption } from '../types';
+import { RouteOption } from '../types';
 
 /**
- * @description 格式化路由路径
- * @param {RouteOption} item
- * @param {string} basePath
- * @param {string} [parentPath]
- * @returns {*}  {string}
+ * 组装并格式化路由路径以获取完整路径
+ * @param item 路由配置
+ * @param basePath 基础路径
+ * @param parentPath 父路径
  */
 export const formatPath = (item: RouteOption, basePath: string, parentPath?: string): string => {
     const currentPath = 'path' in item && typeof item.path === 'string' ? item.path : '';

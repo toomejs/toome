@@ -4,11 +4,9 @@ import { useCallback } from 'react';
 
 import { useResponsiveMobileCheck } from '@/utils';
 
-import '../../style.css';
+import { useLayout, useLayoutDispatch } from '../../hooks';
 
-import { useLayout, useLayoutDispatch } from '../hooks';
-
-import { getLayoutCssStyle } from '../utils';
+import { getLayoutCssStyle } from '../../utils';
 
 import { EmbedMenu, SideMenu } from './menu';
 import { Logo } from './logo';
@@ -16,8 +14,11 @@ import { Logo } from './logo';
 export const Sidebar = () => {
     const { Sider } = Layout;
     const isMobile = useResponsiveMobileCheck();
-    const { menu, theme, mode, collapsed, mobileSide } = useLayout();
-    const { vars } = useLayout();
+    const {
+        menu,
+        config: { theme, mode, collapsed, vars },
+        mobileSide,
+    } = useLayout();
     const { changeCollapse, changeMobileSide } = useLayoutDispatch();
     const breakPointChange = useCallback((broken: boolean) => {
         if (broken) changeCollapse(true);
@@ -79,7 +80,10 @@ export const Sidebar = () => {
 };
 export const EmbedSidebar = () => {
     const { Sider } = Layout;
-    const { menu, collapsed, vars } = useLayout();
+    const {
+        menu,
+        config: { collapsed, vars },
+    } = useLayout();
     return (
         <Sider
             collapsible

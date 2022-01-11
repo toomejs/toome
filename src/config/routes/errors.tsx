@@ -1,6 +1,6 @@
-import type { AntdRouteMenuMeta, RouteOption } from '@/components/Router';
+import type { RouteOption } from '@/components/Router';
 
-export const errors: RouteOption<AntdRouteMenuMeta>[] = [
+export const errors: RouteOption[] = [
     {
         name: '404',
         path: '*',

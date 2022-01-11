@@ -1,11 +1,9 @@
 import { useSetupAuth } from './components/Auth';
 import { useSetupConfig } from './components/Config';
-
 import { SWRFetcher, useSetupFetcher } from './components/Fetcher';
 import { useSetupIcon } from './components/Icon';
 import { useSetupMenu } from './components/Menu';
 import { Router, useSetupRouter } from './components/Router';
-
 import { useSetupStorage } from './components/Storage';
 import { config, router } from './config';
 

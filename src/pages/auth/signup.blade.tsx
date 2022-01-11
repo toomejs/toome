@@ -1,12 +1,12 @@
 import { useDeepCompareEffect } from 'ahooks';
 import { FC, useState } from 'react';
 
-import { useAntdMenus } from '@/components/Menu';
-import type { AntdMenuOption } from '@/components/Menu';
+import { MenuOption, useAntdMenus } from '@/components/Menu';
+// import type { AntdMenuOption } from '@/components/Menu';
 
 const SingUp: FC = () => {
     const menus = useAntdMenus();
-    const [sss, setSss] = useState<AntdMenuOption<RecordNever>[]>([]);
+    const [sss, setSss] = useState<MenuOption<RecordNever>[]>([]);
     useDeepCompareEffect(() => setSss(menus), [menus]);
     return (
         <div>

@@ -5,7 +5,7 @@
     position: relative;
     width: var(--size);
     height: var(--size);
-    border: calc(var(--size) / 30) var(--color, #00adb5) solid;
+    border: calc(var(--size) / 30) var(--color) solid;
     border-radius: 0 0 calc(var(--size) / 6) calc(var(--size) / 6);
 
     &::before {

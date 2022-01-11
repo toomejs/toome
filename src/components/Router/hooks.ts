@@ -1,3 +1,15 @@
+/*
+ * @Author         : pincman
+ * @HomePage       : https://pincman.com
+ * @Support        : support@pincman.com
+ * @Created_at     : 2021-12-16 17:14:30 +0800
+ * @Updated_at     : 2022-01-09 14:34:05 +0800
+ * @Path           : /src/components/Router/hooks.ts
+ * @Description    : 路由组件可用钩子
+ * @LastEditors    : pincman
+ * Copyright 2022 pincman, All Rights Reserved.
+ *
+ */
 import { useRef, useCallback } from 'react';
 
 import { useUnmount } from 'react-use';
@@ -6,20 +18,22 @@ import { useStoreSetuped, debounceRun, createHookSelectors, deepMerge } from '@/
 
 import { useFetcherGetter } from '../Fetcher';
 
-import type { RouterConfig, RouteOption, RouterStatusType } from './types';
+import { RouterConfig, RouteOption, RouterStatusType } from './types';
 import { factoryRoutes, generateFinalRoutes } from './utils';
 
 import { RouterStore, RouterStatus } from './store';
 
 /**
  * 初始化路由功能
- * @param {RouterConfig<T>} config - 路由配置,(*)必填
+ * @param config 路由配置
  */
 export const useSetupRouter = <T extends RecordAnyOrNever>(config: RouterConfig<T>) => {
+    /**  api请求实例获取函数 */
     const fetcher = useFetcherGetter();
+    /** 路由状态记忆变量,用于防止短时间内多次刷新路由配置列表 */
     const changing = useRef();
+    /** 路由状态记忆变量,用于防止短时间内多次生成路由渲染列表 */
     const generating = useRef();
-
     // 初始化路由
     useStoreSetuped<RouterStatusType>({
         store: RouterStatus,
@@ -30,16 +44,12 @@ export const useSetupRouter = <T extends RecordAnyOrNever>(config: RouterConfig<
         },
     });
 
-    useUnmount(() => {
-        unSetupSub();
-        unChangeSub();
-        unGenerateSub();
-    });
-
+    // 如果路由不依赖于Auth的状态则在初始化后直接开始生成配置列表
     const unSetupSub = RouterStatus.subscribe(
         (state) => state.setuped,
         (setuped) => {
             if (!setuped) return;
+            // 一旦初始化后就不再监听setuped状态
             unSetupSub();
             if (!RouterStore.getState().config.auth.enabled) {
                 RouterStatus.setState((state) => {
@@ -49,43 +59,84 @@ export const useSetupRouter = <T extends RecordAnyOrNever>(config: RouterConfig<
         },
     );
 
+    // 订阅路由刷新状态用于生成新的路由列表
     const unChangeSub = RouterStatus.subscribe(
         (state) => state.next,
         (next) => {
             if (next) debounceRun(changing, () => factoryRoutes(fetcher()));
         },
     );
+    // 订阅路由列表生成状态,如果已经生成新的配置列表则开始生成渲染列表
     const unGenerateSub = RouterStatus.subscribe(
         (state) => state.ready,
         (ready) => {
             if (ready) debounceRun(generating, () => generateFinalRoutes());
         },
     );
+
+    // Router组件卸载时销毁订阅
+    useUnmount(() => {
+        unSetupSub();
+        unChangeSub();
+        unGenerateSub();
+    });
 };
 
 /**
- * 路由初始化信号
+ * 获取路由状态信号的钩子
  */
 export const useRouterStatus = createHookSelectors(RouterStatus);
+/**
+ * 获取路由状态池的钩子
+ */
 export const useRouter = createHookSelectors(RouterStore);
+/**
+ * 刷新路由
+ */
 export const useRouterReset = () =>
     useCallback(() => {
         RouterStatus.setState((state) => ({ ...state, next: true, ready: false, success: false }));
     }, []);
-
+/**
+ * 路由列表操作
+ */
 export const useRoutesChange = () => {
-    const addRoutes = useCallback(<T extends RecordAnyOrNever>(items: RouteOption<T>[]) => {
-        RouterStore.setState((state) => {
-            state.config.routes.dynamic = [...state.config.routes.dynamic, ...items];
-        });
-        RouterStatus.setState((state) => ({ ...state, next: true, ready: false, success: false }));
-    }, []);
-    const setRoutes = useCallback(<T extends RecordAnyOrNever>(items: RouteOption<T>[]) => {
-        RouterStore.setState((state) => {
-            state.config.routes.dynamic = [...items];
-        });
-        RouterStatus.setState((state) => ({ ...state, next: true, ready: false, success: false }));
-    }, []);
+    const addRoutes = useCallback(
+        /**
+         * 添加动态路由
+         * @param items 新增路由列表
+         */
+        <T extends RecordAnyOrNever>(items: RouteOption<T>[]) => {
+            RouterStore.setState((state) => {
+                state.config.routes.dynamic = [...state.config.routes.dynamic, ...items];
+            });
+            RouterStatus.setState((state) => ({
+                ...state,
+                next: true,
+                ready: false,
+                success: false,
+            }));
+        },
+        [],
+    );
+    const setRoutes = useCallback(
+        /**
+         * 重置动态路由
+         * @param items 路由列表
+         */
+        <T extends RecordAnyOrNever>(items: RouteOption<T>[]) => {
+            RouterStore.setState((state) => {
+                state.config.routes.dynamic = [...items];
+            });
+            RouterStatus.setState((state) => ({
+                ...state,
+                next: true,
+                ready: false,
+                success: false,
+            }));
+        },
+        [],
+    );
     return {
         addRoutes,
         setRoutes,

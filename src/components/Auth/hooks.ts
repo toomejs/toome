@@ -1,3 +1,15 @@
+/*
+ * @Author         : pincman
+ * @HomePage       : https://pincman.com
+ * @Support        : support@pincman.com
+ * @Created_at     : 2021-12-16 05:55:08 +0800
+ * @Updated_at     : 2022-01-10 10:29:19 +0800
+ * @Path           : /src/components/Auth/hooks.ts
+ * @Description    : Auth组件可用钩子
+ * @LastEditors    : pincman
+ * Copyright 2022 pincman, All Rights Reserved.
+ *
+ */
 import { useCallback } from 'react';
 
 import { useUnmount } from 'react-use';
@@ -10,7 +22,7 @@ import { useRouterReset } from '../Router/hooks';
 
 import { useFetcherGetter } from '../Fetcher';
 
-import type { User } from './types';
+import { User } from './types';
 import { AuthStore } from './store';
 /**
  * 账户初始化状态
@@ -46,8 +58,8 @@ export const getUser = () => AuthStore.getState().user;
  * @param api 获取用户信息的api接口地址
  */
 export const useSetupAuth = (api?: string) => {
-    // 查询器,因为fetcher依赖于Auth的Token状态
-    // 所以要用`useFetcherGetter`即使查询器来获取请求实例而不能通过响应式的`useFetter`来获取
+    // api请求实例获取函数,因为fetcher依赖于Auth的Token状态
+    // 所以要用`useFetcherGetter`来获取请求实例而不能通过响应式的`useFetter`来获取
     const fetcher = useFetcherGetter();
     const { addTable, getInstance } = useStorageDispatch();
     // 重置Router组件以生成路由
@@ -58,21 +70,20 @@ export const useSetupAuth = (api?: string) => {
         (state) => state.setuped,
         async (setuped) => {
             if (!setuped) return;
-            addTable({ name: 'auth' });
-            const storage = getInstance('auth');
+            addTable({ name: 'app' });
+            const storage = getInstance('app');
             if (!storage) return;
-            const storgeToken = await storage.getItem<string | null>('token');
+            const storgeAuth = await storage.getItem<{ token: string | null }>('auth');
+            const token = storgeAuth?.token ?? null;
             AuthStore.setState((state) => {
-                state.token = storgeToken ?? null;
+                state.token = token;
                 state.inited = true;
             });
             // 路由没有本地储存的Token,则证明没有登录,所以直接再次生成路由
             // 如果有Token则通过下面的订阅Token函数来等用户信息请求到后再生成路由
-            if (!storgeToken) {
-                await storage.setItem('token', null);
+            if (!token) {
+                await storage.setItem('auth', { token: null });
                 resetRouter();
-            } else {
-                await storage.setItem('token', storgeToken);
             }
         },
     );
@@ -123,9 +134,9 @@ export const useAuthDispatch = () => {
             AuthStore.setState((state) => {
                 state.inited = false;
             });
-            const storage = getInstance('auth');
+            const storage = getInstance('app');
             if (!storage) return;
-            await storage.setItem('token', value);
+            await storage.setItem('auth', { token: value });
             AuthStore.setState((state) => {
                 state.token = value;
                 state.inited = true;
@@ -142,9 +153,9 @@ export const useAuthDispatch = () => {
             AuthStore.setState((state) => {
                 state.inited = false;
             });
-            const storage = getInstance('auth');
+            const storage = getInstance('app');
             if (!storage) return;
-            await storage.setItem('token', null);
+            await storage.setItem('auth', { token: null });
             AuthStore.setState((state) => {
                 state.token = null;
                 state.user = null;

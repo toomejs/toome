@@ -27,7 +27,9 @@ const analysisPanel = {
 };
 const Dashboard = () => {
     const [analysis, setAnalysis] = useState('network');
-    const changeAnalysis = useCallback((tab: string) => setAnalysis(tab), []);
+    const changeAnalysis = useCallback((tab: string) => {
+        setAnalysis(tab);
+    }, []);
     return (
         <div className="md:container md:mx-auto">
             <Row gutter={[8, 16]}>

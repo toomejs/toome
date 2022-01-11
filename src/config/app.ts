@@ -12,7 +12,7 @@ export const config: ConfigProps = {
     },
     colors: {
         primary: '#1890ff',
-        info: '#1890ff',
+        info: '#00adb5',
         success: '#52c41a',
         error: '#ff4d4f',
         warning: '#faad14',

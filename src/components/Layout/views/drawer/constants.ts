@@ -1,5 +1,6 @@
-import { LayoutMode } from '@/components/Config';
-import type { ColorConfig } from '@/components/Config';
+import { ColorConfig } from '@/components/Config';
+
+import { LayoutMode } from '../../constants';
 
 export enum LayoutTheme {
     DarkLight = 'dark-light',
