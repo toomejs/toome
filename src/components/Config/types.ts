@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-29 11:55:02 +0800
- * @Updated_at     : 2022-01-10 14:01:20 +0800
+ * @Updated_at     : 2022-01-11 14:30:14 +0800
  * @Path           : /src/components/Config/types.ts
  * @Description    : 配置组件类型
  * @LastEditors    : pincman
@@ -24,7 +24,13 @@ export interface ConfigProps {
     theme?: ThemeConfig;
     /** 色系配置 */
     colors?: ColorConfig;
-    // layout?: LayoutConfig;
+    /**
+     * 临时变量,是否使用antd组件
+     * 由于antd下暂时不支持动态暗黑而采用dark-reader
+     * 但是arco,tdesign等都支持
+     * 有了这个变量在后面开发其它组件库的面板时切换暗黑模式时就可以做判断了
+     */
+    isAntd?: boolean;
 }
 /**
  * 配置组件状态池
@@ -73,12 +79,6 @@ export interface ColorConfig {
     warning?: string;
 }
 
-// export interface LayoutConfig {
-//     mode?: `${LayoutMode}`;
-//     collapsed?: boolean;
-//     theme?: Partial<LayoutTheme>;
-//     fixed?: Partial<LayoutFixed>;
-// }
 /**
  * 主题切换时间范围
  */
@@ -90,6 +90,3 @@ export interface DarkReaderConfig {
     theme?: Partial<DarkReader.Theme>;
     fixes?: Partial<DarkReader.DynamicThemeFix>;
 }
-
-// export type LayoutTheme = { [key in `${LayoutComponent}`]: `${ThemeMode}` };
-// export type LayoutFixed = { [key in `${LayoutComponent}`]: boolean };

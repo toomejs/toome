@@ -4,19 +4,19 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { useResponsiveMobileCheck } from '@/utils';
 
-import { useLayout } from '../hooks';
+import {
+    getLayoutClasses,
+    getLayoutCssStyle,
+    LayoutConfig,
+    LayoutProvider,
+    useLayout,
+} from '@/components/Layout';
 
-import { LayoutProvider } from '../provider';
+import style from '../styles/index.module.less';
 
-import { LayoutConfig } from '../types';
-
-import { getLayoutClasses, getLayoutCssStyle } from '../utils';
-
-import { ConfigDrawer } from './drawer';
-
-import { LayoutHeader } from './header';
 import { EmbedSidebar, Sidebar } from './sidebar';
-import style from './styles/index.module.less';
+import { LayoutHeader } from './header';
+import { ConfigDrawer } from './drawer';
 
 const LayoutContent: FC = ({ children }) => <div className="p-2 h-full">{children}</div>;
 const SideLayout: FC = ({ children }) => {
@@ -94,9 +94,11 @@ const LayoutWrapper: FC = ({ children }) => {
         setClasses(getLayoutClasses(fixed, mode, style, isMobile));
     }, [fixed, mode, isMobile]);
     const Main = useMemo(() => {
-        if (mode === 'top') return <TopLayout>{children}</TopLayout>;
-        if (mode === 'content') return <ContentLayout>{children}</ContentLayout>;
-        if (mode === 'embed' && !isMobile) return <EmbedLayout>{children}</EmbedLayout>;
+        if (!isMobile) {
+            if (mode === 'top') return <TopLayout>{children}</TopLayout>;
+            if (mode === 'content') return <ContentLayout>{children}</ContentLayout>;
+            if (mode === 'embed') return <EmbedLayout>{children}</EmbedLayout>;
+        }
         return <SideLayout>{children}</SideLayout>;
     }, [mode, isMobile]);
     return (

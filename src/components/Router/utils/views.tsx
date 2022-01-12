@@ -3,7 +3,7 @@
  * HomePage       : https://pincman.com
  * Support        : support@pincman.com
  * Created_at     : 2021-12-14 00:07:50 +0800
- * Updated_at     : 2022-01-09 20:08:05 +0800
+ * Updated_at     : 2022-01-11 14:58:38 +0800
  * Path           : /src/components/Router/utils/views.tsx
  * Description    : 页面和视图组件
  * LastEditors    : pincman
@@ -15,6 +15,7 @@ import pMinDelay from 'p-min-delay';
 import { FC, FunctionComponent } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { timeout } from 'promise-timeout';
+import { has } from 'lodash-es';
 
 /**
  * 根据正则和glob递归获取所有动态页面导入映射
@@ -37,16 +38,16 @@ const getAsyncImports = (imports: Record<string, () => Promise<any>>, reg: RegEx
  * 所有动态页面映射
  */
 export const pages = getAsyncImports(
-    import.meta.glob('../../../pages/**/*.blade.{tsx,jsx}'),
-    /..\/..\/\..\/pages\/([\w+.?/?]+)(.blade.tsx)|(.blade.jsx)/i,
+    import.meta.glob('../../../views/**/*.blade.{tsx,jsx}'),
+    /..\/..\/\..\/views\/([\w+.?/?]+)(.blade.tsx)|(.blade.jsx)/i,
 );
 /**
  * 所有动态布局映射
  */
-export const layouts = getAsyncImports(
-    import.meta.glob('../../../layouts/**/*.blade.{tsx,jsx}'),
-    /..\/..\/\..\/layouts\/([\w+.?/?]+)(.blade.tsx)|(.blade.jsx)/i,
-);
+// export const layouts = getAsyncImports(
+//     import.meta.glob('../../../layouts/**/*.blade.{tsx,jsx}'),
+//     /..\/..\/\..\/layouts\/([\w+.?/?]+)(.blade.tsx)|(.blade.jsx)/i,
+// );
 /**
  * 未登录跳转页面组件
  * @param props
@@ -72,12 +73,13 @@ export const getAsyncPage = (props: {
     /** 页面路径 */
     page: string;
     /** 是否为布局 */
-    layout?: boolean;
+    // layout?: boolean;
 }) => {
-    const { cacheKey, page, layout } = props;
+    const { cacheKey, page } = props;
     const fallback: JSX.Element | undefined = props.loading ? <props.loading /> : undefined;
-    const view = layout ? layouts[page] : pages[page];
-    return loadable(() => timeout(pMinDelay(view(), 50), 220000), {
+    if (!has(pages, page)) throw new Error(`Page ${page} not exits in 'views' dir!`);
+    // const view = layout ? layouts[page] : pages[page];
+    return loadable(() => timeout(pMinDelay(pages[page](), 50), 220000), {
         cacheKey: () => cacheKey,
         fallback,
     });

@@ -4,27 +4,27 @@ import { Link } from 'react-router-dom';
 
 import { MenuProps } from 'antd/es/menu';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+
+import { useDebounceFn, useUpdateEffect } from 'ahooks';
 
 import { MenuOption } from '@/components/Menu';
-import { isUrl } from '@/utils';
+import { isUrl, useResponsive } from '@/utils';
 import { ThemeMode } from '@/components/Config';
-
-import { LayoutMenuState } from '../../types';
-import { useLayout } from '../../hooks';
+import { LayoutMenuState, useLayout } from '@/components/Layout';
 
 const MenuItem: FC<{ menu: MenuOption; parent?: MenuOption }> = ({ menu, parent }) => {
     if (menu.hide) return null;
+    const icon = parent ? null : menu.icon;
     if (menu.children) {
         return (
-            <Menu.SubMenu key={menu.id} title={menu.text} icon={menu.icon}>
+            <Menu.SubMenu key={menu.id} title={menu.text} icon={icon}>
                 {menu.children
                     .map((child) => MenuItem({ menu: child, parent: menu }))
                     .filter((child) => child !== null)}
             </Menu.SubMenu>
         );
     }
-    const icon = parent ? null : menu.icon;
     if (!menu.path) {
         return (
             <Menu.Item key={menu.id} icon={icon}>
@@ -47,6 +47,7 @@ const MenuItem: FC<{ menu: MenuOption; parent?: MenuOption }> = ({ menu, parent 
         </Menu.Item>
     );
 };
+
 export const SideMenu: FC<{
     mode?: MenuProps['mode'];
     theme: `${ThemeMode}`;
@@ -55,10 +56,17 @@ export const SideMenu: FC<{
     const {
         config: { collapsed },
     } = useLayout();
-    const [opens, setOpens] = useState(mode === 'horizontal' ? [] : menu.opens);
+    const { isMobile } = useResponsive();
+    const [opens, setOpens] = useState<string[]>(
+        mode !== 'horizontal' && (isMobile || !collapsed) ? menu.opens : [],
+    );
+    const { run: changeOpens } = useDebounceFn((data: string[]) => setOpens(data), {
+        wait: 50,
+    });
+    const ref = useRef<string[]>(menu.opens);
     const onOpenChange = useCallback(
         (keys: string[]) => {
-            if (collapsed) return;
+            if (mode === 'horizontal' || collapsed) return;
             const latest = keys.find((key) => opens.indexOf(key) === -1);
             if (latest && menu.rootSubKeys.indexOf(latest) === -1) {
                 setOpens(keys);
@@ -66,19 +74,38 @@ export const SideMenu: FC<{
                 setOpens(latest ? [latest] : []);
             }
         },
-        [opens, collapsed],
+        [opens, mode, collapsed],
     );
-    const openKeys = useMemo(() => (collapsed ? [] : opens), [collapsed, opens]);
+    useUpdateEffect(() => {
+        if (mode !== 'horizontal' && (isMobile || !collapsed)) setOpens(menu.opens);
+        if (mode !== 'horizontal' && !isMobile) ref.current = menu.opens;
+    }, [menu.opens]);
+    useUpdateEffect(() => {
+        if (mode !== 'horizontal' && !isMobile && !collapsed) ref.current = opens;
+    }, [opens]);
+    useUpdateEffect(() => {
+        if (mode === 'horizontal' || isMobile) return;
+        if (collapsed) setOpens([]);
+        else changeOpens(ref.current);
+    }, [collapsed]);
+    useUpdateEffect(() => {
+        setOpens(menu.opens);
+    }, [isMobile]);
     return (
-        <Menu
-            theme={theme}
-            mode={mode}
-            openKeys={openKeys}
-            selectedKeys={menu.selects}
-            onOpenChange={onOpenChange}
-        >
-            {menu.data.map((item) => MenuItem({ menu: item })).filter((child) => child !== null)}
-        </Menu>
+        <div className="fixed-sidebar-content">
+            <Menu
+                inlineIndent={16}
+                theme={theme}
+                mode={mode}
+                openKeys={opens}
+                selectedKeys={menu.selects}
+                onOpenChange={onOpenChange}
+            >
+                {menu.data
+                    .map((item) => MenuItem({ menu: item }))
+                    .filter((child) => child !== null)}
+            </Menu>
+        </div>
     );
 };
 

@@ -17,6 +17,18 @@ export const dashboard: RouteOption[] = [
                 page: 'dashboard/monitor/index',
                 meta: { text: '监控页' },
             },
+            {
+                name: 'dashboard.anlysis',
+                path: 'dashboard/anlysis',
+                page: 'dashboard/monitor/index',
+                meta: { text: '分析页' },
+            },
+            {
+                name: 'dashboard.workbench',
+                path: 'dashboard/workbench',
+                page: 'dashboard/monitor/index',
+                meta: { text: '工作台' },
+            },
         ],
     },
 ];

@@ -3,7 +3,7 @@
  * HomePage       : https://pincman.com
  * Support        : support@pincman.com
  * Created_at     : 2021-12-14 00:07:50 +0800
- * Updated_at     : 2022-01-09 21:11:11 +0800
+ * Updated_at     : 2022-01-11 16:26:26 +0800
  * Path           : /src/components/Router/utils/generator.tsx
  * Description    : 路由生成函数
  * LastEditors    : pincman
@@ -311,9 +311,14 @@ const generateRoutes = (
                             page: item.page as string,
                             cacheKey: item.cacheKey ?? item.name ?? current.index!,
                             loading: item.loading ?? loading,
-                            layout: item.layout,
+                            // layout: item.layout,
                         });
                         route.element = <AsyncPage />;
+                        // route.element = item.layout ? (
+                        //     <AsyncPage />
+                        // ) : item.loading ? (
+                        //     <item.loading />
+                        // ) : null;
                     } else {
                         route.element = item.page;
                     }
@@ -328,7 +333,7 @@ const generateRoutes = (
                     );
                 }
             }
-            if (!item.children?.length) delete item.children;
+            if (item.children && item.children.length > 0) route.children = item.children;
             if (item.children) {
                 const rst = generateRoutes(item.children, current, loading);
                 nameMaps = { ...nameMaps, ...rst.nameMaps };

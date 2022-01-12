@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-29 11:55:02 +0800
- * @Updated_at     : 2022-01-10 14:05:52 +0800
+ * @Updated_at     : 2022-01-11 14:30:55 +0800
  * @Path           : /src/components/Config/_default.config.ts
  * @Description    : 默认配置
  * @LastEditors    : pincman
@@ -15,6 +15,7 @@ import { ConfigStoreType } from './types';
 
 export const defaultConfig: ConfigStoreType['config'] = {
     timezone: 'UTC',
+    isAntd: true,
     theme: {
         mode: 'light',
         depend: 'manual',

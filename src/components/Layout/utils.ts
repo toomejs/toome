@@ -15,8 +15,6 @@ import { MenuOption } from '@/components/Menu';
 
 import { ThemeMode } from '../Config';
 
-import { defaultConfig } from '../Config/_default.config';
-
 import {
     LayoutAction,
     LayoutConfig,
@@ -28,6 +26,7 @@ import {
     LayoutVarsConfig,
 } from './types';
 import { LayoutActionType, LayoutMode } from './constants';
+import { defaultConfig } from './default.config';
 /**
  * 暗黑模式下的组件背景色
  */
@@ -52,7 +51,6 @@ export const initLayoutConfig = (params: {
     };
     // 如果全局主题为暗黑则设置默认组件背景
     if (systemTheme === 'dark') data.config.theme = layoutDarkTheme;
-    // if (isMobile) data.config.vars.sidebarCollapseWidth = 0;
     return data;
 };
 /**

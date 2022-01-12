@@ -7,7 +7,7 @@ import { SketchPicker, ColorResult } from 'react-color';
 
 import { useColorDispatch, useColors, ColorConfig } from '@/components/Config';
 
-import { useLayout, useLayoutDispatch } from '../../hooks';
+import { useLayout, useLayoutDispatch } from '@/components/Layout';
 
 import style from './index.module.less';
 

@@ -9,7 +9,22 @@
         left: 0;
         z-index: 99;
         height: 100vh;
-        overflow: auto;
+        overflow: hidden;
+
+        & > :global(.ant-layout-sider-children) {
+            display: flex;
+            flex-direction: column;
+
+            & > :global(.fixed-sidebar-content) {
+                flex: auto;
+                overflow: auto;
+
+                &::-webkit-scrollbar {
+                    width: 3px;
+                    height: 3px;
+                }
+            }
+        }
     }
 
     .fixed-header(@width: 100%) {

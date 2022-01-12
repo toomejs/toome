@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-29 11:55:51 +0800
- * @Updated_at     : 2022-01-10 14:00:02 +0800
+ * @Updated_at     : 2022-01-11 14:33:23 +0800
  * @Path           : /src/components/Config/hooks.ts
  * @Description    : 配置组件钩子
  * @LastEditors    : pincman
@@ -15,7 +15,10 @@ import { useCallback } from 'react';
 import { ConfigStore } from './store';
 import { ColorConfig, ThemeTimeRange } from './types';
 import { ThemeDepend, ThemeMode } from './constants';
-
+/**
+ * 判断当前面板是否使用antd组件开发
+ */
+export const useAntdCheck = () => ConfigStore(useCallback((state) => state.config.isAntd, []));
 /**
  * 获取色系状态
  */
@@ -115,17 +118,3 @@ export const useThemeDispatch = () => ({
         [],
     ),
 });
-// export const useLayoutConfig = () => ConfigStore(useCallback((state) => state.config.layout, []));
-// export const useChangeLayoutConfig = () =>
-//     useCallback(
-//         (config: LayoutConfig | ((old: ReRequired<LayoutConfig>) => ReRequired<LayoutConfig>)) => {
-//             ConfigStore.setState((state) => {
-//                 if (isFunction(config)) {
-//                     state.config.layout = produce(state.config.layout, config);
-//                 } else {
-//                     state.config.layout = deepMerge(state.config.layout, config, 'replace');
-//                 }
-//             });
-//         },
-//         [],
-//     );

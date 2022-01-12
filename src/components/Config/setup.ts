@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2022-01-04 11:01:24 +0800
- * @Updated_at     : 2022-01-10 19:07:38 +0800
+ * @Updated_at     : 2022-01-11 14:31:33 +0800
  * @Path           : /src/components/Config/setup.ts
  * @Description    : 配置组件初始化
  * @LastEditors    : pincman
@@ -13,6 +13,8 @@
 import { useUnmount } from 'react-use';
 
 import { MutableRefObject, useRef } from 'react';
+
+import { omit } from 'lodash-es';
 
 import { deepMerge, debounceRun } from '@/utils';
 
@@ -73,7 +75,7 @@ export const initConfigState = async (
         state.config = deepMerge(state.config, StorageConfig, 'replace');
     });
     const { config } = ConfigStore.getState();
-    await storage.setItem('config', config);
+    await storage.setItem('config', omit(config, 'isAntd'));
     // 根据主题模式依赖创建切换监听器
     createThemeWatcher(themeRef);
     // 监听主题模式变化
@@ -114,7 +116,7 @@ export const useConfigSubscriber = async (themeRef: MutableRefObject<'light' | '
     // 监听配置,如果变化则重新存储
     ConfigStore.subscribe(
         (state) => state.config,
-        async (config) => subsciber((storage) => storage.setItem('config', config)),
+        async (config) => subsciber((storage) => storage.setItem('config', omit(config, 'isAntd'))),
     );
 };
 /**

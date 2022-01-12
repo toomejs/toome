@@ -10,6 +10,8 @@ import { deepMerge } from '@/utils';
 
 import { StorageSetup, useStorageDispatch } from '../Storage';
 
+import { useAntdCheck, useTheme } from '../Config';
+
 import {
     LayoutConfig,
     LayoutFixed,
@@ -61,7 +63,8 @@ export const useChangeLayoutLocalData = () =>
         (config: LayoutConfig | ((old: ReRequired<LayoutConfig>) => ReRequired<LayoutConfig>)) => {
             LayoutStore.setState((state) => {
                 if (isFunction(config)) {
-                    return produce(state, config);
+                    const data = produce(state, config);
+                    return data;
                 }
                 return deepMerge(state, config, 'replace');
             }, true);
@@ -76,6 +79,8 @@ export const useLayout = () => {
 };
 export const useLayoutDispatch = () => {
     const dispatch = useContext(LayoutDispatchContext);
+    const systemTheme = useTheme();
+    const isAntd = useAntdCheck();
     if (!dispatch) throw new Error("please wrapper the layout width 'LayoutProvider'!");
     const changeVars = useCallback(
         (vars: LayoutVarsConfig) => dispatch({ type: LayoutActionType.CHANGE_VARS, vars }),
@@ -91,9 +96,12 @@ export const useLayoutDispatch = () => {
         [],
     );
     const changeTheme = useCallback(
-        (theme: Partial<LayoutTheme>) =>
-            dispatch({ type: LayoutActionType.CHANGE_THEME, value: theme }),
-        [],
+        (theme: Partial<LayoutTheme>) => {
+            if (!isAntd || systemTheme !== 'dark') {
+                dispatch({ type: LayoutActionType.CHANGE_THEME, value: theme });
+            }
+        },
+        [systemTheme, isAntd],
     );
     const changeCollapse = useCallback(
         (collapsed: boolean) =>
@@ -105,8 +113,8 @@ export const useLayoutDispatch = () => {
         [],
     );
     const changeMobileSide = useCallback(
-        (collapsed: boolean) =>
-            dispatch({ type: LayoutActionType.CHANGE_MOBILE_SIDE, value: collapsed }),
+        (visible: boolean) =>
+            dispatch({ type: LayoutActionType.CHANGE_MOBILE_SIDE, value: visible }),
         [],
     );
     const toggleMobileSide = useCallback(

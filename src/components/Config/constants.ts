@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2022-01-02 18:30:16 +0800
- * @Updated_at     : 2022-01-10 14:00:51 +0800
+ * @Updated_at     : 2022-01-11 14:19:47 +0800
  * @Path           : /src/components/Config/constants.ts
  * @Description    : 配置组件常量
  * @LastEditors    : pincman
@@ -31,14 +31,3 @@ export enum ThemeMode {
     /** 暗黑 */
     DARK = 'dark',
 }
-// export enum LayoutMode {
-//     TOP = 'top',
-//     SIDE = 'side',
-//     CONTENT = 'content',
-//     EMBED = 'embed',
-// }
-// export enum LayoutComponent {
-//     HEADER = 'header',
-//     SIDEBAR = 'sidebar',
-//     EMBED = 'embed',
-// }

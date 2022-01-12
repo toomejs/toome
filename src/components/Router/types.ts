@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-14 00:07:50 +0800
- * @Updated_at     : 2022-01-09 20:07:21 +0800
+ * @Updated_at     : 2022-01-11 14:43:44 +0800
  * @Path           : /src/components/Router/types.ts
  * @Description    : 路由组件类型
  * @LastEditors    : pincman
@@ -148,7 +148,7 @@ interface PathRouteProps<T extends RecordAnyOrNever = RecordNever> extends BaseR
     /** 路由页面,可以是组件或组件路径字符串 */
     page?: React.ReactNode | string;
     /** 是否为布局页面 */
-    layout?: boolean;
+    // layout?: boolean;
     /** 独立配置loadding,如果不设置则使用总配置的loading */
     loading?: FunctionComponent | false;
 }
@@ -163,7 +163,7 @@ interface IndexRouteProps<T extends RecordAnyOrNever = RecordNever> extends Base
     /** 路由页面,可以是组件或组件路径字符串 */
     page?: React.ReactNode | string;
     /** 是否为布局页面 */
-    layout?: boolean;
+    // layout?: boolean;
     /** 独立配置loadding,如果不设置则使用总配置的loading */
     loading?: FunctionComponent | false;
 }

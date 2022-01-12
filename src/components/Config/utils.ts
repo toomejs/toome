@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-29 11:56:17 +0800
- * @Updated_at     : 2022-01-10 13:54:42 +0800
+ * @Updated_at     : 2022-01-11 19:47:14 +0800
  * @Path           : /src/components/Config/utils.ts
  * @Description    : 配置组件工具函数
  * @LastEditors    : pincman
@@ -27,9 +27,13 @@ import { ThemeMode } from './constants';
  */
 export const subscribeColors = (colors: ColorConfig) => {
     const newColors = { ...ConfigStore.getState().config.colors, ...colors };
-    ConfigProvider.config({
-        theme: Object.fromEntries(Object.keys(newColors).map((k) => [`${k}Color`, newColors[k]])),
-    });
+    if (ConfigStore.getState().config.isAntd) {
+        ConfigProvider.config({
+            theme: Object.fromEntries(
+                Object.keys(newColors).map((k) => [`${k}Color`, newColors[k]]),
+            ),
+        });
+    }
 };
 
 /**
@@ -49,10 +53,12 @@ export const subscribeThemeMode = (
     html.classList.remove(theme);
     html.classList.add(theme);
     // 为antd使用enableDark设置暗黑主题
-    if (theme === 'dark') {
-        enableDarkMode(config.theme.darken!.theme!, config.theme.darken!.fixes as any);
-    } else {
-        disableDarkMode();
+    if (config.isAntd) {
+        if (theme === 'dark') {
+            enableDarkMode(config.theme.darken!.theme!, config.theme.darken!.fixes as any);
+        } else {
+            disableDarkMode();
+        }
     }
     themeRef.current = theme;
 };

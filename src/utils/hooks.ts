@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2022-01-08 12:39:33 +0800
- * @Updated_at     : 2022-01-08 14:20:36 +0800
+ * @Updated_at     : 2022-01-12 01:08:43 +0800
  * @Path           : /src/utils/hooks.ts
  * @Description    : Hooks集合
  * @LastEditors    : pincman
@@ -27,9 +27,27 @@ import { dequal } from 'dequal';
 
 import { isAsyncFn } from './helpers';
 import { SetupedEffectProps, SetupedState } from './types';
+import { screenSize } from './constants';
 
 /** ******************************  设备相关 ********************************** */
 
+export const useResponsive = () => {
+    const mobile = useMedia(`(max-width: ${screenSize.sm - 1}px)`);
+    const tablet = useMedia(`(max-width: ${screenSize.md - 1}px)`);
+    const notebook = useMedia(`(max-width: ${screenSize.lg - 1}px)`);
+    const pc = useMedia(`(min-width: ${screenSize.lg}px)`);
+    const [isMobile, setMobile] = useState(mobile);
+    const [isTablet, setTablet] = useState(tablet);
+    const [isNotebook, setNotebook] = useState(notebook);
+    const [isPC, setPC] = useState(pc);
+    useUpdateEffect(() => {
+        setMobile(mobile);
+        setTablet(tablet);
+        setNotebook(notebook);
+        setPC(pc);
+    }, [mobile, tablet, notebook, pc]);
+    return { isMobile, isTablet, isNotebook, isPC };
+};
 /**
  * 通过响应式检测是否为移动设备屏幕
  */

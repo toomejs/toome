@@ -8,17 +8,15 @@ import { useTheme, useThemeDispatch } from '@/components/Config';
 
 import { Icon } from '@/components/Icon';
 
-import { useResponsiveMobileCheck } from '@/utils';
+import { useResponsive, useResponsiveMobileCheck } from '@/utils';
+
+import { getLayoutCssStyle, useLayout, useLayoutDispatch } from '@/components/Layout';
 
 import { SideMenu } from '../sidebar/menu';
 
 import { useDrawer, useDrawerChange } from '../drawer/hooks';
 
-import { useLayout, useLayoutDispatch } from '../../hooks';
-
 import { Logo } from '../sidebar/logo';
-
-import { getLayoutCssStyle } from '../../utils';
 
 import Sun from '~icons/carbon/sun';
 import Moon from '~icons/carbon/moon';
@@ -44,6 +42,7 @@ const Setting = () => {
 const defaultClasses = ['flex', 'content-between', '!px-[15px]'];
 export const LayoutHeader = () => {
     const { Header } = Layout;
+    const { isNotebook } = useResponsive();
     const isMobile = useResponsiveMobileCheck();
     const {
         config: { mode, theme, fixed, collapsed, vars },
@@ -51,10 +50,9 @@ export const LayoutHeader = () => {
     } = useLayout();
     const { toggleCollapse, toggleMobileSide } = useLayoutDispatch();
     const [classes, setClasses] = useState<string>('');
-    const sideCtrol = useCallback(
-        () => (isMobile ? toggleMobileSide() : toggleCollapse()),
-        [isMobile],
-    );
+    const sideCtrol = useCallback(() => {
+        isMobile ? toggleMobileSide() : toggleCollapse();
+    }, [isMobile, isNotebook]);
     useEffect(() => {
         setClasses(() => {
             const items = [...defaultClasses];
@@ -69,7 +67,7 @@ export const LayoutHeader = () => {
     return (
         <Header className={classes} style={getLayoutCssStyle(vars)}>
             <Space>
-                {mode === 'content' ? (
+                {mode === 'content' && !isMobile ? (
                     <div className="flex-none">
                         <Logo style={{ backgroundColor: '#000', height: '30px', width: '150px' }} />
                     </div>

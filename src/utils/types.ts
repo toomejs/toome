@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-16 05:55:08 +0800
- * @Updated_at     : 2022-01-08 17:21:47 +0800
+ * @Updated_at     : 2022-01-11 20:28:07 +0800
  * @Path           : /src/utils/types.ts
  * @Description    : 所有Utils的类型
  * @LastEditors    : pincman

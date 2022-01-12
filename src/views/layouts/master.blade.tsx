@@ -2,13 +2,13 @@ import { FC } from 'react';
 
 import { Outlet } from 'react-router-dom';
 
-import { BasicLayout } from '@/components/Layout';
+import { layout } from '@/config';
 
-// import { AppFooter, AppHeader, AppSidebar } from './components';
+import { BasicLayout } from './components';
 
 const MasterLayout: FC = () => {
     return (
-        <BasicLayout>
+        <BasicLayout {...layout}>
             <Outlet />
         </BasicLayout>
     );
