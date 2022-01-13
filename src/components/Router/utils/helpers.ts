@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-14 00:07:50 +0800
- * @Updated_at     : 2022-01-13 01:57:20 +0800
+ * @Updated_at     : 2022-01-13 21:35:52 +0800
  * @Path           : /src/components/Router/utils/helpers.ts
  * @Description    : 工具函数
  * @LastEditors    : pincman
@@ -38,7 +38,9 @@ export const formatPath = (item: RouteOption, basePath: string, parentPath?: str
 };
 
 export const checkRoute = (option: RouteOption) => {
-    if ('index' in option && option.index) return true;
-    if ('path' in option && !isNil(option.path)) return !isUrl(option.path);
+    if ('index' in option) return option.index;
+    if ('path' in option) {
+        return !isNil(option.path) && option.path.length > 0 && !isUrl(option.path);
+    }
     return false;
 };

@@ -75,6 +75,9 @@ export const SideMenu: FC<{
         wait: 50,
     });
     useUpdateEffect(() => {
+        setOpens(menu.opens);
+    }, [menu.opens]);
+    useUpdateEffect(() => {
         if (mode === 'horizontal') return;
         if (config.collapsed) setOpens(undefined);
         else changeOpens(ref.current);

@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-16 17:14:30 +0800
- * @Updated_at     : 2022-01-09 14:34:05 +0800
+ * @Updated_at     : 2022-01-13 22:53:32 +0800
  * @Path           : /src/components/Router/hooks.ts
  * @Description    : 路由组件可用钩子
  * @LastEditors    : pincman
@@ -19,7 +19,7 @@ import { useStoreSetuped, debounceRun, createHookSelectors, deepMerge } from '@/
 import { useFetcherGetter } from '../Fetcher';
 
 import { RouterConfig, RouteOption, RouterStatusType } from './types';
-import { factoryRoutes, generateFinalRoutes } from './utils';
+import { factoryRoutes } from './utils';
 
 import { RouterStore, RouterStatus } from './store';
 
@@ -33,7 +33,7 @@ export const useSetupRouter = <T extends RecordAnyOrNever>(config: RouterConfig<
     /** 路由状态记忆变量,用于防止短时间内多次刷新路由配置列表 */
     const changing = useRef();
     /** 路由状态记忆变量,用于防止短时间内多次生成路由渲染列表 */
-    const generating = useRef();
+    // const generating = useRef();
     // 初始化路由
     useStoreSetuped<RouterStatusType>({
         store: RouterStatus,
@@ -66,19 +66,11 @@ export const useSetupRouter = <T extends RecordAnyOrNever>(config: RouterConfig<
             if (next) debounceRun(changing, () => factoryRoutes(fetcher()));
         },
     );
-    // 订阅路由列表生成状态,如果已经生成新的配置列表则开始生成渲染列表
-    const unGenerateSub = RouterStatus.subscribe(
-        (state) => state.ready,
-        (ready) => {
-            if (ready) debounceRun(generating, () => generateFinalRoutes());
-        },
-    );
 
     // Router组件卸载时销毁订阅
     useUnmount(() => {
         unSetupSub();
         unChangeSub();
-        unGenerateSub();
     });
 };
 
@@ -95,7 +87,11 @@ export const useRouter = createHookSelectors(RouterStore);
  */
 export const useRouterReset = () =>
     useCallback(() => {
-        RouterStatus.setState((state) => ({ ...state, next: true, ready: false, success: false }));
+        RouterStatus.setState((state) => ({
+            ...state,
+            next: true,
+            success: false,
+        }));
     }, []);
 /**
  * 路由列表操作
@@ -113,7 +109,6 @@ export const useRoutesChange = () => {
             RouterStatus.setState((state) => ({
                 ...state,
                 next: true,
-                ready: false,
                 success: false,
             }));
         },
@@ -131,7 +126,6 @@ export const useRoutesChange = () => {
             RouterStatus.setState((state) => ({
                 ...state,
                 next: true,
-                ready: false,
                 success: false,
             }));
         },

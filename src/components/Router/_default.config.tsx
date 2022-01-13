@@ -3,7 +3,7 @@
  * HomePage       : https://pincman.com
  * Support        : support@pincman.com
  * Created_at     : 2021-12-14 00:07:50 +0800
- * Updated_at     : 2022-01-09 20:03:38 +0800
+ * Updated_at     : 2022-01-13 22:51:52 +0800
  * Path           : /src/components/Router/_default.config.tsx
  * Description    : 路由组件默认配置
  * LastEditors    : pincman
@@ -15,14 +15,11 @@ import { Spinner } from '@/components/Spinner';
 import { RouterStoreType } from './types';
 
 export const getDefaultStore: <M extends RecordNever>() => RouterStoreType<M> = () => ({
-    signal: {
-        shouldChange: false,
-        canGenerate: false,
-        generated: false,
-    },
     routes: [],
+    items: [],
+    flats: [],
     renders: [],
-    names: {},
+    maps: {},
     config: {
         basePath: '/',
         hash: false,

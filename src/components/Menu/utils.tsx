@@ -3,7 +3,7 @@
  * HomePage       : https://pincman.com
  * Support        : support@pincman.com
  * Created_at     : 2021-12-14 00:07:50 +0800
- * Updated_at     : 2022-01-13 02:05:53 +0800
+ * Updated_at     : 2022-01-13 17:08:57 +0800
  * Path           : /src/components/Menu/utils.tsx
  * Description    : 菜单工具函数
  * LastEditors    : pincman
@@ -90,10 +90,8 @@ const getRouteMenus = (routes: RouteOption[], parent: ParentRouteProps): MenuOpt
                     id: current.index!,
                     text: meta.text ?? route.name ?? current.index,
                 };
-                if ('path' in route && route.path && isUrl(route.path)) {
-                    menu.path = route.path;
-                } else if (current.path) {
-                    menu.path = current.path;
+                if ('path' in route && route.path) {
+                    menu.path = isUrl(route.path) ? route.path : current.path;
                 }
                 if (children.length) menu.children = children;
                 return [menu];

@@ -1,2 +1,2 @@
-export * from './generator';
+export * from './factory';
 export * from './helpers';
