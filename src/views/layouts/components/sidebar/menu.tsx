@@ -8,14 +8,26 @@ import { useCallback, useRef, useState } from 'react';
 
 import { useDebounceFn, useUpdateEffect } from 'ahooks';
 
+import { isString } from 'lodash-es';
+
+import { isNil } from 'ramda';
+
 import { MenuOption } from '@/components/Menu';
 import { isUrl, useResponsive } from '@/utils';
 import { ThemeMode } from '@/components/Config';
 import { LayoutMenuState, useLayout } from '@/components/Layout';
+import { Icon } from '@/components/Icon';
 
 const MenuItem: FC<{ menu: MenuOption; parent?: MenuOption }> = ({ menu, parent }) => {
     if (menu.hide) return null;
-    const icon = parent ? null : menu.icon;
+    let icon: React.ReactNode | null = null;
+    if (!parent && menu.icon) {
+        icon = isString(menu.icon) ? (
+            <Icon name={menu.icon as any} />
+        ) : (
+            <Icon component={menu.icon} style={{ fontSize: '0.875rem' }} />
+        );
+    }
     if (menu.children) {
         return (
             <Menu.SubMenu key={menu.id} title={menu.text} icon={icon}>
@@ -53,20 +65,27 @@ export const SideMenu: FC<{
     theme: `${ThemeMode}`;
     menu: LayoutMenuState;
 }> = ({ mode = 'inline', theme, menu }) => {
-    const {
-        config: { collapsed },
-    } = useLayout();
+    const { config } = useLayout();
     const { isMobile } = useResponsive();
-    const [opens, setOpens] = useState<string[]>(
-        mode !== 'horizontal' && (isMobile || !collapsed) ? menu.opens : [],
+    const ref = useRef<string[]>(mode !== 'horizontal' ? menu.opens : []);
+    const [opens, setOpens] = useState<string[] | undefined>(
+        config.collapsed ? undefined : ref.current,
     );
     const { run: changeOpens } = useDebounceFn((data: string[]) => setOpens(data), {
         wait: 50,
     });
-    const ref = useRef<string[]>(menu.opens);
+    useUpdateEffect(() => {
+        if (mode === 'horizontal') return;
+        if (config.collapsed) setOpens(undefined);
+        else changeOpens(ref.current);
+    }, [config.collapsed]);
+    useUpdateEffect(() => {
+        if (mode === 'horizontal') return;
+        if (!config.collapsed && !isNil(opens)) ref.current = opens;
+    }, [opens]);
     const onOpenChange = useCallback(
         (keys: string[]) => {
-            if (mode === 'horizontal' || collapsed) return;
+            if (mode === 'horizontal' || config.collapsed || !opens) return;
             const latest = keys.find((key) => opens.indexOf(key) === -1);
             if (latest && menu.rootSubKeys.indexOf(latest) === -1) {
                 setOpens(keys);
@@ -74,20 +93,8 @@ export const SideMenu: FC<{
                 setOpens(latest ? [latest] : []);
             }
         },
-        [opens, mode, collapsed],
+        [opens, mode, config.collapsed],
     );
-    useUpdateEffect(() => {
-        if (mode !== 'horizontal' && (isMobile || !collapsed)) setOpens(menu.opens);
-        if (mode !== 'horizontal' && !isMobile) ref.current = menu.opens;
-    }, [menu.opens]);
-    useUpdateEffect(() => {
-        if (mode !== 'horizontal' && !isMobile && !collapsed) ref.current = opens;
-    }, [opens]);
-    useUpdateEffect(() => {
-        if (mode === 'horizontal' || isMobile) return;
-        if (collapsed) setOpens([]);
-        else changeOpens(ref.current);
-    }, [collapsed]);
     useUpdateEffect(() => {
         setOpens(menu.opens);
     }, [isMobile]);
@@ -97,6 +104,7 @@ export const SideMenu: FC<{
                 inlineIndent={16}
                 theme={theme}
                 mode={mode}
+                // defaultOpenKeys={menu.opens}
                 openKeys={opens}
                 selectedKeys={menu.selects}
                 onOpenChange={onOpenChange}

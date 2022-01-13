@@ -1,42 +1,27 @@
 import ReactDOM from 'react-dom';
 import { equals, isNil, map, filter, not } from 'ramda';
 import { useUpdate } from 'ahooks';
-import {
-    JSXElementConstructor,
-    memo,
-    ReactElement,
-    RefObject,
-    useEffect,
-    useLayoutEffect,
-    useRef,
-    useState,
-} from 'react';
+import { memo, useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
 
-type Children = ReactElement<any, string | JSXElementConstructor<any>> | null;
-interface Props {
-    activeName?: string;
-    isAsyncInclude: boolean; // 是否异步添加 Include  如果不是又填写了 true 会导致重复渲染
-    include?: Array<string>;
-    exclude?: Array<string>;
-    maxLen?: number;
-    children: Children;
-}
-const KeepAlive = ({
-    activeName,
-    children,
-    exclude,
-    include,
-    isAsyncInclude,
-    maxLen = 10,
-}: Props) => {
+import { useLocation, useNavigate } from 'react-router-dom';
+
+import {
+    KeepAliveChildren,
+    KeepAliveComponentProps,
+    KeepAliveContextType,
+    KeepAliveProps,
+} from './types';
+import { KeepAliveContext } from './constants';
+import { reducer } from './utils';
+
+export const KeepAlive: FC<KeepAliveProps> = memo((props) => {
+    const { activeName, children, exclude, include, isAsyncInclude, maxLen = 10 } = props;
     const containerRef = useRef<HTMLDivElement>(null);
-    const components = useRef<Array<{ name: string; ele: Children }>>([]);
+    const components = useRef<Array<{ name: string; ele: KeepAliveChildren }>>([]);
     const [asyncInclude] = useState<boolean>(isAsyncInclude);
     const update = useUpdate();
     useLayoutEffect(() => {
-        if (isNil(activeName)) {
-            return;
-        }
+        if (isNil(activeName)) return;
         // 缓存超过上限的 干掉第一个缓存
         if (components.current.length >= maxLen) {
             components.current = components.current.slice(1);
@@ -51,22 +36,15 @@ const KeepAlive = ({
                     ele: children,
                 },
             ];
-            if (not(asyncInclude)) {
-                update();
-            }
+            if (not(asyncInclude)) update();
         }
+        // eslint-disable-next-line consistent-return
         return () => {
             // 处理 黑白名单
-            if (isNil(exclude) && isNil(include)) {
-                return;
-            }
+            if (isNil(exclude) && isNil(include)) return;
             components.current = filter(({ name }) => {
-                if (exclude && exclude.includes(name)) {
-                    return false;
-                }
-                if (include) {
-                    return include.includes(name);
-                }
+                if (exclude && exclude.includes(name)) return false;
+                if (include) return include.includes(name);
                 return true;
             }, components.current);
         };
@@ -89,16 +67,10 @@ const KeepAlive = ({
             )}
         </>
     );
-};
-export default memo(KeepAlive);
-interface ComponentProps {
-    active: boolean;
-    children: Children;
-    name: string;
-    renderDiv: RefObject<HTMLDivElement>;
-}
+});
+
 // 渲染 当前匹配的路由 不匹配的 利用createPortal 移动到 document.createElement('div') 里面
-var Component = ({ active, children, name, renderDiv }: ComponentProps) => {
+const Component: FC<KeepAliveComponentProps> = ({ active, children, name, renderDiv }) => {
     const [targetElement] = useState(() => document.createElement('div'));
     const activatedRef = useRef(false);
     activatedRef.current = activatedRef.current || active;
@@ -110,6 +82,7 @@ var Component = ({ active, children, name, renderDiv }: ComponentProps) => {
             try {
                 // 移除不渲染的组件
                 renderDiv.current?.removeChild(targetElement);
+                // eslint-disable-next-line no-empty
             } catch (e) {}
         }
     }, [active, name, renderDiv, targetElement]);
@@ -121,3 +94,23 @@ var Component = ({ active, children, name, renderDiv }: ComponentProps) => {
     return <>{activatedRef.current && ReactDOM.createPortal(children, targetElement)}</>;
 };
 export const KeepAliveComponent = memo(Component);
+export const KeepAliveProvider: FC<{ value: KeepAliveContextType }> = ({ value, children }) => (
+    <KeepAliveContext.Provider value={value}>{children}</KeepAliveContext.Provider>
+);
+export const KeepAliveContainer: FC = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const [keepAliveList, dispatch] = useReducer(reducer, []);
+    // 生成子路由
+    const routeObject = useMemo(() => {
+        if (route.children) {
+            return makeRouteObject(route.children, dispatch);
+        }
+        return [];
+    }, [route.children]);
+    return (
+        <KeepAlive active={matchRouteObj?.key} include={include} isAsyncInclude>
+            {ele}
+        </KeepAlive>
+    );
+};

@@ -1,6 +1,7 @@
 import type { RouteOption } from '@/components/Router';
 
-export const auth: RouteOption[] = [
+export const constantsRoutes = () => [...auth, ...errors];
+const auth: RouteOption[] = [
     {
         path: '/auth',
         children: [
@@ -23,5 +24,14 @@ export const auth: RouteOption[] = [
                 meta: { hide: true },
             },
         ],
+    },
+];
+
+const errors: RouteOption[] = [
+    {
+        name: '404',
+        path: '*',
+        page: 'errors/404',
+        meta: { hide: true },
     },
 ];

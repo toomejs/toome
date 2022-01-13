@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-14 00:07:50 +0800
- * @Updated_at     : 2022-01-11 14:43:44 +0800
+ * @Updated_at     : 2022-01-13 01:59:58 +0800
  * @Path           : /src/components/Router/types.ts
  * @Description    : 路由组件类型
  * @LastEditors    : pincman
@@ -14,6 +14,8 @@ import { FunctionComponent, ReactElement, ReactNode } from 'react';
 import { BrowserRouterProps, NavigateProps, RouteObject } from 'react-router-dom';
 
 import { SetupedState } from '@/utils';
+
+import { IconComponent, IconName } from '../Icon';
 
 /**
  * 路由配置
@@ -99,19 +101,19 @@ export type RouteOption<T extends RecordAnyOrNever = RecordNever> = (
 };
 
 /**
- * 路由菜单数据类型(在使用路由方式生成菜单时配置)
+ * 路由元数据数据类型(在使用路由方式生成菜单,面包屑,标题等时配置)
  */
-export type RouteMenuMeta<T extends RecordAnyOrNever = RecordNever> = RecordScalable<
+export type RouteMeta<T extends RecordAnyOrNever = RecordNever> = RecordScalable<
     {
-        /** 菜单名称,不配置则为路由名称/路径 */
+        /** 显示名称,不配置则为路由名称/路径 */
         text?: string;
-        /** 菜单图标 */
-        icon?: React.ReactNode;
-        /** 是否为分隔符 */
+        /** 显示图标 */
+        icon?: IconComponent | IconName;
+        /** 是否为纯分隔符 */
         devide?: boolean;
-        /** 是否隐藏,当路由不是菜单时设置为true */
+        /** 是否在菜单中隐藏 */
         hide?: boolean;
-        /** <a>标签上的target */
+        /** <a>标签上的target,用于菜单打开外链 */
         target?: '_parent' | '_self' | '_top' | '_blank';
     },
     T
@@ -211,7 +213,7 @@ interface BaseRouteProps<T extends RecordAnyOrNever = RecordNever> {
               permissions?: string[];
           };
     /** 路由菜单数据 */
-    meta?: RouteMenuMeta<T>;
+    meta?: RouteMeta<T>;
 }
 // export type AntdRouteMenuMeta<T extends RecordAnyOrNever = RecordNever> = RecordScalable<
 //     Pick<

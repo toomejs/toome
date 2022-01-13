@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-14 00:07:50 +0800
- * @Updated_at     : 2022-01-09 21:43:26 +0800
+ * @Updated_at     : 2022-01-12 21:02:47 +0800
  * @Path           : /src/components/Menu/types.ts
  * @Description    : 菜单组件类型
  * @LastEditors    : pincman
@@ -12,7 +12,7 @@
  */
 import { SetupedState } from '@/utils';
 
-import { RouteMenuMeta } from '../Router';
+import { RouteMeta } from '../Router';
 
 /**
  * 菜单配置
@@ -41,7 +41,7 @@ export interface MenuState<T extends RecordAnyOrNever = RecordNever>
 /**
  * 菜单选项(继承自路由菜单元数据)
  */
-export type MenuOption<T extends RecordAnyOrNever = RecordNever> = RouteMenuMeta<T> & {
+export type MenuOption<T extends RecordAnyOrNever = RecordNever> = RouteMeta<T> & {
     /** 菜单ID */
     id: string;
     /** 菜单文字 */

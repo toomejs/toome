@@ -3,7 +3,7 @@
  * HomePage       : https://pincman.com
  * Support        : support@pincman.com
  * Created_at     : 2021-12-14 00:07:50 +0800
- * Updated_at     : 2022-01-11 14:58:38 +0800
+ * Updated_at     : 2022-01-13 02:10:30 +0800
  * Path           : /src/components/Router/utils/views.tsx
  * Description    : 页面和视图组件
  * LastEditors    : pincman
@@ -41,13 +41,7 @@ export const pages = getAsyncImports(
     import.meta.glob('../../../views/**/*.blade.{tsx,jsx}'),
     /..\/..\/\..\/views\/([\w+.?/?]+)(.blade.tsx)|(.blade.jsx)/i,
 );
-/**
- * 所有动态布局映射
- */
-// export const layouts = getAsyncImports(
-//     import.meta.glob('../../../layouts/**/*.blade.{tsx,jsx}'),
-//     /..\/..\/\..\/layouts\/([\w+.?/?]+)(.blade.tsx)|(.blade.jsx)/i,
-// );
+
 /**
  * 未登录跳转页面组件
  * @param props
@@ -72,15 +66,16 @@ export const getAsyncPage = (props: {
     loading: FunctionComponent | false;
     /** 页面路径 */
     page: string;
-    /** 是否为布局 */
-    // layout?: boolean;
 }) => {
     const { cacheKey, page } = props;
     const fallback: JSX.Element | undefined = props.loading ? <props.loading /> : undefined;
     if (!has(pages, page)) throw new Error(`Page ${page} not exits in 'views' dir!`);
-    // const view = layout ? layouts[page] : pages[page];
     return loadable(() => timeout(pMinDelay(pages[page](), 50), 220000), {
         cacheKey: () => cacheKey,
         fallback,
     });
+};
+
+export const IFramePage: FC<{ id: string; path: string; text: string }> = ({ path, id, text }) => {
+    return <iframe id={id} title={text} width="100%" height="100%" src={path} />;
 };

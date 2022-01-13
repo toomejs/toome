@@ -3,7 +3,7 @@
  * HomePage       : https://pincman.com
  * Support        : support@pincman.com
  * Created_at     : 2021-12-14 00:07:50 +0800
- * Updated_at     : 2022-01-09 21:43:17 +0800
+ * Updated_at     : 2022-01-13 02:05:53 +0800
  * Path           : /src/components/Menu/utils.tsx
  * Description    : 菜单工具函数
  * LastEditors    : pincman
@@ -16,8 +16,8 @@ import { AxiosInstance } from 'axios';
 
 import { isUrl } from '@/utils';
 
-import { RouteMenuMeta, ParentRouteProps, RouteOption } from '../Router/types';
-import { formatPath } from '../Router/utils';
+import { RouteMeta, ParentRouteProps, RouteOption } from '../Router/types';
+import { checkRoute, formatPath } from '../Router/utils';
 
 import { RouterStore } from '../Router';
 
@@ -74,35 +74,28 @@ export const changeMenus = async (next: boolean, fetcher: AxiosInstance) => {
 const getRouteMenus = (routes: RouteOption[], parent: ParentRouteProps): MenuOption[] =>
     routes
         .map((route, index) => {
-            const current: ParentRouteProps = {
+            const current: ParentRouteProps & { index: string } = {
                 ...parent,
                 basePath: parent.basePath,
                 index: parent.index ? `${parent.index}.${index.toString()}` : index.toString(),
             };
-            const isRoute =
-                ('path' in route && route.path && !isUrl('path')) ||
-                'index' in route ||
-                'to' in route;
-            if (isRoute) {
-                current.path = formatPath(route, parent.basePath, parent.path);
-            }
+            const isRoute = checkRoute(route);
+            if (isRoute) current.path = formatPath(route, parent.basePath, parent.path);
             let children: MenuOption[] = [];
-            if (route.children) {
-                children = getRouteMenus(route.children, current);
-            }
+            if (route.children) children = getRouteMenus(route.children, current);
             if (route.name) {
-                const meta = (route.meta ?? {}) as RouteMenuMeta;
+                const meta = (route.meta ?? {}) as RouteMeta;
                 const menu: MenuOption = {
                     ...meta,
                     id: current.index!,
-                    text: meta.text ?? route.name,
+                    text: meta.text ?? route.name ?? current.index,
                 };
-                if (current.path) {
+                if ('path' in route && route.path && isUrl(route.path)) {
+                    menu.path = route.path;
+                } else if (current.path) {
                     menu.path = current.path;
                 }
-                if (children.length) {
-                    menu.children = children;
-                }
+                if (children.length) menu.children = children;
                 return [menu];
             }
             return children;

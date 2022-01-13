@@ -3,7 +3,7 @@
  * HomePage       : https://pincman.com
  * Support        : support@pincman.com
  * Created_at     : 2021-12-14 00:07:50 +0800
- * Updated_at     : 2022-01-11 16:26:26 +0800
+ * Updated_at     : 2022-01-13 01:58:31 +0800
  * Path           : /src/components/Router/utils/generator.tsx
  * Description    : 路由生成函数
  * LastEditors    : pincman
@@ -15,16 +15,17 @@ import { isArray, omit, pick, trim } from 'lodash-es';
 import { FunctionComponent, ReactElement } from 'react';
 import { RouteObject, Navigate, Outlet } from 'react-router-dom';
 
-import { isUrl } from '@/utils';
-
 import { Permission, User, getUser } from '@/components/Auth';
+
+import { isUrl } from '@/utils';
 
 import { RouterStatus, RouterStore } from '../store';
 
 import { ParentRouteProps, RouteOption, RouterState, WhiteRoute } from '../types';
 
-import { formatPath } from './helpers';
-import { AuthRedirect, getAsyncPage } from './views';
+import { checkRoute, formatPath } from './helpers';
+import { AuthRedirect, getAsyncPage, IFramePage } from './views';
+
 /**
  * 根据角色和权限过滤路由
  * @param user 登录账户信息
@@ -276,7 +277,7 @@ const filteWhiteList = (
  * 构建路由渲染列表
  * @param children 路由列表
  * @param parent 父级配置
- * @param loading 加载中组件s
+ * @param loading 加载中组件
  */
 const generateRoutes = (
     children: RouteOption[],
@@ -287,23 +288,32 @@ const generateRoutes = (
     const routes = children
         .map((item, index) => {
             const route: RouteObject = { ...omit(item, ['page', 'children']) };
-            const current: ParentRouteProps = {
+            const current: ParentRouteProps & { index: string } = {
                 ...parent,
                 index: parent.index ? `${parent.index}.${index.toString()}` : index.toString(),
             };
-            const isRoute =
-                ('path' in item && item.path && !isUrl('path')) || 'index' in item || 'to' in item;
+            const isRoute = checkRoute(item);
             if (isRoute) {
                 const currentPath = formatPath(item, parent.basePath, parent.path);
                 current.path = currentPath;
                 // 当前项是一个跳转路由
                 const isRedirectRoute = 'to' in item;
-                if (item.name) {
-                    nameMaps[item.name] = current.path;
-                }
-                // 当前项是一个跳转路由
+                if (item.name) nameMaps[item.name] = current.path;
                 if (isRedirectRoute) {
-                    route.element = <Navigate {...pick(item, ['to', 'state'])} replace />;
+                    // 当前项是一个跳转路由
+                    if (typeof item.to === 'string' && isUrl(item.to)) {
+                        // 跳转到外链的时候使用Iframe包装
+                        route.element = (
+                            <IFramePage
+                                id={item.name ?? current.index}
+                                text={item.meta?.text ?? item.name ?? current.index}
+                                path={item.to as string}
+                            />
+                        );
+                    } else {
+                        route.element = <Navigate {...pick(item, ['to', 'state'])} replace />;
+                    }
+
                     // 当前项是一个页面路由
                 } else if ('page' in item && item.page) {
                     if (typeof item.page === 'string') {
@@ -311,14 +321,8 @@ const generateRoutes = (
                             page: item.page as string,
                             cacheKey: item.cacheKey ?? item.name ?? current.index!,
                             loading: item.loading ?? loading,
-                            // layout: item.layout,
                         });
-                        route.element = <AsyncPage />;
-                        // route.element = item.layout ? (
-                        //     <AsyncPage />
-                        // ) : item.loading ? (
-                        //     <item.loading />
-                        // ) : null;
+                        route.element = <AsyncPage route={item} />;
                     } else {
                         route.element = item.page;
                     }

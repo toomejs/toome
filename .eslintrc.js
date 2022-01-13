@@ -102,8 +102,6 @@ module.exports = {
         // https://github.com/sweepline/eslint-plugin-unused-imports
         'no-unused-vars': 0,
         '@typescript-eslint/no-unused-vars': 0,
-        'react/jsx-uses-react': 1,
-        'react/jsx-uses-vars': 1,
         'unused-imports/no-unused-imports': 1,
         'unused-imports/no-unused-vars': [
             'error',
@@ -166,6 +164,9 @@ module.exports = {
         '@typescript-eslint/no-unsafe-argument': 0,
 
         /* ********************************** React and Hooks ********************************** */
+        'react/jsx-uses-react': 1,
+        'react/jsx-uses-vars': 1,
+        'react/jsx-no-useless-fragment': 0,
         'react/display-name': 0,
         'react/button-has-type': 0,
         'react/prop-types': 0,
