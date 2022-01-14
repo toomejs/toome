@@ -1,9 +1,9 @@
 import ReactDOM from 'react-dom';
 import { equals, isNil, map, filter, not } from 'ramda';
-import { useDeepCompareEffect, useUpdate } from 'ahooks';
-import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useUpdate } from 'ahooks';
+import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import { RouteComponentProps, RouteItem, RouterStore, useRoutesChange } from '../Router';
+import { RouteComponentProps } from '../Router';
 
 import { KeepAliveComponentProps, KeepAliveContextType, KeepAliveProps } from './types';
 import { KeepAliveContext } from './constants';
@@ -91,35 +91,12 @@ export const KeepAliveComponent = memo(Component);
 export const KeepAliveProvider: FC<{ value: KeepAliveContextType }> = ({ value, children }) => (
     <KeepAliveContext.Provider value={value}>{children}</KeepAliveContext.Provider>
 );
-const getRouteItems = (routes: RouteItem[]) =>
-    routes.map((item) => {
-        if (item.isRoute) {
-            item.component = (props) => (
-                <KeepAliveProvider value={{ name: item.id }}>
-                    <item.component {...props} />
-                </KeepAliveProvider>
-            );
-        }
-        if (item.children) item.children = getRouteItems(item.children);
-        return item;
-    });
+
 export const KeepAliveContainer: FC<{ route: RouteComponentProps }> = ({ route, children }) => {
     // const location = useLocation();
     // const navigate = useNavigate();
-    const { changeRouteItems } = useRoutesChange();
     // const [keepAliveList, dispatch] = useReducer(reducer, []);
-    // // 生成子路由
-    const routeConfig = RouterStore(useCallback((state) => state.routes, []));
-    useDeepCompareEffect(() => {
-        // changeRouteItems((state) =>
-        //     state.map((item) => {
-        //         // if (item.isRoute && item.id === route.id && item.children) {
-        //         //     return { ...item, children: getRouteItems(item.children) };
-        //         // }
-        //         return item;
-        //     }),
-        // );
-    }, []);
+
     // // 计算 匹配的路由id
     // const matchRouteObj = useDeepCompareMemo(() => {
     //     const { renders, flats } = RouterStore.getState();

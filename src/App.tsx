@@ -2,6 +2,7 @@ import { useSetupAuth } from './components/Auth';
 import { useSetupConfig } from './components/Config';
 import { SWRFetcher, useSetupFetcher } from './components/Fetcher';
 import { useSetupIcon } from './components/Icon';
+import { useSetupKeepAlive } from './components/KeepAlive';
 import { useSetupMenu } from './components/Menu';
 import { Router, useSetupRouter } from './components/Router';
 import { useSetupStorage } from './components/Storage';
@@ -17,6 +18,7 @@ const useSetup = () => {
     useSetupAuth('/user/info');
     // 通过用户信息初始化路由
     useSetupRouter(router);
+    useSetupKeepAlive('/');
     // 通过路由或用户信息初始化菜单
     useSetupMenu();
     // 初始化图标配置
