@@ -4,13 +4,17 @@ import { Outlet } from 'react-router-dom';
 
 import { layout } from '@/config';
 
-import { RouteOption } from '@/components/Router';
+import { RouteComponentProps } from '@/components/Router';
 
 import { BasicLayout } from './components';
 
-const MasterLayout: FC<{ route: RouteOption }> = ({ route }) => {
+const MasterLayout: FC<{ route: RouteComponentProps }> = ({ route }) => {
+    // const location = useLocation();
+    // const matches = matchRoutes(factoryRenders(route.children ?? []), location, route.path.base);
+    // console.log(matches);
+    // console.log(route);
     return (
-        <BasicLayout {...layout}>
+        <BasicLayout config={layout} route={route}>
             <Outlet />
         </BasicLayout>
     );

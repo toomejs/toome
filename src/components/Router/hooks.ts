@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-16 17:14:30 +0800
- * @Updated_at     : 2022-01-13 22:53:32 +0800
+ * @Updated_at     : 2022-01-14 17:35:50 +0800
  * @Path           : /src/components/Router/hooks.ts
  * @Description    : 路由组件可用钩子
  * @LastEditors    : pincman
@@ -14,12 +14,16 @@ import { useRef, useCallback } from 'react';
 
 import { useUnmount } from 'react-use';
 
+import { isFunction } from 'lodash-es';
+
+import { produce } from 'immer';
+
 import { useStoreSetuped, debounceRun, createHookSelectors, deepMerge } from '@/utils';
 
 import { useFetcherGetter } from '../Fetcher';
 
-import { RouterConfig, RouteOption, RouterStatusType } from './types';
-import { factoryRoutes } from './utils';
+import { RouterConfig, RouteOption, RouterStatusType, RouteItem } from './types';
+import { factoryFinalRoutes, factoryRenders, factoryRoutes } from './utils';
 
 import { RouterStore, RouterStatus } from './store';
 
@@ -30,10 +34,8 @@ import { RouterStore, RouterStatus } from './store';
 export const useSetupRouter = <T extends RecordAnyOrNever>(config: RouterConfig<T>) => {
     /**  api请求实例获取函数 */
     const fetcher = useFetcherGetter();
-    /** 路由状态记忆变量,用于防止短时间内多次刷新路由配置列表 */
-    const changing = useRef();
     /** 路由状态记忆变量,用于防止短时间内多次生成路由渲染列表 */
-    // const generating = useRef();
+    const generating = useRef();
     // 初始化路由
     useStoreSetuped<RouterStatusType>({
         store: RouterStatus,
@@ -58,19 +60,32 @@ export const useSetupRouter = <T extends RecordAnyOrNever>(config: RouterConfig<
             }
         },
     );
-
     // 订阅路由刷新状态用于生成新的路由列表
-    const unChangeSub = RouterStatus.subscribe(
+    const listenRoutes = RouterStatus.subscribe(
         (state) => state.next,
         (next) => {
-            if (next) debounceRun(changing, () => factoryRoutes(fetcher()));
+            if (next) factoryRoutes(fetcher());
+        },
+    );
+
+    const listenItems = RouterStore.subscribe(
+        (state) => state.items,
+        (items) => factoryRenders(items),
+    );
+
+    const listenRenders = RouterStore.subscribe(
+        (state) => state.renders,
+        (renders) => {
+            debounceRun(generating, () => factoryFinalRoutes(renders));
         },
     );
 
     // Router组件卸载时销毁订阅
     useUnmount(() => {
         unSetupSub();
-        unChangeSub();
+        listenRoutes();
+        listenItems();
+        listenRenders();
     });
 };
 
@@ -131,7 +146,16 @@ export const useRoutesChange = () => {
         },
         [],
     );
+    const changeRouteItems = useCallback(
+        (items: RouteItem[] | ((old: RouteItem[]) => RouteItem[])) => {
+            RouterStore.setState((state) => {
+                state.items = isFunction(items) ? produce(state.items, items) : items;
+            });
+        },
+        [],
+    );
     return {
+        changeRouteItems,
         addRoutes,
         setRoutes,
     };

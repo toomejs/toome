@@ -1,6 +1,6 @@
 import { Layout } from 'antd';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 
 import { useResponsiveMobileCheck } from '@/utils';
 
@@ -12,13 +12,28 @@ import {
     useLayout,
 } from '@/components/Layout';
 
+import { LayoutRouteInfo } from '@/components/Layout/store';
+
+import { RouteComponentProps } from '@/components/Router';
+
+import { KeepAliveContainer } from '@/components/KeepAlive';
+
 import style from '../styles/index.module.less';
 
 import { EmbedSidebar, Sidebar } from './sidebar';
 import { LayoutHeader } from './header';
 import { ConfigDrawer } from './drawer';
 
-const LayoutContent: FC = ({ children }) => <div className="p-2 h-full">{children}</div>;
+const LayoutContent: FC = ({ children }) => {
+    const route = useContext(LayoutRouteInfo);
+    if (route)
+        return (
+            <KeepAliveContainer route={route}>
+                <div className="p-2 h-full">{children}</div>
+            </KeepAliveContainer>
+        );
+    return <div className="p-2 h-full">{children}</div>;
+};
 const SideLayout: FC = ({ children }) => {
     const { Content } = Layout;
     return (
@@ -107,10 +122,16 @@ const LayoutWrapper: FC = ({ children }) => {
         </Layout>
     );
 };
-export const BasicLayout: FC<LayoutConfig> = ({ children, ...rest }) => {
+export const BasicLayout: FC<{ config: LayoutConfig; route: RouteComponentProps }> = ({
+    children,
+    config,
+    route,
+}) => {
     return (
-        <ProviderWrapper {...rest}>
-            <LayoutWrapper>{children}</LayoutWrapper>
+        <ProviderWrapper {...config}>
+            <LayoutRouteInfo.Provider value={route}>
+                <LayoutWrapper>{children}</LayoutWrapper>
+            </LayoutRouteInfo.Provider>
         </ProviderWrapper>
     );
 };

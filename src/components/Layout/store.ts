@@ -2,6 +2,8 @@ import { createContext, Dispatch } from 'react';
 
 import { createImmberSubsciber } from '@/utils';
 
+import { RouteComponentProps } from '../Router';
+
 import { defaultConfig } from './default.config';
 
 import { LayoutAction, LayoutContextType, LayoutStorageStoreType } from './types';
@@ -16,3 +18,4 @@ export const LayoutSetup = createImmberSubsciber<{ setuped?: true }>(() => ({}))
 export const LayoutStore = createImmberSubsciber<LayoutStorageStoreType>(() => defaultConfig);
 export const LayoutContext = createContext<LayoutContextType | null>(null);
 export const LayoutDispatchContext = createContext<Dispatch<LayoutAction> | null>(null);
+export const LayoutRouteInfo = createContext<RouteComponentProps | null>(null);

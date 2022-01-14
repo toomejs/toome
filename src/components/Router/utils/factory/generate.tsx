@@ -1,45 +1,35 @@
-/**
- * Author         : pincman
- * HomePage       : https://pincman.com
- * Support        : support@pincman.com
- * Created_at     : 2021-12-14 00:07:50 +0800
- * Updated_at     : 2022-01-13 22:56:06 +0800
- * Path           : /src/components/Router/utils/generator.tsx
- * Description    : 路由生成函数
- * LastEditors    : pincman
- * Copyright 2022 pincman, All Rights Reserved.
- *
- */
-import { omit, pick } from 'lodash-es';
-import { FunctionComponent } from 'react';
-import { RouteObject, Navigate, Outlet } from 'react-router-dom';
+import { isNil, omit, pick } from 'lodash-es';
 
-import { isNil } from 'ramda';
+import { Navigate, Outlet } from 'react-router-dom';
+
+import { is } from 'ramda';
 
 import { isUrl } from '@/utils';
 
 import { getUser } from '@/components/Auth';
 
 import {
+    CustomRender,
     FlatRouteItem,
     ParentRouteProps,
-    RouteComponentProps,
     RouteItem,
+    RouteObjectWithId,
     RouteOption,
-} from '../types';
+    RoutePage,
+} from '../../types';
+import { checkRoute, formatPath } from '../helpers';
+import { AuthRedirect, getAsyncPage, IFramePage } from '../views';
+import { RouterStatus, RouterStore } from '../../store';
 
-import { RouterStatus, RouterStore } from '../store';
-
-import { formatPath, checkRoute } from './helpers';
-import { AuthRedirect, getAsyncPage, IFramePage } from './views';
-
-/**
- * 生成最终路由
- */
-export const generateFinalRoutes = () => {
-    const user = getUser();
+interface PageCreateProps {
+    item: RouteOption;
+    cacheKey: string;
+    loading: false | FC;
+    render?: CustomRender;
+}
+export const factoryItems = () => {
     const { config, routes } = RouterStore.getState();
-    const { items, flats, maps, renders } = generateRoutes(
+    const items = generateItems(
         routes,
         {
             basePath: config.basePath,
@@ -49,53 +39,64 @@ export const generateFinalRoutes = () => {
     );
     RouterStore.setState((state) => {
         state.items = items;
+    });
+};
+export const factoryRenders = (items: RouteItem[], render?: CustomRender<RecordAny>) => {
+    const renders = generateRenders(items, render);
+    const flats = generateFlats(items);
+    const maps = generateMaps(flats);
+    RouterStore.setState((state) => {
+        state.renders = renders;
         state.flats = flats;
         state.maps = maps;
+    });
+};
+/**
+ * 生成路由渲染列表
+ */
+export const factoryFinalRoutes = (renders: RouteObjectWithId[]) => {
+    RouterStatus.setState((state) => ({ ...state, success: false }));
+    const user = getUser();
+    const { config } = RouterStore.getState();
+    RouterStore.setState((state) => {
         state.renders = renders;
-        // 如果开启权限保护并且没有登录则对于不存在的路由直接跳转到登录页面
-        if (state.config.auth.enabled && !user && state.config.auth.login_redirect) {
+        if (config.auth.enabled && !user && config.auth.login_redirect) {
             state.renders.push({
+                id: 'auth-redirect',
                 path: '*',
-                element: <AuthRedirect loginPath={state.config.auth.login_redirect} />,
+                element: <AuthRedirect loginPath={config.auth.login_redirect} />,
             });
         }
     });
-    RouterStatus.setState((state) => ({ ...state, next: false, ready: false, success: true }));
+    RouterStatus.setState((state) => ({ ...state, success: true }));
 };
+
 /**
  * 构建路由渲染列表
  * @param routes
  */
-export const generateRenders = (routes: RouteItem[]) => {
+export const generateRenders = (routes: RouteItem[], render?: CustomRender<RecordAny>) => {
     return routes
         .map((item) => {
-            const children: RouteObject[] = item.children ? generateRenders(item.children) : [];
+            const children: RouteObjectWithId[] = item.children
+                ? generateRenders(item.children)
+                : [];
             if (!item.isRoute) return children;
-            const route: RouteObject = { caseSensitive: item.caseSensitive };
+            const route: RouteObjectWithId = { id: item.id, caseSensitive: item.caseSensitive };
             if (item.path.relative) route.path = item.path.relative;
             else route.index = item.path.index;
-            route.element = <item.component {...omit(item, 'component')} />;
+            if (render) {
+                route.element = () =>
+                    render({ route: { ...omit(item, 'component') } }, item.component);
+            } else {
+                route.element = <item.component route={{ ...omit(item, 'component') }} />;
+            }
             route.children = children;
             return [route];
         })
         .reduce((o, n) => [...o, ...n], []);
 };
-const generateRoutes = (
-    options: RouteOption[],
-    parent: ParentRouteProps,
-    loading: FunctionComponent | false,
-) => {
-    const items = generateItems(options, parent, loading);
-    const flats = generateFlats(items);
-    const maps = generateMaps(flats);
-    const renders = generateRenders(items);
-    return { items, flats, maps, renders };
-};
-const generateItems = (
-    options: RouteOption[],
-    parent: ParentRouteProps,
-    loading: FunctionComponent | false,
-) => {
+const generateItems = (options: RouteOption[], parent: ParentRouteProps, loading: FC | false) => {
     return options.map((item, index) => {
         const current: ParentRouteProps & { index: string } = {
             ...parent,
@@ -106,7 +107,7 @@ const generateItems = (
             current.path = formatPath(item, parent.basePath, parent.path);
         }
         const route = {
-            id: item.name ?? current.index,
+            id: current.index,
             name: item.name,
             meta: item.meta,
             loading: false,
@@ -124,11 +125,12 @@ const generateItems = (
         if (route.isRoute) {
             if ((item as any).path) route.path = { ...route.path, relative: (item as any).path };
             else route.path = { ...route.path, index: true };
-            route.component = getRoutePage(
+            route.component = getRoutePage({
                 item,
-                item.cacheKey ?? item.name ?? current.index,
-                (item as any).loading ?? loading,
-            );
+                cacheKey: item.cacheKey ?? item.name ?? current.index,
+                loading: (item as any).loading ?? loading,
+                render: 'render' in item ? item.render : parent.render,
+            });
         }
         return route;
     });
@@ -150,36 +152,37 @@ const generateMaps = (routes: FlatRouteItem[]): { [key: string]: string } => {
             .filter(
                 (item) => !item.isRoute || isNil(item.path) || isUrl(item.path) || isNil(item.name),
             )
-            .map((item) => [item.name, item.path]),
+            .map((item) => [item.name, item.id]),
     );
 };
-
-const getRoutePage = (item: RouteOption, cacheKey: string, loading: false | FunctionComponent) => {
+const getRoutePage = ({ item, cacheKey, loading, render }: PageCreateProps): RoutePage => {
     const isRedirectRoute = 'to' in item;
     if (isRedirectRoute) {
         // 当前项是一个跳转路由
         if (typeof item.to === 'string' && isUrl(item.to)) {
             // 跳转到外链的时候使用Iframe包装
-            return (props: Omit<RouteComponentProps, 'component'>) => (
-                <IFramePage to={item.to as string} {...props} />
+            return ({ route, ...rest }) => (
+                <IFramePage to={item.to as string} route={route} {...rest} />
             );
         }
         return () => <Navigate {...pick(item, ['to', 'state'])} replace />;
     }
     if ('page' in item && item.page) {
         // 当前页面是一个页面路由
-        if (typeof item.page === 'string') {
+        if (is(String, item.page)) {
             // 异步页面
             const AsyncPage = getAsyncPage({
                 page: item.page as string,
                 cacheKey,
                 loading,
             });
-            return (props: RouteComponentProps) => <AsyncPage route={props} />;
+            if (render) return (props) => render(props, AsyncPage);
+            return ({ route, ...rest }) => <AsyncPage route={route} {...rest} />;
         }
         // 正常页面
-        return item.page;
+        const Page = item.page;
+        if (render) return (props) => render(props, Page);
+        return ({ route, ...rest }) => <Page route={route} {...rest} />;
     }
-    // 当前页面不是路由的情况下直接放入占位符
     return () => <Outlet />;
 };

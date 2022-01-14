@@ -3,14 +3,14 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-14 00:07:50 +0800
- * @Updated_at     : 2022-01-13 22:49:46 +0800
+ * @Updated_at     : 2022-01-14 14:01:30 +0800
  * @Path           : /src/components/Router/types.ts
  * @Description    : 路由组件类型
  * @LastEditors    : pincman
  * Copyright 2022 pincman, All Rights Reserved.
  *
  */
-import { ComponentType, FunctionComponent, ReactElement, ReactNode } from 'react';
+import { ComponentType, FunctionComponent, ReactElement } from 'react';
 import { BrowserRouterProps, NavigateProps, RouteObject } from 'react-router-dom';
 
 import { SetupedState } from '@/utils';
@@ -33,7 +33,7 @@ export interface RouterConfig<T extends RecordAnyOrNever = RecordNever> {
     /** 通过服务器获取路由配置的API地址,如果不设置则本地配置 */
     server?: string | null;
     /** 自定义页面包装器 */
-    render?: (basename: string, route: RouteOption<T>, element: ReactElement) => ReactNode;
+    render?: CustomRender;
     /** 权限保护 */
     auth?: {
         /** 是否根据账户来生成路由 */
@@ -62,8 +62,6 @@ export interface RouterConfig<T extends RecordAnyOrNever = RecordNever> {
 export type RouterStatusType = SetupedState<{
     /** 需要生成新的路由配置 */
     next: boolean;
-    /** 新的路由配置已生成完毕,等待生成路由渲染列表 */
-    // ready: boolean;
     /** 路由渲染列表生成完毕,提供给react router重置路由 */
     success: boolean;
 }>;
@@ -76,7 +74,7 @@ export type RouterStoreType<T extends RecordAnyOrNever = RecordNever> = {
     /** 路由项目列表 */
     items: RouteItem[];
     /** 生成的路由渲染列表,用于提供给react router生成路由 */
-    renders: RouteObject[];
+    renders: RouteObjectWithId[];
     /** 扁平化路由(不包含页面值),用于渲染面包屑等 */
     flats: FlatRouteItem[];
     /** 路由名称映射,用于通过名称导航路由 */
@@ -155,7 +153,8 @@ interface BaseRouteOption<T extends RecordAnyOrNever = RecordNever> {
 /**
  * 路径路由选项
  */
-interface PathRouteOption<T extends RecordAnyOrNever = RecordNever> extends BaseRouteOption<T> {
+export interface PathRouteOption<T extends RecordAnyOrNever = RecordNever>
+    extends BaseRouteOption<T> {
     /** 路由名称 */
     name?: string;
     /** 对URL是否区分大小写 */
@@ -163,7 +162,9 @@ interface PathRouteOption<T extends RecordAnyOrNever = RecordNever> extends Base
     /** 路由路径 */
     path: string;
     /** 路由页面,可以是组件或组件路径字符串 */
-    page?: ComponentType<RouteComponentProps> | string;
+    page?: RoutePage | string;
+    /** 自定义Render,覆盖全局自定义 */
+    render?: CustomRender;
     /** 是否为布局页面 */
     // layout?: boolean;
     /** 独立配置loadding,如果不设置则使用总配置的loading */
@@ -173,20 +174,21 @@ interface PathRouteOption<T extends RecordAnyOrNever = RecordNever> extends Base
 /**
  * 索引路由选项
  */
-interface IndexRouteOption<T extends RecordAnyOrNever = RecordNever> extends BaseRouteOption<T> {
+export interface IndexRouteOption<T extends RecordAnyOrNever = RecordNever>
+    extends BaseRouteOption<T> {
     /** 路由名称 */
     name?: string;
     /** index必须为true */
     index: true;
     /** 路由页面,可以是组件或组件路径字符串 */
-    page?: ComponentType<RouteComponentProps> | string;
-    /** 是否为布局页面 */
-    // layout?: boolean;
+    page?: RoutePage | string;
+    /** 自定义Render,覆盖全局自定义 */
+    render?: CustomRender;
     /** 独立配置loadding,如果不设置则使用总配置的loading */
     loading?: FunctionComponent | false;
 }
 /** 跳转路由选项 */
-type NavigateRouteOption<T extends RecordAnyOrNever = RecordNever> = BaseRouteOption<T> &
+export type NavigateRouteOption<T extends RecordAnyOrNever = RecordNever> = BaseRouteOption<T> &
     NavigateProps & {
         /** 路由名称 */
         name?: string;
@@ -204,20 +206,25 @@ type NavigateRouteOption<T extends RecordAnyOrNever = RecordNever> = BaseRouteOp
 /**
  * 非路由选项(只用作菜单等)
  */
-interface MetaRouterProps<T extends RecordAnyOrNever = RecordNever> extends BaseRouteOption<T> {
+export interface MetaRouterProps<T extends RecordAnyOrNever = RecordNever>
+    extends BaseRouteOption<T> {
     /** 路由名称 */
     name: string;
     /** 路由路径 */
     path?: string;
 }
+export type CustomRender<T extends RecordAnyOrNever = RecordNever> = (
+    props: { route: RouteComponentProps } & T,
+    component: RoutePage<T>,
+) => ReactElement;
 /**
  * 递归路由选项时传入的父级路由参数
  */
-export interface ParentRouteProps<T extends RecordAnyOrNever = RecordNever> {
+export interface ParentRouteProps {
     /** 基础路径 */
     basePath: string;
     /** 自定义渲染包装器 */
-    render?: (basename: string, route: RouteOption<T>, element: ReactElement) => ReactNode;
+    render?: CustomRender;
     /** 父路由序号连接符,用于生成ID */
     index?: string;
     /** 父路由路径 */
@@ -225,6 +232,15 @@ export interface ParentRouteProps<T extends RecordAnyOrNever = RecordNever> {
 }
 
 /** ********************************* 数据 ********************************* */
+export interface RouteObjectWithId extends RouteObject {
+    id: string;
+}
+/**
+ * 页面组件
+ */
+export type RoutePage<T extends RecordAnyOrNever = RecordNever> = ComponentType<
+    { route: RouteComponentProps } & T
+>;
 /**
  * 处理后的准确配置
  */
@@ -251,7 +267,7 @@ export type FlatRouteItem<T extends RecordAnyOrNever = RecordNever> = Pick<
  */
 interface PathRouteItem {
     isRoute: true;
-    component: ComponentType<RouteComponentProps>;
+    component: RoutePage;
     path: { base: string; absolute: string; relative?: string; index?: boolean };
 }
 
@@ -266,10 +282,7 @@ interface MetaRouteItem {
 /**
  * 传给页面的参数
  */
-export type RouteComponentProps<T extends RecordAnyOrNever = RecordNever> = RecordScalable<
-    Omit<RouteItem & PathRouteItem, 'component'>,
-    T
->;
+export type RouteComponentProps = Omit<RouteItem & PathRouteItem, 'component'>;
 
 // export type AntdRouteMenuMeta<T extends RecordAnyOrNever = RecordNever> = RecordScalable<
 //     Pick<

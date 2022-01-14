@@ -3,7 +3,7 @@
  * HomePage       : https://pincman.com
  * Support        : support@pincman.com
  * Created_at     : 2021-12-14 00:07:50 +0800
- * Updated_at     : 2022-01-13 21:07:16 +0800
+ * Updated_at     : 2022-01-14 00:46:36 +0800
  * Path           : /src/components/Router/utils/views.tsx
  * Description    : 页面和视图组件
  * LastEditors    : pincman
@@ -17,7 +17,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { timeout } from 'promise-timeout';
 import { has } from 'lodash-es';
 
-import { RouteComponentProps } from '../types';
+import { RoutePage } from '../types';
 
 /**
  * 根据正则和glob递归获取所有动态页面导入映射
@@ -78,6 +78,6 @@ export const getAsyncPage = (props: {
     });
 };
 
-export const IFramePage: FC<RouteComponentProps<{ to: string }>> = ({ id, meta, to }) => {
-    return <iframe id={id} title={meta?.text} width="100%" height="100%" src={to} />;
+export const IFramePage: RoutePage<{ to: string }> = ({ route, to }) => {
+    return <iframe id={route.id} title={route.meta?.text} width="100%" height="100%" src={to} />;
 };

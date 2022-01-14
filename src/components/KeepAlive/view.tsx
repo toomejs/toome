@@ -1,23 +1,17 @@
 import ReactDOM from 'react-dom';
 import { equals, isNil, map, filter, not } from 'ramda';
-import { useUpdate } from 'ahooks';
-import { memo, useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
+import { useDeepCompareEffect, useUpdate } from 'ahooks';
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import { useLocation, useNavigate } from 'react-router-dom';
+import { RouteComponentProps, RouteItem, RouterStore, useRoutesChange } from '../Router';
 
-import {
-    KeepAliveChildren,
-    KeepAliveComponentProps,
-    KeepAliveContextType,
-    KeepAliveProps,
-} from './types';
+import { KeepAliveComponentProps, KeepAliveContextType, KeepAliveProps } from './types';
 import { KeepAliveContext } from './constants';
-import { reducer } from './utils';
 
 export const KeepAlive: FC<KeepAliveProps> = memo((props) => {
     const { activeName, children, exclude, include, isAsyncInclude, maxLen = 10 } = props;
     const containerRef = useRef<HTMLDivElement>(null);
-    const components = useRef<Array<{ name: string; ele: KeepAliveChildren }>>([]);
+    const components = useRef<Array<{ name: string; ele: any }>>([]);
     const [asyncInclude] = useState<boolean>(isAsyncInclude);
     const update = useUpdate();
     useLayoutEffect(() => {
@@ -97,20 +91,72 @@ export const KeepAliveComponent = memo(Component);
 export const KeepAliveProvider: FC<{ value: KeepAliveContextType }> = ({ value, children }) => (
     <KeepAliveContext.Provider value={value}>{children}</KeepAliveContext.Provider>
 );
-export const KeepAliveContainer: FC = () => {
-    const location = useLocation();
-    const navigate = useNavigate();
-    const [keepAliveList, dispatch] = useReducer(reducer, []);
-    // 生成子路由
-    const routeObject = useMemo(() => {
-        if (route.children) {
-            return makeRouteObject(route.children, dispatch);
+const getRouteItems = (routes: RouteItem[]) =>
+    routes.map((item) => {
+        if (item.isRoute) {
+            item.component = (props) => (
+                <KeepAliveProvider value={{ name: item.id }}>
+                    <item.component {...props} />
+                </KeepAliveProvider>
+            );
         }
-        return [];
-    }, [route.children]);
-    return (
-        <KeepAlive active={matchRouteObj?.key} include={include} isAsyncInclude>
-            {ele}
-        </KeepAlive>
-    );
+        if (item.children) item.children = getRouteItems(item.children);
+        return item;
+    });
+export const KeepAliveContainer: FC<{ route: RouteComponentProps }> = ({ route, children }) => {
+    // const location = useLocation();
+    // const navigate = useNavigate();
+    const { changeRouteItems } = useRoutesChange();
+    // const [keepAliveList, dispatch] = useReducer(reducer, []);
+    // // 生成子路由
+    const routeConfig = RouterStore(useCallback((state) => state.routes, []));
+    useDeepCompareEffect(() => {
+        // changeRouteItems((state) =>
+        //     state.map((item) => {
+        //         // if (item.isRoute && item.id === route.id && item.children) {
+        //         //     return { ...item, children: getRouteItems(item.children) };
+        //         // }
+        //         return item;
+        //     }),
+        // );
+    }, []);
+    // // 计算 匹配的路由id
+    // const matchRouteObj = useDeepCompareMemo(() => {
+    //     const { renders, flats } = RouterStore.getState();
+    //     const matches = matchRoutes(renders, location, route.path.base);
+    //     if (isNil(matches) || matches.length <= 0) return null;
+    //     const match = matches[matches.length - 1];
+    //     const data = flats.find((f) => f.id === (match.route as any).id);
+    //     if (!data) return null;
+    //     return {
+    //         key: data.id,
+    //         title: data.meta?.text ?? '',
+    //         name: data.name ?? '',
+    //         selectedKeys: matches.map((m) => (m as any).id),
+    //     };
+    // }, [route, location]);
+    // // 缓存渲染 & 判断是否404
+    // useEffect(() => {
+    //     if (matchRouteObj) {
+    //         dispatch({
+    //             type: KeepAliveActionType.add,
+    //             payload: {
+    //                 ...matchRouteObj,
+    //             },
+    //         });
+    //     } else if (!equals(location.pathname, '/')) {
+    //         navigate({
+    //             pathname: '/404',
+    //         });
+    //     }
+    // }, [matchRouteObj, location, navigate]);
+    // const include = useMemo(() => {
+    //     return map((res) => res.key, keepAliveList);
+    // }, [keepAliveList]);
+    return <>{children}</>;
+    // return (
+    //     <KeepAlive activeName={matchRouteObj?.key} include={include} isAsyncInclude>
+    //         {children}
+    //     </KeepAlive>
+    // );
 };

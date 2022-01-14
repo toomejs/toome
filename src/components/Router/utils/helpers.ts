@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-14 00:07:50 +0800
- * @Updated_at     : 2022-01-13 21:35:52 +0800
+ * @Updated_at     : 2022-01-14 12:37:18 +0800
  * @Path           : /src/components/Router/utils/helpers.ts
  * @Description    : 工具函数
  * @LastEditors    : pincman
@@ -15,7 +15,7 @@ import { isNil } from 'ramda';
 
 import { isUrl } from '@/utils';
 
-import { RouteOption } from '../types';
+import { IndexRouteOption, PathRouteOption, RouteOption } from '../types';
 
 /**
  * 组装并格式化路由路径以获取完整路径
@@ -37,7 +37,7 @@ export const formatPath = (item: RouteOption, basePath: string, parentPath?: str
     return `${prefix}${trim(currentPath, '/')}`;
 };
 
-export const checkRoute = (option: RouteOption) => {
+export const checkRoute = (option: RouteOption): option is PathRouteOption | IndexRouteOption => {
     if ('index' in option) return option.index;
     if ('path' in option) {
         return !isNil(option.path) && option.path.length > 0 && !isUrl(option.path);
