@@ -1,2 +1,3 @@
 export * from './view';
-export * from './setup';
+export * from './hooks';
+export * from './utils';

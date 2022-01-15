@@ -112,6 +112,7 @@ const generateItems = (options: RouteOption[], parent: ParentRouteProps, loading
             meta: item.meta,
             loading: false,
             isRoute,
+            isPage: 'page' in item && item.page,
             caseSensitive: 'caseSensitive' in item && item.caseSensitive,
             path: {
                 base: current.basePath,
@@ -141,6 +142,10 @@ const generateFlats = (routes: RouteItem[]): FlatRouteItem[] => {
         .map((item) => {
             const data = pick(item, ['id', 'name', 'meta', 'isRoute']) as FlatRouteItem;
             data.path = item.path.absolute;
+            if (item.isRoute) {
+                data.index = item.path.index;
+                data.isPage = item.isPage;
+            }
             if (!item.children) return [data];
             return [data, ...generateFlats(item.children)];
         })

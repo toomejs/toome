@@ -1,59 +1,56 @@
 import { RefObject } from 'react';
-import { NavigateFunction } from 'react-router-dom';
 
-import { RouteOption } from '../Router';
+import { RouteNavigator, RouteOption } from '../Router';
 
-import { KeepAliveActionType } from './constants';
+import { AliveActionType } from './constants';
 
 export type KeepAliveRouteOption = RouteOption<{ id: string }>;
-export interface KeepAliveProps {
-    activeName?: string;
-    isAsyncInclude: boolean; // 是否异步添加 Include  如果不是又填写了 true 会导致重复渲染
-    include?: Array<string>;
+
+export interface KeepAliveConfig {
+    path?: string;
+    active?: string | null;
+    // isAsyncInclude: boolean; // 是否异步添加 Include  如果不是又填写了 true 会导致重复渲染
     exclude?: Array<string>;
     maxLen?: number;
+    notFound?: string;
 }
-export interface KeepAliveComponentProps {
-    active: boolean;
-    name: string;
+
+export interface KeepAliveStoreType extends Required<KeepAliveConfig> {
+    include?: Array<string>;
+    lives: string[];
+}
+export interface AlivePageProps {
+    isActive: boolean;
+    id: string;
     renderDiv: RefObject<HTMLDivElement>;
 }
 export interface KeepAliveContextType {
-    name?: string;
+    id: string;
     dispatch?: React.Dispatch<KeepAliveAction>;
-    mate?: any;
 }
 
-export interface KeepAliveDelActionParams {
-    key: string;
-    navigate: NavigateFunction;
-}
-export interface KeepAliveAddActionParams {
-    key: string;
-    title: string;
-    name: string;
-    selectedKeys: string[];
-}
-export interface TagsViewDto {
-    key: string;
-    active: boolean;
-    title: string;
-    name: string;
-}
+// export interface AliveItemType {
+//     id: string;
+//     isActive: boolean;
+// }
 
 export type KeepAliveAction =
     | {
-          type: KeepAliveActionType.del;
-          payload: KeepAliveDelActionParams;
+          type: AliveActionType.REMOVE;
+          params: {
+              id: string;
+              navigate: RouteNavigator;
+          };
       }
     | {
-          type: KeepAliveActionType.add;
-          payload: KeepAliveAddActionParams;
+          type: AliveActionType.ADD;
+          id: string;
       }
     | {
-          type: KeepAliveActionType.update;
-          payload: Partial<TagsViewDto> | TagsViewDto[];
+          type: AliveActionType.ACTIVE;
+          id: string;
       }
     | {
-          type: KeepAliveActionType.clear;
+          type: AliveActionType.CLEAR;
+          navigate: RouteNavigator;
       };

@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-14 00:07:50 +0800
- * @Updated_at     : 2022-01-14 14:01:30 +0800
+ * @Updated_at     : 2022-01-15 14:53:16 +0800
  * @Path           : /src/components/Router/types.ts
  * @Description    : 路由组件类型
  * @LastEditors    : pincman
@@ -11,7 +11,13 @@
  *
  */
 import { ComponentType, FunctionComponent, ReactElement } from 'react';
-import { BrowserRouterProps, NavigateProps, RouteObject } from 'react-router-dom';
+import {
+    BrowserRouterProps,
+    NavigateOptions,
+    NavigateProps,
+    Path,
+    RouteObject,
+} from 'react-router-dom';
 
 import { SetupedState } from '@/utils';
 
@@ -259,7 +265,9 @@ export type FlatRouteItem<T extends RecordAnyOrNever = RecordNever> = Pick<
     RouteItem<T>,
     'id' | 'name' | 'meta' | 'isRoute'
 > & {
+    index?: boolean;
     path: string;
+    isPage: boolean;
 };
 
 /**
@@ -267,6 +275,7 @@ export type FlatRouteItem<T extends RecordAnyOrNever = RecordNever> = Pick<
  */
 interface PathRouteItem {
     isRoute: true;
+    isPage: boolean;
     component: RoutePage;
     path: { base: string; absolute: string; relative?: string; index?: boolean };
 }
@@ -283,6 +292,17 @@ interface MetaRouteItem {
  * 传给页面的参数
  */
 export type RouteComponentProps = Omit<RouteItem & PathRouteItem, 'component'>;
+
+/** ********************************* 函数 ********************************* */
+interface RoutePath extends Path {
+    id: string;
+    name: string;
+}
+type NavigateTo = string | Partial<RoutePath>;
+export interface RouteNavigator {
+    (to: NavigateTo, options?: NavigateOptions): void;
+    (delta: number): void;
+}
 
 // export type AntdRouteMenuMeta<T extends RecordAnyOrNever = RecordNever> = RecordScalable<
 //     Pick<

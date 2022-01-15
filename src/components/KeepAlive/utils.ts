@@ -1,98 +1,71 @@
-import { isArray } from 'lodash-es';
-import { clone, equals, find, findIndex, isEmpty, last, map, mergeRight, pick, pipe } from 'ramda';
+import produce from 'immer';
+import { equals, find, findIndex, last } from 'ramda';
+import { Reducer } from 'react';
 
-import { KeepAliveActionType } from './constants';
+import { RouteNavigator } from '../Router';
 
-import {
-    KeepAliveAction,
-    KeepAliveAddActionParams,
-    KeepAliveDelActionParams,
-    TagsViewDto,
-} from './types';
+import { AliveActionType } from './constants';
 
-const mergeMatchRoute = pipe(pick(['key', 'title', 'ele', 'name']), mergeRight({ active: true }));
-const addKeepAlive = (state: Array<TagsViewDto>, matchRouteObj: KeepAliveAddActionParams) => {
-    if (state.some((item) => equals(item.key, matchRouteObj.key) && item.active)) {
-        return state;
-    }
-    let isNew = true;
-    // 改变选中的值
-    const data = map((item) => {
-        if (equals(item.key, matchRouteObj.key)) {
-            item.active = true;
-            isNew = false;
-        } else {
-            item.active = false;
+import { KeepAliveAction, KeepAliveStoreType } from './types';
+
+export const keepAliveReducer: Reducer<KeepAliveStoreType, KeepAliveAction> = produce(
+    (state, action) => {
+        switch (action.type) {
+            case AliveActionType.ADD:
+                add(state, action.id);
+                break;
+            case AliveActionType.REMOVE:
+                remove(state, action.params);
+                break;
+            case AliveActionType.CLEAR:
+                clear(state, action.navigate);
+                break;
+            case AliveActionType.ACTIVE:
+                changeActive(state, action.id);
+                break;
+            default:
+                break;
         }
-        return item;
-    }, state);
+    },
+);
+
+const add = (state: KeepAliveStoreType, id: string) => {
+    const lives = [...state.lives];
+    if (lives.some((item) => item === id && state.active === id)) return;
+    const isNew = lives.filter((item) => item === id).length < 1;
     if (isNew) {
-        if (data.length >= 10) {
-            data.shift();
-        }
-        data.push(mergeMatchRoute(matchRouteObj));
+        if (lives.length >= state.maxLen) state.lives.shift();
+        state.lives.push(id);
+        state.active = id;
     }
-    return data;
 };
 
-const delKeepAlive = (
-    keepAliveList: Array<TagsViewDto>,
-    { key, navigate }: KeepAliveDelActionParams,
+const remove = (
+    state: KeepAliveStoreType,
+    params: {
+        id: string;
+        navigate: RouteNavigator;
+    },
 ) => {
-    let index = findIndex((item) => equals(item.key, key), keepAliveList);
-    if (equals(index, -1)) {
-        return keepAliveList;
+    const { id, navigate } = params;
+    const index = findIndex((item) => item === id, state.lives);
+    if (equals(index, -1)) return;
+    let preId: string | undefined;
+    const lives = [...state.lives];
+    const current = lives[index];
+    // 如果删除是当前渲染需要移动位置
+    if (state.active === current && lives.length > 1) {
+        preId = index === lives.length - 1 ? lives[index - 1] : last(lives);
     }
-    let pathname = '';
-    if (keepAliveList.length > 1) {
-        index = findIndex((item) => equals(item.key, key), keepAliveList);
-        const data = keepAliveList[index];
-        // 如果删除是  当前渲染     需要移动位置
-        if (data && data.active) {
-            // 如果是最后一个 那么  跳转到上一个
-            if (equals(index, keepAliveList.length - 1)) {
-                pathname = keepAliveList[index - 1].key;
-            } else {
-                // 跳转到最后一个
-                pathname = last(keepAliveList)?.key ?? '';
-            }
-        }
-    }
-    keepAliveList.splice(index, 1);
-    if (!isEmpty(pathname)) {
-        navigate({ pathname });
-    }
-    return clone(keepAliveList);
+    state.lives.splice(index, 1);
+    if (preId) navigate({ id });
 };
 
-const updateKeepAliveList = (state: Array<TagsViewDto>, keepAlive: Array<TagsViewDto>) => {
-    return map((item) => {
-        const data = find((res) => equals(res.key, item.key), keepAlive);
-        if (data) {
-            return mergeRight(item, data ?? {});
-        }
-        return item;
-    }, state);
+const changeActive = (state: KeepAliveStoreType, id: string) => {
+    const current = find((item) => item === id, state.lives);
+    if (current && state.active !== current) state.active = current;
 };
-const updateKeepAlive = (state: Array<TagsViewDto>, keepAlive: Partial<TagsViewDto>) => {
-    return map(
-        (item) => (equals(item.key, keepAlive.key) ? mergeRight(item, keepAlive) : item),
-        state,
-    );
-};
-export const reducer = (state: Array<TagsViewDto>, action: KeepAliveAction): TagsViewDto[] => {
-    switch (action.type) {
-        case KeepAliveActionType.add:
-            return addKeepAlive(state, action.payload);
-        case KeepAliveActionType.del:
-            return delKeepAlive(state, action.payload);
-        case KeepAliveActionType.clear:
-            return [];
-        case KeepAliveActionType.update:
-            return isArray(action.payload)
-                ? updateKeepAliveList(state, action.payload)
-                : updateKeepAlive(state, action.payload);
-        default:
-            return state;
-    }
+const clear = (state: KeepAliveStoreType, navigate: RouteNavigator) => {
+    if (state.active) state.lives = [state.active];
+    navigate({ pathname: '/' });
 };

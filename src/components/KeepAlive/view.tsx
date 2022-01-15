@@ -1,32 +1,51 @@
 import ReactDOM from 'react-dom';
 import { equals, isNil, map, filter, not } from 'ramda';
 import { useUpdate } from 'ahooks';
-import { memo, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import {
+    memo,
+    useCallback,
+    useContext,
+    useEffect,
+    useLayoutEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 
-import { RouteComponentProps } from '../Router';
+import { matchRoutes, useLocation, useNavigate } from 'react-router-dom';
 
-import { KeepAliveComponentProps, KeepAliveContextType, KeepAliveProps } from './types';
-import { KeepAliveContext } from './constants';
+import { useDeepCompareMemo } from '@/utils';
 
-export const KeepAlive: FC<KeepAliveProps> = memo((props) => {
-    const { activeName, children, exclude, include, isAsyncInclude, maxLen = 10 } = props;
+import { RouteComponentProps, RouterStore } from '../Router';
+
+import { AlivePageProps, KeepAliveContextType } from './types';
+import { AliveActionType, KeepAliveContext, KeepAliveDispatchContext } from './constants';
+import { KeepAliveStore } from './store';
+
+export const KeepAlive: FC<{ isAsyncInclude: boolean }> = memo((props) => {
+    const { active, exclude, include, maxLen } = KeepAliveStore(
+        useCallback((state) => ({ ...state }), []),
+    );
+    const { children, isAsyncInclude } = props;
+    const dispatchContext = useContext(KeepAliveDispatchContext);
+    const dispatch = isNil(dispatchContext) ? undefined : dispatchContext.dispatch;
     const containerRef = useRef<HTMLDivElement>(null);
-    const components = useRef<Array<{ name: string; ele: any }>>([]);
+    const pages = useRef<Array<{ id: string; ele: any }>>([]);
     const [asyncInclude] = useState<boolean>(isAsyncInclude);
     const update = useUpdate();
     useLayoutEffect(() => {
-        if (isNil(activeName)) return;
+        if (isNil(active)) return;
         // 缓存超过上限的 干掉第一个缓存
-        if (components.current.length >= maxLen) {
-            components.current = components.current.slice(1);
+        if (pages.current.length >= maxLen) {
+            pages.current = pages.current.slice(1);
         }
-        // 添加
-        const component = components.current.find((res) => equals(res.name, activeName));
-        if (isNil(component)) {
-            components.current = [
-                ...components.current,
+        // 如果当前激活的标签页不在pages中则添加它
+        const page = pages.current.find((item) => equals(item.id, active));
+        if (isNil(page)) {
+            pages.current = [
+                ...pages.current,
                 {
-                    name: activeName,
+                    id: active,
                     ele: children,
                 },
             ];
@@ -36,104 +55,98 @@ export const KeepAlive: FC<KeepAliveProps> = memo((props) => {
         return () => {
             // 处理 黑白名单
             if (isNil(exclude) && isNil(include)) return;
-            components.current = filter(({ name }) => {
-                if (exclude && exclude.includes(name)) return false;
-                if (include) return include.includes(name);
+            pages.current = filter(({ id }) => {
+                if (exclude && exclude.includes(id)) return false;
+                if (include) return include.includes(id);
                 return true;
-            }, components.current);
+            }, pages.current);
         };
-    }, [children, activeName, exclude, maxLen, include, update, asyncInclude]);
+    }, [children, active, exclude, maxLen, include, update, asyncInclude]);
     return (
         <>
             <div ref={containerRef} className="keep-alive" />
             {map(
-                ({ name, ele }) => (
-                    <Component
-                        active={equals(name, activeName)}
+                ({ id, ele }) => (
+                    <AlivePage
+                        isActive={equals(id, active)}
                         renderDiv={containerRef}
-                        name={name}
-                        key={name}
+                        id={id}
+                        key={id}
                     >
-                        {ele}
-                    </Component>
+                        <KeepAliveProvider value={{ id, dispatch }}>{ele}</KeepAliveProvider>
+                    </AlivePage>
                 ),
-                components.current,
+                pages.current,
             )}
         </>
     );
 });
 
 // 渲染 当前匹配的路由 不匹配的 利用createPortal 移动到 document.createElement('div') 里面
-const Component: FC<KeepAliveComponentProps> = ({ active, children, name, renderDiv }) => {
+const AlivePage: FC<AlivePageProps> = memo(({ isActive, children, id, renderDiv }) => {
     const [targetElement] = useState(() => document.createElement('div'));
     const activatedRef = useRef(false);
-    activatedRef.current = activatedRef.current || active;
+    activatedRef.current = activatedRef.current || isActive;
+    // 根据当前页面是否被激活来移除页面的DOM
     useEffect(() => {
-        if (active) {
-            // 渲染匹配的组件
+        if (isActive) {
             renderDiv.current?.appendChild(targetElement);
         } else {
             try {
-                // 移除不渲染的组件
                 renderDiv.current?.removeChild(targetElement);
                 // eslint-disable-next-line no-empty
             } catch (e) {}
         }
-    }, [active, name, renderDiv, targetElement]);
+    }, [isActive, id, renderDiv, targetElement]);
     useEffect(() => {
         // 添加一个id 作为标识 并没有什么太多作用
-        targetElement.setAttribute('id', name);
-    }, [name, targetElement]);
-    // 把vnode 渲染到document.createElement('div') 里面
+        targetElement.setAttribute('id', id);
+    }, [id, targetElement]);
+    // 如果处于激活状态则把vnode渲染到document.createElement('div') 里面
     return <>{activatedRef.current && ReactDOM.createPortal(children, targetElement)}</>;
-};
-export const KeepAliveComponent = memo(Component);
+});
 export const KeepAliveProvider: FC<{ value: KeepAliveContextType }> = ({ value, children }) => (
     <KeepAliveContext.Provider value={value}>{children}</KeepAliveContext.Provider>
 );
 
 export const KeepAliveContainer: FC<{ route: RouteComponentProps }> = ({ route, children }) => {
-    // const location = useLocation();
-    // const navigate = useNavigate();
-    // const [keepAliveList, dispatch] = useReducer(reducer, []);
-
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { path, notFound, lives } = KeepAliveStore(useCallback((state) => ({ ...state }), []));
+    const [isRoot, setIsRoot] = useState(true);
     // // 计算 匹配的路由id
-    // const matchRouteObj = useDeepCompareMemo(() => {
-    //     const { renders, flats } = RouterStore.getState();
-    //     const matches = matchRoutes(renders, location, route.path.base);
-    //     if (isNil(matches) || matches.length <= 0) return null;
-    //     const match = matches[matches.length - 1];
-    //     const data = flats.find((f) => f.id === (match.route as any).id);
-    //     if (!data) return null;
-    //     return {
-    //         key: data.id,
-    //         title: data.meta?.text ?? '',
-    //         name: data.name ?? '',
-    //         selectedKeys: matches.map((m) => (m as any).id),
-    //     };
-    // }, [route, location]);
-    // // 缓存渲染 & 判断是否404
-    // useEffect(() => {
-    //     if (matchRouteObj) {
-    //         dispatch({
-    //             type: KeepAliveActionType.add,
-    //             payload: {
-    //                 ...matchRouteObj,
-    //             },
-    //         });
-    //     } else if (!equals(location.pathname, '/')) {
-    //         navigate({
-    //             pathname: '/404',
-    //         });
-    //     }
-    // }, [matchRouteObj, location, navigate]);
-    // const include = useMemo(() => {
-    //     return map((res) => res.key, keepAliveList);
-    // }, [keepAliveList]);
-    return <>{children}</>;
-    // return (
-    //     <KeepAlive activeName={matchRouteObj?.key} include={include} isAsyncInclude>
-    //         {children}
-    //     </KeepAlive>
-    // );
+    const matchRouteId = useDeepCompareMemo(() => {
+        const { renders, flats } = RouterStore.getState();
+        const matches = matchRoutes(renders, location, route.path.base);
+        if (isNil(matches) || matches.length < 1) return null;
+        const match = matches[matches.length - 1];
+        const item = flats.find((f) => f.id === (match.route as any).id);
+        if (!item) return null;
+        return item.id;
+    }, [route, location]);
+    // 缓存渲染 & 判断是否404
+    useEffect(() => {
+        const { flats } = RouterStore.getState();
+        const matchItem = flats.find((item) => item.id === matchRouteId);
+        const checkRoot = !!(
+            matchItem &&
+            matchItem.path === path &&
+            (!matchItem.index || (matchItem.index && !matchItem.isPage))
+        );
+        setIsRoot(checkRoot);
+        if (checkRoot) return;
+        if (matchRouteId) {
+            KeepAliveStore.dispatch({ type: AliveActionType.ADD, id: matchRouteId });
+        } else if (!equals(location.pathname, path)) {
+            navigate({ pathname: notFound });
+        }
+    }, [matchRouteId, location, navigate]);
+    const dispatchValue = useMemo(() => ({ dispatch }), [dispatch]);
+    return isRoot ? (
+        <>{children}</>
+    ) : (
+        <KeepAliveDispatchContext.Provider value={dispatchValue}>
+            <KeepAlive isAsyncInclude>{children}</KeepAlive>
+        </KeepAliveDispatchContext.Provider>
+    );
 };
