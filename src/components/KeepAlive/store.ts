@@ -1,6 +1,6 @@
 import { redux } from 'zustand/middleware';
 
-import { createImmer } from '@/utils';
+import { createImmer, createStore } from '@/utils';
 
 import { keepAliveReducer } from './utils';
 
@@ -13,7 +13,7 @@ export const KeepAliveSetup = createImmer<{ setuped?: true; generated?: true }>(
 //     maxLen: 10,
 //     notFound: '/errors/404',
 // }));
-export const KeepAliveStore = createImmer(
+export const KeepAliveStore = createStore(
     redux(keepAliveReducer, {
         path: '/',
         active: null,

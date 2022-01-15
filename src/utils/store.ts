@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-16 05:55:08 +0800
- * @Updated_at     : 2022-01-15 17:26:12 +0800
+ * @Updated_at     : 2022-01-15 18:32:11 +0800
  * @Path           : /src/utils/store.ts
  * @Description    : 状态管理扩展(基于zustand)
  * @LastEditors    : pincman
@@ -12,11 +12,13 @@
  */
 import { createSelectorFunctions, createSelectorHooks } from 'auto-zustand-selectors-hook';
 import produce, { Draft } from 'immer';
+import { isNil } from 'ramda';
 import create, { State, GetState, SetState, StoreApi, UseBoundStore } from 'zustand';
 
 import { subscribeWithSelector } from 'zustand/middleware';
 
 import {
+    CreateStore,
     ImmberStateCreator,
     ImmberUseBoundStore,
     ImmerSetState,
@@ -28,6 +30,10 @@ import {
     CreateImmberSubsciber,
 } from './types';
 
+export const createStore: CreateStore = (createState: any, immber?: boolean) => {
+    if (isNil(immber) || immber) return createImmberSubsciber(createState);
+    return createSubsciber(createState);
+};
 /**
  * 创建一个immber store
  * @param createState store创建函数
