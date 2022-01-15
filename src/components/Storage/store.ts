@@ -1,5 +1,5 @@
-import create from 'zustand';
 import { redux } from 'zustand/middleware';
+import create from 'zustand';
 
 import { createSubsciber, SetupedState } from '@/utils';
 

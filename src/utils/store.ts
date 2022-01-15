@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-16 05:55:08 +0800
- * @Updated_at     : 2022-01-15 15:58:49 +0800
+ * @Updated_at     : 2022-01-15 17:26:12 +0800
  * @Path           : /src/utils/store.ts
  * @Description    : 状态管理扩展(基于zustand)
  * @LastEditors    : pincman
@@ -23,9 +23,9 @@ import {
     ImmerStoreApi,
     HookSelector,
     StateSelector,
-    ImmerSelectorStoreApi,
     CreateImmer,
     CreateSubsciber,
+    CreateImmberSubsciber,
 } from './types';
 
 /**
@@ -46,30 +46,15 @@ export const createSubsciber: CreateSubsciber = (createState: any) => {
     return create(subscribeWithSelector(createState as any));
 };
 
-export function createImmberSubsciber<
-    T extends State,
-    CustomSetState extends ImmerSetState<T>,
-    CustomGetState,
-    CustomStoreApi extends ImmerSelectorStoreApi<T>,
->(
-    createState:
-        | ImmberStateCreator<T, CustomSetState, CustomGetState, CustomStoreApi>
-        | CustomStoreApi,
-): ImmberUseBoundStore<T, CustomStoreApi>;
-
-export function createImmberSubsciber<T extends State>(
-    createState: ImmberStateCreator<T, ImmerSetState<T>, GetState<T>, ImmerSelectorStoreApi<T>>,
-): ImmberUseBoundStore<T, ImmerSelectorStoreApi<T>>;
-
 /**
  * 创建一个可供订阅的immber store
  * @param createState store创建函数
  */
-export function createImmberSubsciber(createState: any) {
+export const createImmberSubsciber: CreateImmberSubsciber = (createState: any) => {
     const store = create(subscribeWithSelector(ImmerMiddleware(createState as any)));
     store.setState = setImmerState(store.setState) as any;
     return store as any;
-}
+};
 /**
  * 创建一个store的响应式取值器,可以通过store.use.xxx来获取状态
  * @param store 需要取值的store

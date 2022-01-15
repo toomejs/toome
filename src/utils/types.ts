@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-16 05:55:08 +0800
- * @Updated_at     : 2022-01-15 15:59:32 +0800
+ * @Updated_at     : 2022-01-15 18:01:33 +0800
  * @Path           : /src/utils/types.ts
  * @Description    : 所有Utils的类型
  * @LastEditors    : pincman
@@ -175,7 +175,7 @@ export interface CreateSubsciber {
 }
 
 export interface CreateImmberSubsciber {
-    CreateImmberSubsciber<
+    <
         T extends State,
         CustomSetState extends ImmerSetState<T>,
         CustomGetState,
@@ -186,11 +186,28 @@ export interface CreateImmberSubsciber {
             | CustomStoreApi,
     ): ImmberUseBoundStore<T, CustomStoreApi>;
 
-    CreateImmberSubsciber<T extends State>(
+    <T extends State>(
         createState: ImmberStateCreator<T, ImmerSetState<T>, GetState<T>, ImmerSelectorStoreApi<T>>,
     ): ImmberUseBoundStore<T, ImmerSelectorStoreApi<T>>;
 }
 
+export interface CreateStore {
+    <
+        T extends State,
+        CustomSetState extends ImmerSetState<T>,
+        CustomGetState,
+        CustomStoreApi extends ImmerSelectorStoreApi<T>,
+    >(
+        createState:
+            | ImmberStateCreator<T, CustomSetState, CustomGetState, CustomStoreApi>
+            | CustomStoreApi,
+        immer: true,
+    ): ImmberUseBoundStore<T, CustomStoreApi>;
+
+    <T extends State>(
+        createState: ImmberStateCreator<T, ImmerSetState<T>, GetState<T>, ImmerSelectorStoreApi<T>>,
+    ): ImmberUseBoundStore<T, ImmerSelectorStoreApi<T>>;
+}
 // export type SubsciberDebounceProps<T extends State, K extends keyof T> = {
 //     store: SubsciberDebounceStore<T>;
 //     select: string;
