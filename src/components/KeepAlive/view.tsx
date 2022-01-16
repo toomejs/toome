@@ -1,16 +1,7 @@
 import ReactDOM from 'react-dom';
-import { equals, isNil, map, filter, not } from 'ramda';
+import { equals, isNil, map, filter } from 'ramda';
 import { useUpdate } from 'ahooks';
-import {
-    memo,
-    useCallback,
-    useContext,
-    useEffect,
-    useLayoutEffect,
-    useMemo,
-    useRef,
-    useState,
-} from 'react';
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { matchRoutes, useLocation, useNavigate } from 'react-router-dom';
 
@@ -18,20 +9,18 @@ import { useDeepCompareMemo } from '@/utils';
 
 import { RouteComponentProps, RouterStore } from '../Router';
 
-import { AlivePageProps, KeepAliveContextType } from './types';
-import { AliveActionType, KeepAliveContext, KeepAliveDispatchContext } from './constants';
+import { AlivePageProps } from './types';
+import { AliveActionType, KeepAliveDispatchContext, KeepAliveIdContext } from './constants';
 import { KeepAliveStore } from './store';
 
-export const KeepAlive: FC<{ isAsyncInclude: boolean }> = memo((props) => {
+export const KeepAlive: FC = memo(({ children }) => {
     const { active, exclude, include, maxLen } = KeepAliveStore(
         useCallback((state) => ({ ...state }), []),
     );
-    const { children, isAsyncInclude } = props;
-    const dispatchContext = useContext(KeepAliveDispatchContext);
-    const dispatch = isNil(dispatchContext) ? undefined : dispatchContext.dispatch;
+    const ref = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const pages = useRef<Array<{ id: string; ele: any }>>([]);
-    const [asyncInclude] = useState<boolean>(isAsyncInclude);
+    const [updated, setUpdate] = useState<boolean>(false);
     const update = useUpdate();
     useLayoutEffect(() => {
         if (isNil(active)) return;
@@ -49,7 +38,11 @@ export const KeepAlive: FC<{ isAsyncInclude: boolean }> = memo((props) => {
                     ele: children,
                 },
             ];
-            if (not(asyncInclude)) update();
+            update();
+            // if (not(updated)) {
+            //     update();
+            //     setUpdate(true);
+            // }
         }
         // eslint-disable-next-line consistent-return
         return () => {
@@ -61,9 +54,11 @@ export const KeepAlive: FC<{ isAsyncInclude: boolean }> = memo((props) => {
                 return true;
             }, pages.current);
         };
-    }, [children, active, exclude, maxLen, include, update, asyncInclude]);
+    }, [children, active, exclude, maxLen, include, update, updated]);
+
     return (
         <>
+            <div ref={ref} className="ppp" />
             <div ref={containerRef} className="keep-alive" />
             {map(
                 ({ id, ele }) => (
@@ -73,7 +68,7 @@ export const KeepAlive: FC<{ isAsyncInclude: boolean }> = memo((props) => {
                         id={id}
                         key={id}
                     >
-                        <KeepAliveProvider value={{ id, dispatch }}>{ele}</KeepAliveProvider>
+                        <KeepAliveIdContext.Provider value={id}>{ele}</KeepAliveIdContext.Provider>
                     </AlivePage>
                 ),
                 pages.current,
@@ -83,12 +78,14 @@ export const KeepAlive: FC<{ isAsyncInclude: boolean }> = memo((props) => {
 });
 
 // 渲染 当前匹配的路由 不匹配的 利用createPortal 移动到 document.createElement('div') 里面
-const AlivePage: FC<AlivePageProps> = memo(({ isActive, children, id, renderDiv }) => {
+const AlivePage: FC<AlivePageProps> = ({ isActive, children, id, renderDiv }) => {
+    console.log('ccc');
     const [targetElement] = useState(() => document.createElement('div'));
     const activatedRef = useRef(false);
     activatedRef.current = activatedRef.current || isActive;
     // 根据当前页面是否被激活来移除页面的DOM
     useEffect(() => {
+        console.log(targetElement);
         if (isActive) {
             renderDiv.current?.appendChild(targetElement);
         } else {
@@ -104,15 +101,12 @@ const AlivePage: FC<AlivePageProps> = memo(({ isActive, children, id, renderDiv 
     }, [id, targetElement]);
     // 如果处于激活状态则把vnode渲染到document.createElement('div') 里面
     return <>{activatedRef.current && ReactDOM.createPortal(children, targetElement)}</>;
-});
-export const KeepAliveProvider: FC<{ value: KeepAliveContextType }> = ({ value, children }) => (
-    <KeepAliveContext.Provider value={value}>{children}</KeepAliveContext.Provider>
-);
+};
 
 export const KeepAliveContainer: FC<{ route: RouteComponentProps }> = ({ route, children }) => {
     const location = useLocation();
     const navigate = useNavigate();
-    const { path, notFound, lives } = KeepAliveStore(useCallback((state) => ({ ...state }), []));
+    const { path, notFound } = KeepAliveStore(useCallback((state) => ({ ...state }), []));
     const [isRoot, setIsRoot] = useState(true);
     // // 计算 匹配的路由id
     const matchRouteId = useDeepCompareMemo(() => {
@@ -141,12 +135,11 @@ export const KeepAliveContainer: FC<{ route: RouteComponentProps }> = ({ route, 
             navigate({ pathname: notFound });
         }
     }, [matchRouteId, location, navigate]);
-    const dispatchValue = useMemo(() => ({ dispatch }), [dispatch]);
     return isRoot ? (
         <>{children}</>
     ) : (
-        <KeepAliveDispatchContext.Provider value={dispatchValue}>
-            <KeepAlive isAsyncInclude>{children}</KeepAlive>
+        <KeepAliveDispatchContext.Provider value={KeepAliveStore.dispatch}>
+            <KeepAlive>{children}</KeepAlive>
         </KeepAliveDispatchContext.Provider>
     );
 };

@@ -36,13 +36,13 @@ const dashboard: RouteOption[] = [
             {
                 name: 'dashboard.anlysis',
                 path: 'dashboard/anlysis',
-                page: 'dashboard/monitor/index',
+                page: 'dashboard/anlysis/index',
                 meta: { text: '分析页' },
             },
             {
-                name: 'dashboard.workbench',
-                path: 'dashboard/workbench',
-                page: 'dashboard/monitor/index',
+                name: 'dashboard.workspace',
+                path: 'dashboard/workspace',
+                page: 'dashboard/workspace/index',
                 meta: { text: '工作台' },
             },
         ],

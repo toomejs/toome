@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-25 05:01:46 +0800
- * @Updated_at     : 2022-01-10 10:15:39 +0800
+ * @Updated_at     : 2022-01-16 00:29:34 +0800
  * @Path           : /src/components/Fetcher/store.ts
  * @Description    : Fetcher组件状态池
  * @LastEditors    : pincman
@@ -12,7 +12,7 @@
  */
 import create from 'zustand';
 
-import { createImmberSubsciber } from '@/utils';
+import { createStore } from '@/utils';
 
 import { FetcherStoreType } from './types';
 /**
@@ -22,4 +22,7 @@ export const FetcherSetup = create<{ setuped?: true }>(() => ({}));
 /**
  * Fetcher组件状态池
  */
-export const FetcherStore = createImmberSubsciber<FetcherStoreType>(() => ({ axios: {}, swr: {} }));
+export const FetcherStore = createStore<FetcherStoreType>(() => ({
+    axios: {},
+    swr: {},
+}));

@@ -1,3 +1,5 @@
+import { useUnmount } from 'react-use';
+
 import { deepMerge, useStoreSetuped } from '@/utils';
 
 import { KeepAliveSetup, KeepAliveStore } from './store';
@@ -46,10 +48,9 @@ export const useSetupKeepAlive = (config: KeepAliveConfig) => {
     //         });
     //     },
     // );
-    // useUnmount(() => {
-    // listenRouteOptions();
-    // listenRouteItems();
-    // });
+    useUnmount(() => {
+        listenLives();
+    });
 };
 
 // const getRouteItems = (routes: RouteItem[]) =>

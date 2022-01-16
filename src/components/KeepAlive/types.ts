@@ -9,14 +9,13 @@ export type KeepAliveRouteOption = RouteOption<{ id: string }>;
 export interface KeepAliveConfig {
     path?: string;
     active?: string | null;
-    // isAsyncInclude: boolean; // 是否异步添加 Include  如果不是又填写了 true 会导致重复渲染
     exclude?: Array<string>;
     maxLen?: number;
     notFound?: string;
 }
 
 export interface KeepAliveStoreType extends Required<KeepAliveConfig> {
-    include?: Array<string>;
+    include?: Array<string>; // 是否异步添加 Include  如果不是又填写了 true 会导致重复渲染
     lives: string[];
 }
 export interface AlivePageProps {
@@ -24,10 +23,10 @@ export interface AlivePageProps {
     id: string;
     renderDiv: RefObject<HTMLDivElement>;
 }
-export interface KeepAliveContextType {
-    id: string;
-    dispatch?: React.Dispatch<KeepAliveAction>;
-}
+// export interface KeepAliveContextType {
+//     id: string;
+//     dispatch?: Dispatch<KeepAliveAction>;
+// }
 
 // export interface AliveItemType {
 //     id: string;

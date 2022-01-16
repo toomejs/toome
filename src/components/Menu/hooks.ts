@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-16 05:55:08 +0800
- * @Updated_at     : 2022-01-09 21:43:43 +0800
+ * @Updated_at     : 2022-01-15 22:22:11 +0800
  * @Path           : /src/components/Menu/hooks.ts
  * @Description    : 可用的菜单组件钩子
  * @LastEditors    : pincman
@@ -14,7 +14,7 @@ import { useCallback } from 'react';
 
 import { useUnmount } from 'react-use';
 
-import { createHookSelectors, deepMerge, useStoreSetuped } from '@/utils';
+import { createStoreHooks, deepMerge, useStoreSetuped } from '@/utils';
 
 import { AuthStore } from '../Auth';
 
@@ -28,7 +28,7 @@ import { MenuStatus, MenuStore } from './store';
 /**
  * 动态菜单状态池
  */
-export const useMenu = createHookSelectors(MenuStore);
+export const useMenu = createStoreHooks(MenuStore);
 /**
  * 动态菜单数据
  */

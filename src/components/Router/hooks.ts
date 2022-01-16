@@ -18,7 +18,7 @@ import { isFunction } from 'lodash-es';
 
 import { produce } from 'immer';
 
-import { useStoreSetuped, debounceRun, createHookSelectors, deepMerge } from '@/utils';
+import { useStoreSetuped, debounceRun, createStoreHooks, deepMerge } from '@/utils';
 
 import { useFetcherGetter } from '../Fetcher';
 
@@ -92,11 +92,11 @@ export const useSetupRouter = <T extends RecordAnyOrNever>(config: RouterConfig<
 /**
  * 获取路由状态信号的钩子
  */
-export const useRouterStatus = createHookSelectors(RouterStatus);
+export const useRouterStatus = createStoreHooks(RouterStatus);
 /**
  * 获取路由状态池的钩子
  */
-export const useRouter = createHookSelectors(RouterStore);
+export const useRouter = createStoreHooks(RouterStore);
 /**
  * 刷新路由
  */

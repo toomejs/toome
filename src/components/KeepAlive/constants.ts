@@ -1,6 +1,6 @@
 import { createContext, Dispatch } from 'react';
 
-import { KeepAliveAction, KeepAliveContextType } from './types';
+import { KeepAliveAction } from './types';
 
 export enum AliveActionType {
     REMOVE = 'remove',
@@ -8,7 +8,5 @@ export enum AliveActionType {
     CLEAR = 'clear',
     ACTIVE = 'ACTIVE',
 }
-export const KeepAliveContext = createContext<KeepAliveContextType | null>(null);
-export const KeepAliveDispatchContext = createContext<{
-    dispatch: Dispatch<KeepAliveAction>;
-} | null>(null);
+export const KeepAliveIdContext = createContext<string | null>(null);
+export const KeepAliveDispatchContext = createContext<Dispatch<KeepAliveAction> | null>(null);

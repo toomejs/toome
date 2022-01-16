@@ -1,8 +1,8 @@
 import { Col, Input, Row } from 'antd';
 import { useCallback, useState } from 'react';
 
-const MonitorDashboard = () => {
-    const [ddd, setDdd] = useState('monitor');
+const WorkspaceDashboard = () => {
+    const [ddd, setDdd] = useState('workspace');
     const changeDdd = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => setDdd(e.target.value),
         [],
@@ -17,4 +17,4 @@ const MonitorDashboard = () => {
         </div>
     );
 };
-export default MonitorDashboard;
+export default WorkspaceDashboard;

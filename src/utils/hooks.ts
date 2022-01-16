@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2022-01-08 12:39:33 +0800
- * @Updated_at     : 2022-01-12 01:08:43 +0800
+ * @Updated_at     : 2022-01-15 21:32:19 +0800
  * @Path           : /src/utils/hooks.ts
  * @Description    : Hooks集合
  * @LastEditors    : pincman
@@ -19,14 +19,13 @@ import {
     useMemo,
     useRef,
 } from 'react';
-import { useDebounce, useMedia, useUpdateEffect } from 'react-use';
+import { useMedia, useUpdateEffect } from 'react-use';
 
 import { useDeepCompareEffect } from 'ahooks';
 
 import { dequal } from 'dequal';
 
 import { isAsyncFn } from './helpers';
-import { SetupedEffectProps, SetupedState } from './types';
 import { screenSize } from './constants';
 
 /** ******************************  设备相关 ********************************** */
@@ -84,44 +83,6 @@ export const debounceRun = (
             }
         }, wait ?? 10);
     }
-};
-
-/** ****************************** 状态管理  ********************************** */
-
-/**
- * 用于初始化自定义组件,具有避免重复设置和防抖作用
- * @param 选项
- * @param deps 依赖项(尽量别写而使用zustantd的subscribe代替,否则会导致多次渲染)
- */
-export const useStoreSetuped = <T extends SetupedState>(
-    { store, callback, clear, wait }: SetupedEffectProps<T>,
-    deps: DependencyList = [],
-) => {
-    const depends = useDeepCompareMemoize(deps);
-    useDebounce(
-        () => {
-            if (
-                depends.every((d) => !!d) &&
-                !store.getState().created &&
-                !store.getState().setuped
-            ) {
-                store.setState((state: any) => ({ ...state, created: true }));
-                if (isAsyncFn(callback)) {
-                    callback().then(() => {
-                        store.setState((state: any) => ({ ...state, setuped: true }));
-                    });
-                } else {
-                    callback();
-                    store.setState((state: any) => ({ ...state, setuped: true }));
-                }
-            }
-            return () => {
-                if (clear) clear();
-            };
-        },
-        wait ?? 10,
-        depends,
-    );
 };
 
 /** ****************************** 生命周期 ********************************** */
@@ -245,7 +206,7 @@ export function useDeepCompareMemo<T>(factory: () => T, dependencies: Dependency
  * 深度检测依赖值是否改变
  * @param deps 依赖项
  */
-const useDeepCompareMemoize = (deps: DependencyList) => {
+export const useDeepCompareMemoize = (deps: DependencyList) => {
     const ref = useRef<DependencyList>([]);
 
     if (!dequal(deps, ref.current)) {

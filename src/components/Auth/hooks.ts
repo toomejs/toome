@@ -14,7 +14,7 @@ import { useCallback } from 'react';
 
 import { useUnmount } from 'react-use';
 
-import { createHookSelectors } from '@/utils';
+import { createStoreHooks } from '@/utils';
 
 import { StorageSetup, useStorageDispatch } from '../Storage';
 
@@ -31,7 +31,7 @@ export const useAuthInited = () => useAuth.useInited();
 /**
  * 账户状态信息
  */
-export const useAuth = createHookSelectors(AuthStore);
+export const useAuth = createStoreHooks(AuthStore);
 /**
  * Token信息
  */

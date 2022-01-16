@@ -1,11 +1,9 @@
-import { redux } from 'zustand/middleware';
-
-import { createImmer, createStore } from '@/utils';
+import { createReduxStore, createStore } from '@/utils';
 
 import { keepAliveReducer } from './utils';
 
-export const KeepAliveSetup = createImmer<{ setuped?: true; generated?: true }>(() => ({}));
-// export const KeepAliveStore = createImmer<KeepAliveStoreType>(() => ({
+export const KeepAliveSetup = createStore<{ setuped?: true; generated?: true }>(() => ({}));
+// export const KeepAliveStore = createImmerStore<KeepAliveStoreType>(() => ({
 //     path: '/',
 //     active: null,
 //     include: [],
@@ -13,8 +11,9 @@ export const KeepAliveSetup = createImmer<{ setuped?: true; generated?: true }>(
 //     maxLen: 10,
 //     notFound: '/errors/404',
 // }));
-export const KeepAliveStore = createStore(
-    redux(keepAliveReducer, {
+export const KeepAliveStore = createReduxStore(
+    keepAliveReducer,
+    {
         path: '/',
         active: null,
         include: [],
@@ -22,5 +21,14 @@ export const KeepAliveStore = createStore(
         maxLen: 10,
         notFound: '/errors/404',
         lives: [],
-    }),
+    },
+    // redux(keepAliveReducer, {
+    //     path: '/',
+    //     active: null,
+    //     include: [],
+    //     exclude: [],
+    //     maxLen: 10,
+    //     notFound: '/errors/404',
+    //     lives: [],
+    // }),
 );
