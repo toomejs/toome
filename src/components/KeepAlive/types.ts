@@ -23,15 +23,6 @@ export interface AlivePageProps {
     id: string;
     renderDiv: RefObject<HTMLDivElement>;
 }
-// export interface KeepAliveContextType {
-//     id: string;
-//     dispatch?: Dispatch<KeepAliveAction>;
-// }
-
-// export interface AliveItemType {
-//     id: string;
-//     isActive: boolean;
-// }
 
 export type KeepAliveAction =
     | {

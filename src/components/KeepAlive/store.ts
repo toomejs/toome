@@ -3,14 +3,7 @@ import { createReduxStore, createStore } from '@/utils';
 import { keepAliveReducer } from './utils';
 
 export const KeepAliveSetup = createStore<{ setuped?: true; generated?: true }>(() => ({}));
-// export const KeepAliveStore = createImmerStore<KeepAliveStoreType>(() => ({
-//     path: '/',
-//     active: null,
-//     include: [],
-//     exclude: [],
-//     maxLen: 10,
-//     notFound: '/errors/404',
-// }));
+
 export const KeepAliveStore = createReduxStore(
     keepAliveReducer,
     {

@@ -23,14 +23,18 @@ import style from '../styles/index.module.less';
 import { EmbedSidebar, Sidebar } from './sidebar';
 import { LayoutHeader } from './header';
 import { ConfigDrawer } from './drawer';
+import { LayoutTabs } from './tabs';
 
 const LayoutContent: FC = ({ children }) => {
     const route = useContext(LayoutRouteInfo);
     if (route)
         return (
-            <KeepAliveContainer route={route}>
-                <div className="p-2 h-full">{children}</div>
-            </KeepAliveContainer>
+            <>
+                <LayoutTabs />
+                <div className="p-2 h-full">
+                    <KeepAliveContainer route={route}>{children}</KeepAliveContainer>
+                </div>
+            </>
         );
     return <div className="p-2 h-full">{children}</div>;
 };

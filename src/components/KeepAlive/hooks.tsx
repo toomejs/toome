@@ -1,5 +1,7 @@
 import { useUnmount } from 'react-use';
 
+import { useCallback } from 'react';
+
 import { deepMerge, useStoreSetuped } from '@/utils';
 
 import { KeepAliveSetup, KeepAliveStore } from './store';
@@ -21,50 +23,9 @@ export const useSetupKeepAlive = (config: KeepAliveConfig) => {
             });
         },
     );
-    // const listenRouteOptions = RouterStore.subscribe(
-    //     (state) => state.routes,
-    //     () => {
-    //         KeepAliveSetup.setState((state) => {
-    //             state.generated = undefined;
-    //         });
-    //     },
-    // );
-    // const listenRouteItems = RouterStore.subscribe(
-    //     (state) => state.items,
-    //     (items) => {
-    //         if (KeepAliveSetup.getState().generated) return;
-    //         KeepAliveSetup.setState((state) => {
-    //             state.generated = true;
-    //         });
-    //         const { path } = KeepAliveStore.getState();
-    //         const routes = items.map((item) => {
-    //             if (item.isRoute && item.children && item.path.absolute === path) {
-    //                 return { ...item, children: getRouteItems(item.children) };
-    //             }
-    //             return item;
-    //         });
-    //         RouterStore.setState((state) => {
-    //             state.items = routes;
-    //         });
-    //     },
-    // );
     useUnmount(() => {
         listenLives();
     });
 };
-
-// const getRouteItems = (routes: RouteItem[]) =>
-//     routes.map((item) => {
-//         const route: RouteItem = { ...item };
-//         if (route.isRoute) {
-//             route.component = (props) => {
-//                 return (
-//                     <KeepAliveProvider value={{ id: item.id }}>
-//                         <route.component {...props} />
-//                     </KeepAliveProvider>
-//                 );
-//             };
-//         }
-//         if (route.children) route.children = getRouteItems(route.children);
-//         return route;
-//     });
+export const useActivedAlive = () => KeepAliveStore(useCallback((state) => state.active, []));
+export const useKeepAlives = () => KeepAliveStore(useCallback((state) => state.lives, []));

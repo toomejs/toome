@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-14 00:07:50 +0800
- * @Updated_at     : 2022-01-15 14:53:16 +0800
+ * @Updated_at     : 2022-01-17 14:15:10 +0800
  * @Path           : /src/components/Router/types.ts
  * @Description    : 路由组件类型
  * @LastEditors    : pincman
@@ -298,10 +298,9 @@ interface RoutePath extends Path {
     id: string;
     name: string;
 }
-type NavigateTo = string | Partial<RoutePath>;
+export type NavigateTo = string | Partial<RoutePath>;
 export interface RouteNavigator {
-    (to: NavigateTo, options?: NavigateOptions): void;
-    (delta: number): void;
+    (to: NavigateTo, options?: NavigateOptions): null;
 }
 
 // export type AntdRouteMenuMeta<T extends RecordAnyOrNever = RecordNever> = RecordScalable<

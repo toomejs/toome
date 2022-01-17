@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-14 00:07:50 +0800
- * @Updated_at     : 2022-01-14 12:37:18 +0800
+ * @Updated_at     : 2022-01-17 14:23:34 +0800
  * @Path           : /src/components/Router/utils/helpers.ts
  * @Description    : 工具函数
  * @LastEditors    : pincman
@@ -13,9 +13,18 @@
 import { trim } from 'lodash-es';
 import { isNil } from 'ramda';
 
+import { Navigate, NavigateOptions, To } from 'react-router-dom';
+
 import { isUrl } from '@/utils';
 
-import { IndexRouteOption, PathRouteOption, RouteOption } from '../types';
+import {
+    IndexRouteOption,
+    NavigateTo,
+    PathRouteOption,
+    RouteNavigator,
+    RouteOption,
+} from '../types';
+import { RouterStore } from '../store';
 
 /**
  * 组装并格式化路由路径以获取完整路径
@@ -43,4 +52,17 @@ export const checkRoute = (option: RouteOption): option is PathRouteOption | Ind
         return !isNil(option.path) && option.path.length > 0 && !isUrl(option.path);
     }
     return false;
+};
+export const navigateRoute: RouteNavigator = (to: NavigateTo, options?: NavigateOptions) => {
+    const { flats } = RouterStore.getState();
+    let goTo: To | undefined;
+    if (typeof to === 'string') goTo = to;
+    else if (to.pathname) {
+        goTo = { ...to };
+    } else if (to.id || to.name) {
+        const route = flats.find((item) => item.name === to.name || item.id === to.id);
+        if (route) goTo = { ...to, pathname: route.path };
+    }
+    if (!goTo) return null;
+    return Navigate({ to: goTo, ...options });
 };
