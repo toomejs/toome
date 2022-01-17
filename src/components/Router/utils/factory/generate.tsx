@@ -154,11 +154,7 @@ const generateMaps = (routes: FlatRouteItem[]): { [key: string]: string } => {
     return Object.fromEntries(
         routes
             .filter(
-                (item) =>
-                    !item.isRoute ||
-                    isNil(item.path) ||
-                    isUrl(item.path.absolute) ||
-                    isNil(item.name),
+                (item) => !item.isRoute || isNil(item.path) || isUrl(item.path) || isNil(item.name),
             )
             .map((item) => [item.name, item.id]),
     );
