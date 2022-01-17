@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-14 00:07:50 +0800
- * @Updated_at     : 2022-01-17 14:15:10 +0800
+ * @Updated_at     : 2022-01-17 19:48:05 +0800
  * @Path           : /src/components/Router/types.ts
  * @Description    : 路由组件类型
  * @LastEditors    : pincman
@@ -266,7 +266,7 @@ export type FlatRouteItem<T extends RecordAnyOrNever = RecordNever> = Pick<
     'id' | 'name' | 'meta' | 'isRoute'
 > & {
     index?: boolean;
-    path: string;
+    path: { base: string; absolute: string; relative?: string; index?: boolean };
     isPage: boolean;
 };
 
@@ -300,13 +300,5 @@ interface RoutePath extends Path {
 }
 export type NavigateTo = string | Partial<RoutePath>;
 export interface RouteNavigator {
-    (to: NavigateTo, options?: NavigateOptions): null;
+    (to: NavigateTo, options?: NavigateOptions): void;
 }
-
-// export type AntdRouteMenuMeta<T extends RecordAnyOrNever = RecordNever> = RecordScalable<
-//     Pick<
-//         MenuDataItem,
-//         'hideChildrenInMenu' | 'locale' | 'key' | 'disabled' | 'parentKeys' | 'flatMenu'
-//     >,
-//     T
-// >;

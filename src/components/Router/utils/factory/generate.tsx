@@ -140,8 +140,7 @@ const generateItems = (options: RouteOption[], parent: ParentRouteProps, loading
 const generateFlats = (routes: RouteItem[]): FlatRouteItem[] => {
     return routes
         .map((item) => {
-            const data = pick(item, ['id', 'name', 'meta', 'isRoute']) as FlatRouteItem;
-            data.path = item.path.absolute;
+            const data = pick(item, ['id', 'name', 'meta', 'isRoute', 'path']) as FlatRouteItem;
             if (item.isRoute) {
                 data.index = item.path.index;
                 data.isPage = item.isPage;
@@ -155,7 +154,11 @@ const generateMaps = (routes: FlatRouteItem[]): { [key: string]: string } => {
     return Object.fromEntries(
         routes
             .filter(
-                (item) => !item.isRoute || isNil(item.path) || isUrl(item.path) || isNil(item.name),
+                (item) =>
+                    !item.isRoute ||
+                    isNil(item.path) ||
+                    isUrl(item.path.absolute) ||
+                    isNil(item.name),
             )
             .map((item) => [item.name, item.id]),
     );

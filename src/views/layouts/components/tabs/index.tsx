@@ -8,7 +8,7 @@ import {
     useActivedAlive,
     useKeepAlives,
 } from '@/components/KeepAlive';
-import { FlatRouteItem, navigateRoute, useRouter } from '@/components/Router';
+import { FlatRouteItem, useNavigator, useRouter } from '@/components/Router';
 import { useDeepCompareUpdateEffect } from '@/utils';
 
 const { TabPane } = Tabs;
@@ -20,15 +20,20 @@ export const LayoutTabs = () => {
     const flats = useRouter.useFlats();
     const actived = useActivedAlive();
     const data = useKeepAlives();
-    const changeAlive = useCallback((id: string) => {
-        KeepAliveStore.dispatch({ type: AliveActionType.ACTIVE, id });
-    }, []);
+    const navigate = useNavigator();
+    const changeAlive = useCallback(
+        (id: string) => {
+            console.log(id);
+            if (actived !== id) navigate({ id });
+        },
+        [actived],
+    );
     const removeAlive: NonNullable<TabsProps['onEdit']> = useCallback(
         (id, action: 'add' | 'remove') => {
             if (action !== 'remove' || typeof id !== 'string') return;
             KeepAliveStore.dispatch({
                 type: AliveActionType.REMOVE,
-                params: { id, navigate: navigateRoute },
+                params: { id, navigate },
             });
         },
         [actived],

@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-16 17:14:30 +0800
- * @Updated_at     : 2022-01-14 17:35:50 +0800
+ * @Updated_at     : 2022-01-17 19:49:09 +0800
  * @Path           : /src/components/Router/hooks.ts
  * @Description    : 路由组件可用钩子
  * @LastEditors    : pincman
@@ -14,15 +14,13 @@ import { useRef, useCallback } from 'react';
 
 import { useUnmount } from 'react-use';
 
-import { isFunction } from 'lodash-es';
-
-import { produce } from 'immer';
+import { NavigateOptions, To, useNavigate } from 'react-router-dom';
 
 import { useStoreSetuped, debounceRun, createStoreHooks, deepMerge } from '@/utils';
 
 import { useFetcherGetter } from '../Fetcher';
 
-import { RouterConfig, RouteOption, RouterStatusType, RouteItem } from './types';
+import { RouterConfig, RouteOption, RouterStatusType, RouteNavigator, NavigateTo } from './types';
 import { factoryFinalRoutes, factoryRenders, factoryRoutes } from './utils';
 
 import { RouterStore, RouterStatus } from './store';
@@ -146,17 +144,27 @@ export const useRoutesChange = () => {
         },
         [],
     );
-    const changeRouteItems = useCallback(
-        (items: RouteItem[] | ((old: RouteItem[]) => RouteItem[])) => {
-            RouterStore.setState((state) => {
-                state.items = isFunction(items) ? produce(state.items, items) : items;
-            });
-        },
-        [],
-    );
     return {
-        changeRouteItems,
         addRoutes,
         setRoutes,
     };
+};
+
+export const useNavigator = (): RouteNavigator => {
+    const flats = RouterStore(useCallback((state) => state.flats, []));
+    const navigate = useNavigate();
+    return useCallback(
+        (to: NavigateTo, options?: NavigateOptions) => {
+            let goTo: To | undefined;
+            if (typeof to === 'string') goTo = to;
+            else if (to.pathname) {
+                goTo = { ...to };
+            } else if (to.id || to.name) {
+                const route = flats.find((item) => item.name === to.name || item.id === to.id);
+                if (route && route.path.relative) goTo = { ...to, pathname: route.path.relative };
+            }
+            if (goTo) navigate(goTo, options);
+        },
+        [flats, navigate],
+    );
 };

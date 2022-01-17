@@ -1,5 +1,5 @@
 import produce from 'immer';
-import { equals, find, findIndex, last } from 'ramda';
+import { equals, find, findIndex } from 'ramda';
 import { Reducer } from 'react';
 
 import { RouteNavigator } from '../Router';
@@ -50,15 +50,17 @@ const remove = (
     const { id, navigate } = params;
     const index = findIndex((item) => item === id, state.lives);
     if (equals(index, -1)) return;
-    let preId: string | undefined;
-    const lives = [...state.lives];
-    const current = lives[index];
-    // 如果删除是当前渲染需要移动位置
-    if (state.active === current && lives.length > 1) {
-        preId = index === lives.length - 1 ? lives[index - 1] : last(lives);
-    }
+    const toRemove = state.lives[index];
     state.lives.splice(index, 1);
-    if (preId) navigate({ id });
+    if (state.active === toRemove) {
+        if (state.lives.length < 1) {
+            navigate(state.path);
+        } else {
+            const toActiveIndex = index > 0 ? index - 1 : index;
+            state.active = state.lives[toActiveIndex];
+            navigate({ id: state.active });
+        }
+    }
 };
 
 const changeActive = (state: KeepAliveStoreType, id: string) => {
