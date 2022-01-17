@@ -17,7 +17,7 @@ import {
     RouteOption,
     RoutePage,
 } from '../../types';
-import { checkRoute, formatPath } from '../helpers';
+import { checkRoute, mergeRoutePath } from '../helpers';
 import { AuthRedirect, getAsyncPage, IFramePage } from '../views';
 import { RouterStatus, RouterStore } from '../../store';
 
@@ -104,7 +104,7 @@ const generateItems = (options: RouteOption[], parent: ParentRouteProps, loading
         };
         const isRoute = checkRoute(item);
         if (isRoute) {
-            current.path = formatPath(item, parent.basePath, parent.path);
+            current.path = mergeRoutePath(item, parent.basePath, parent.path);
         }
         const route = {
             id: current.index,

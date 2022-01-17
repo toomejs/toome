@@ -17,7 +17,7 @@ import { AxiosInstance } from 'axios';
 import { isUrl } from '@/utils';
 
 import { RouteMeta, ParentRouteProps, RouteOption } from '../Router/types';
-import { checkRoute, formatPath } from '../Router/utils';
+import { checkRoute, mergeRoutePath } from '../Router/utils';
 
 import { RouterStore } from '../Router';
 
@@ -80,7 +80,7 @@ const getRouteMenus = (routes: RouteOption[], parent: ParentRouteProps): MenuOpt
                 index: parent.index ? `${parent.index}.${index.toString()}` : index.toString(),
             };
             const isRoute = checkRoute(route);
-            if (isRoute) current.path = formatPath(route, parent.basePath, parent.path);
+            if (isRoute) current.path = mergeRoutePath(route, parent.basePath, parent.path);
             let children: MenuOption[] = [];
             if (route.children) children = getRouteMenus(route.children, current);
             if (route.name) {

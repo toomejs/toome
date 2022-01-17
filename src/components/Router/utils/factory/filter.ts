@@ -29,7 +29,7 @@ import { RouteOption, ParentRouteProps, RouterState, WhiteRoute } from '../../ty
  *
  */
 
-import { formatPath } from '../helpers';
+import { mergeRoutePath } from '../helpers';
 
 /**
  * 根据角色和权限过滤路由
@@ -90,7 +90,7 @@ export const filteAccessRoutes = (
                 ...parent,
                 basePath: parent.basePath,
             };
-            const currentPath = formatPath(route, parent.basePath, parent.path);
+            const currentPath = mergeRoutePath(route, parent.basePath, parent.path);
             current.path = currentPath;
             if (!route.children) return route;
             return {
@@ -117,7 +117,7 @@ export const filteWhiteList = (
                 ...parent,
                 basePath: parent.basePath,
             };
-            const currentPath = formatPath(route, parent.basePath, parent.path);
+            const currentPath = mergeRoutePath(route, parent.basePath, parent.path);
             current.path = currentPath;
             // 把所有根路径下的通配符路径移除白名单
             if ('path' in route && authConfig.login_redirect && trim(route.path, '/') === '*') {
@@ -159,7 +159,7 @@ const checkInWhiteList = (
         basePath: parent.basePath,
     };
     // 获取当前检测路由的完整路径
-    const currentPath = formatPath(route, parent.basePath, parent.path);
+    const currentPath = mergeRoutePath(route, parent.basePath, parent.path);
     // 如果是登录跳转路径则为白名单路径
     if (loginPath && trim(currentPath, '/') === trim(loginPath, '/')) return true;
     current.path = currentPath;

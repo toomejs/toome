@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-14 00:07:50 +0800
- * @Updated_at     : 2022-01-17 17:50:28 +0800
+ * @Updated_at     : 2022-01-18 06:00:37 +0800
  * @Path           : /src/components/Router/utils/helpers.ts
  * @Description    : 工具函数
  * @LastEditors    : pincman
@@ -23,7 +23,11 @@ import { IndexRouteOption, PathRouteOption, RouteOption } from '../types';
  * @param basePath 基础路径
  * @param parentPath 父路径
  */
-export const formatPath = (item: RouteOption, basePath: string, parentPath?: string): string => {
+export const mergeRoutePath = (
+    item: RouteOption,
+    basePath: string,
+    parentPath?: string,
+): string => {
     const currentPath = 'path' in item && typeof item.path === 'string' ? item.path : '';
     // 如果没有传入父路径则使用basePath作为路由前缀
     let prefix = !parentPath ? basePath : `/${trim(parentPath, '/')}`;
