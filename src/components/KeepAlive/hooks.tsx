@@ -4,9 +4,12 @@ import { useCallback } from 'react';
 
 import { deepMerge, useStoreSetuped } from '@/utils';
 
+import { useNavigator } from '../Router';
+
 import { KeepAliveSetup, KeepAliveStore } from './store';
 
 import { KeepAliveConfig } from './types';
+import { AliveActionType } from './constants';
 
 export const useSetupKeepAlive = (config: KeepAliveConfig) => {
     useStoreSetuped({
@@ -29,3 +32,25 @@ export const useSetupKeepAlive = (config: KeepAliveConfig) => {
 };
 export const useActivedAlive = () => KeepAliveStore(useCallback((state) => state.active, []));
 export const useKeepAlives = () => KeepAliveStore(useCallback((state) => state.lives, []));
+export const useKeepAliveDispath = () => {
+    const navigate = useNavigator();
+    const removeAlive = useCallback(
+        (id: string) => {
+            KeepAliveStore.dispatch({
+                type: AliveActionType.REMOVE,
+                params: { id, navigate },
+            });
+        },
+        [navigate],
+    );
+    const changeAlive = useCallback(
+        (id: string) => {
+            KeepAliveStore.dispatch({
+                type: AliveActionType.CHANGE,
+                params: { id, navigate },
+            });
+        },
+        [navigate],
+    );
+    return { changeAlive, removeAlive };
+};

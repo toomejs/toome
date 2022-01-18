@@ -27,7 +27,12 @@ interface PageCreateProps {
     loading: false | FC;
     render?: CustomRender;
 }
-export const factoryItems = () => {
+/**
+ * 生成路由渲染列表
+ */
+export const generateRoutes = () => {
+    RouterStatus.setState((state) => ({ ...state, success: false }));
+    const user = getUser();
     const { config, routes } = RouterStore.getState();
     const items = generateItems(
         routes,
@@ -37,36 +42,21 @@ export const factoryItems = () => {
         },
         config.loading,
     );
-    RouterStore.setState((state) => {
-        state.items = items;
-    });
-};
-export const factoryRenders = (items: RouteItem[], render?: CustomRender<RecordAny>) => {
-    const renders = generateRenders(items, render);
+    const renders = generateRenders(items);
     const flats = generateFlats(items);
     const maps = generateMaps(flats);
+    if (config.auth.enabled && !user && config.auth.login_redirect) {
+        renders.push({
+            id: 'auth-redirect',
+            path: '*',
+            element: <AuthRedirect loginPath={config.auth.login_redirect} />,
+        });
+    }
     RouterStore.setState((state) => {
+        state.items = items;
         state.renders = renders;
         state.flats = flats;
         state.maps = maps;
-    });
-};
-/**
- * 生成路由渲染列表
- */
-export const factoryFinalRoutes = (renders: RouteObjectWithId[]) => {
-    RouterStatus.setState((state) => ({ ...state, success: false }));
-    const user = getUser();
-    const { config } = RouterStore.getState();
-    RouterStore.setState((state) => {
-        state.renders = renders;
-        if (config.auth.enabled && !user && config.auth.login_redirect) {
-            state.renders.push({
-                id: 'auth-redirect',
-                path: '*',
-                element: <AuthRedirect loginPath={config.auth.login_redirect} />,
-            });
-        }
     });
     RouterStatus.setState((state) => ({ ...state, success: true }));
 };
@@ -75,7 +65,7 @@ export const factoryFinalRoutes = (renders: RouteObjectWithId[]) => {
  * 构建路由渲染列表
  * @param routes
  */
-export const generateRenders = (routes: RouteItem[], render?: CustomRender<RecordAny>) => {
+const generateRenders = (routes: RouteItem[], render?: CustomRender<RecordAny>) => {
     return routes
         .map((item) => {
             const children: RouteObjectWithId[] = item.children
@@ -140,8 +130,9 @@ const generateItems = (options: RouteOption[], parent: ParentRouteProps, loading
 const generateFlats = (routes: RouteItem[]): FlatRouteItem[] => {
     return routes
         .map((item) => {
-            const data = pick(item, ['id', 'name', 'meta', 'isRoute', 'path']) as FlatRouteItem;
+            const data = pick(item, ['id', 'name', 'meta', 'isRoute']) as FlatRouteItem;
             if (item.isRoute) {
+                data.path = item.path.absolute;
                 data.index = item.path.index;
                 data.isPage = item.isPage;
             }
@@ -153,9 +144,7 @@ const generateFlats = (routes: RouteItem[]): FlatRouteItem[] => {
 const generateMaps = (routes: FlatRouteItem[]): { [key: string]: string } => {
     return Object.fromEntries(
         routes
-            .filter(
-                (item) => !item.isRoute || isNil(item.path) || isUrl(item.path) || isNil(item.name),
-            )
+            .filter((item) => !item.isRoute || isNil(item.name))
             .map((item) => [item.name, item.id]),
     );
 };

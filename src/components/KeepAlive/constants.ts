@@ -6,7 +6,8 @@ export enum AliveActionType {
     REMOVE = 'remove',
     ADD = 'add',
     CLEAR = 'clear',
-    ACTIVE = 'ACTIVE',
+    ACTIVE = 'active',
+    CHANGE = 'change',
 }
 export const KeepAliveIdContext = createContext<string | null>(null);
 export const KeepAliveDispatchContext = createContext<Dispatch<KeepAliveAction> | null>(null);

@@ -23,6 +23,9 @@ export const keepAliveReducer: Reducer<KeepAliveStoreType, KeepAliveAction> = pr
             case AliveActionType.ACTIVE:
                 changeActive(state, action.id);
                 break;
+            case AliveActionType.CHANGE:
+                changeTab(state, action.params);
+                break;
             default:
                 break;
         }
@@ -66,6 +69,17 @@ const remove = (
 const changeActive = (state: KeepAliveStoreType, id: string) => {
     const current = find((item) => item === id, state.lives);
     if (current && state.active !== current) state.active = current;
+};
+const changeTab = (
+    state: KeepAliveStoreType,
+    params: {
+        id: string;
+        navigate: RouteNavigator;
+    },
+) => {
+    const current = find((item) => item === params.id, state.lives);
+    if (!current || state.active === params.id) return;
+    params.navigate({ id: params.id });
 };
 const clear = (state: KeepAliveStoreType, navigate: RouteNavigator) => {
     if (state.active) state.lives = [state.active];

@@ -9,9 +9,8 @@ import { RouterStatus, RouterStore } from '../../store';
 import { RouteOption } from '../../types';
 
 import { filteAccessRoutes, filteWhiteList } from './filter';
-import { factoryItems, factoryRenders, factoryFinalRoutes, generateRenders } from './generate';
+import { generateRoutes } from './generate';
 
-export { factoryItems, factoryRenders, factoryFinalRoutes, generateRenders };
 /**
  * 构建用户生成路由渲染的路由列表
  * @param fetcher 远程Request对象
@@ -25,7 +24,7 @@ export const factoryRoutes = async (fetcher: AxiosInstance) => {
         RouterStore.setState((state) => {
             state.routes = [...state.config.routes.constants, ...state.config.routes.dynamic];
         });
-        factoryItems();
+        generateRoutes();
     } else if (user) {
         // 如果用户已登录,首先过滤精通路由
         RouterStore.setState((state) => {
@@ -45,7 +44,7 @@ export const factoryRoutes = async (fetcher: AxiosInstance) => {
                     },
                 );
             });
-            factoryItems();
+            generateRoutes();
         } else {
             try {
                 // 如果路由通过服务器生成则直接合并已过滤的动态路由(权限过滤由服务端搞定)
@@ -71,7 +70,7 @@ export const factoryRoutes = async (fetcher: AxiosInstance) => {
                 }),
             ];
         });
-        factoryItems();
+        generateRoutes();
         RouterStatus.setState((state) => ({ ...state, next: false }));
     }
 };

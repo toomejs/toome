@@ -3,7 +3,7 @@
  * @HomePage       : https://pincman.com
  * @Support        : support@pincman.com
  * @Created_at     : 2021-12-16 17:14:30 +0800
- * @Updated_at     : 2022-01-17 19:49:09 +0800
+ * @Updated_at     : 2022-01-18 06:43:21 +0800
  * @Path           : /src/components/Router/hooks.ts
  * @Description    : 路由组件可用钩子
  * @LastEditors    : pincman
@@ -16,12 +16,12 @@ import { useUnmount } from 'react-use';
 
 import { NavigateOptions, To, useNavigate } from 'react-router-dom';
 
-import { useStoreSetuped, debounceRun, createStoreHooks, deepMerge } from '@/utils';
+import { useStoreSetuped, createStoreHooks, deepMerge } from '@/utils';
 
 import { useFetcherGetter } from '../Fetcher';
 
 import { RouterConfig, RouteOption, RouterStatusType, RouteNavigator, NavigateTo } from './types';
-import { factoryFinalRoutes, factoryRenders, factoryRoutes } from './utils';
+import { factoryRoutes } from './utils';
 
 import { RouterStore, RouterStatus } from './store';
 
@@ -65,25 +65,10 @@ export const useSetupRouter = <T extends RecordAnyOrNever>(config: RouterConfig<
             if (next) factoryRoutes(fetcher());
         },
     );
-
-    const listenItems = RouterStore.subscribe(
-        (state) => state.items,
-        (items) => factoryRenders(items),
-    );
-
-    const listenRenders = RouterStore.subscribe(
-        (state) => state.renders,
-        (renders) => {
-            debounceRun(generating, () => factoryFinalRoutes(renders));
-        },
-    );
-
     // Router组件卸载时销毁订阅
     useUnmount(() => {
         unSetupSub();
         listenRoutes();
-        listenItems();
-        listenRenders();
     });
 };
 
@@ -159,9 +144,13 @@ export const useNavigator = (): RouteNavigator => {
             if (typeof to === 'string') goTo = to;
             else if (to.pathname) {
                 goTo = { ...to };
-            } else if (to.id || to.name) {
-                const route = flats.find((item) => item.name === to.name || item.id === to.id);
-                if (route && route.path.relative) goTo = { ...to, pathname: route.path.relative };
+            } else {
+                const route = flats.find((item) => {
+                    if (to.name && item.name === to.name) return true;
+                    if (to.id && item.id === to.id) return true;
+                    return false;
+                });
+                if (route && route.path) goTo = { ...to, pathname: route.path };
             }
             if (goTo) navigate(goTo, options);
         },

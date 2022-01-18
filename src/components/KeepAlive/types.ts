@@ -41,6 +41,13 @@ export type KeepAliveAction =
           id: string;
       }
     | {
+          type: AliveActionType.CHANGE;
+          params: {
+              id: string;
+              navigate: RouteNavigator;
+          };
+      }
+    | {
           type: AliveActionType.CLEAR;
           navigate: RouteNavigator;
       };
