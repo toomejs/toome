@@ -43,6 +43,16 @@ export const useKeepAliveDispath = () => {
         },
         [navigate],
     );
+    const removeAlives = useCallback(
+        (ids: string[]) => {
+            KeepAliveStore.dispatch({
+                type: AliveActionType.REMOVE_MULTI,
+                params: { ids, navigate },
+            });
+        },
+        [navigate],
+    );
+
     const changeAlive = useCallback(
         (id: string) => {
             KeepAliveStore.dispatch({
@@ -52,5 +62,20 @@ export const useKeepAliveDispath = () => {
         },
         [navigate],
     );
-    return { changeAlive, removeAlive };
+    const clearAlives = useCallback(() => {
+        KeepAliveStore.dispatch({
+            type: AliveActionType.CLEAR,
+            navigate,
+        });
+    }, [navigate]);
+    const refreshAlive = useCallback(
+        (id: string | null) => {
+            KeepAliveStore.dispatch({
+                type: AliveActionType.RESET,
+                params: { id, navigate },
+            });
+        },
+        [navigate],
+    );
+    return { changeAlive, removeAlive, removeAlives, clearAlives, refreshAlive };
 };

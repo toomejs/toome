@@ -15,12 +15,27 @@ import { KeepAliveStore } from './store';
 
 type PageComponentType = React.ReactElement<any, string | React.JSXElementConstructor<any>> | null;
 export const KeepAlive: FC<{ render: PageComponentType }> = memo(({ render }) => {
-    const { active, exclude, include, maxLen } = KeepAliveStore(
+    const { active, exclude, include, maxLen, reset } = KeepAliveStore(
         useCallback((state) => ({ ...state }), []),
     );
     const containerRef = useRef<HTMLDivElement>(null);
     const pages = useRef<Array<{ id: string; component: PageComponentType }>>([]);
     const update = useUpdate();
+    useLayoutEffect(() => {
+        if (!isNil(reset)) {
+            pages.current = map(({ id, component }) => {
+                if (equals(id, reset)) {
+                    KeepAliveStore.dispatch({
+                        type: AliveActionType.RESET,
+                        params: { id: null },
+                    });
+                    return { id, component: render };
+                }
+                return { id, component };
+            }, pages.current);
+            update();
+        }
+    }, [render, reset]);
     useLayoutEffect(() => {
         if (isNil(active)) return;
         // 缓存超过上限的 干掉第一个缓存

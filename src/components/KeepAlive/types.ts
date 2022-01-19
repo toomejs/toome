@@ -17,6 +17,7 @@ export interface KeepAliveConfig {
 export interface KeepAliveStoreType extends Required<KeepAliveConfig> {
     include?: Array<string>; // 是否异步添加 Include  如果不是又填写了 true 会导致重复渲染
     lives: string[];
+    reset: string | null;
 }
 export interface AlivePageProps {
     isActive: boolean;
@@ -29,6 +30,13 @@ export type KeepAliveAction =
           type: AliveActionType.REMOVE;
           params: {
               id: string;
+              navigate: RouteNavigator;
+          };
+      }
+    | {
+          type: AliveActionType.REMOVE_MULTI;
+          params: {
+              ids: string[];
               navigate: RouteNavigator;
           };
       }
@@ -50,4 +58,11 @@ export type KeepAliveAction =
     | {
           type: AliveActionType.CLEAR;
           navigate: RouteNavigator;
+      }
+    | {
+          type: AliveActionType.RESET;
+          params: {
+              id: string | null;
+              navigate?: RouteNavigator;
+          };
       };
