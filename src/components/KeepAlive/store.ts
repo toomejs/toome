@@ -1,5 +1,5 @@
 import produce from 'immer';
-import { equals, filter, find, findIndex, includes, isNil, not } from 'ramda';
+import { equals, filter, find, findIndex, includes, not } from 'ramda';
 import { Reducer } from 'react';
 
 import { createReduxStore, createStore } from '@/utils';
@@ -64,7 +64,6 @@ const keepAliveReducer: Reducer<KeepAliveStoreType, KeepAliveAction> = produce((
         case AliveActionType.RESET: {
             const { id, navigate } = action.params;
             state.reset = id;
-            if (!isNil(id) && navigate) navigate({ id });
             break;
         }
         default:

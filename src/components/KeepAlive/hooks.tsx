@@ -2,6 +2,8 @@ import { useUnmount } from 'react-use';
 
 import { useCallback } from 'react';
 
+import { isNil } from 'ramda';
+
 import { deepMerge, useStoreSetuped } from '@/utils';
 
 import { useNavigator } from '../Router';
@@ -74,6 +76,7 @@ export const useKeepAliveDispath = () => {
                 type: AliveActionType.RESET,
                 params: { id, navigate },
             });
+            if (!isNil(id) && navigate) navigate({ id });
         },
         [navigate],
     );

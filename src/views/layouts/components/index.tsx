@@ -16,7 +16,7 @@ import { LayoutRouteInfo } from '@/components/Layout/store';
 
 import { RouteComponentProps } from '@/components/Router';
 
-import { KeepAliveContainer } from '@/components/KeepAlive';
+import { KeepAlive } from '@/components/KeepAlive';
 
 import style from '../styles/index.module.less';
 
@@ -32,7 +32,7 @@ const LayoutContent: FC = ({ children }) => {
             <>
                 <LayoutTabs />
                 <div className="p-2 h-full">
-                    <KeepAliveContainer route={route}>{children}</KeepAliveContainer>
+                    <KeepAlive route={route}>{children}</KeepAlive>
                 </div>
             </>
         );
