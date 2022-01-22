@@ -64,6 +64,8 @@ specifiers:
   ramda: ^0.27.2
   react: ^17.0.2
   react-color: ^2.19.3
+  react-dnd: ^14.0.5
+  react-dnd-html5-backend: ^14.1.0
   react-dom: ^17.0.2
   react-loadingg: 1.8.0-alpha.2
   react-router-dom: ^6.2.1
@@ -116,6 +118,8 @@ dependencies:
   ramda: 0.27.2
   react: 17.0.2
   react-color: 2.19.3_react@17.0.2
+  react-dnd: 14.0.5_b08e3c15324cbe90a6ff8fcd416c932c
+  react-dnd-html5-backend: 14.1.0
   react-dom: 17.0.2_react@17.0.2
   react-loadingg: 1.8.0-alpha.2_react-dom@17.0.2+react@17.0.2
   react-router-dom: 6.2.1_react-dom@17.0.2+react@17.0.2
@@ -1093,6 +1097,18 @@ packages:
 
   /@qixian.cs/path-to-regexp/6.1.0:
     resolution: {integrity: sha1-a4StAVljMqupX6KdLnAQRpjNXEU=, tarball: '@qixian.cs/path-to-regexp/download/@qixian.cs/path-to-regexp-6.1.0.tgz'}
+    dev: false
+
+  /@react-dnd/asap/4.0.0:
+    resolution: {integrity: sha1-swDu7YPpgB9RvWawM3yabwRUhlE=, tarball: '@react-dnd/asap/download/@react-dnd/asap-4.0.0.tgz'}
+    dev: false
+
+  /@react-dnd/invariant/2.0.0:
+    resolution: {integrity: sha1-CdLoHNOeDnZ9faYt+TJYYPJOUX4=, tarball: '@react-dnd/invariant/download/@react-dnd/invariant-2.0.0.tgz'}
+    dev: false
+
+  /@react-dnd/shallowequal/2.0.0:
+    resolution: {integrity: sha1-owMetUEp8sZrJ1P4QEJm7Hv2fwo=, tarball: '@react-dnd/shallowequal/download/@react-dnd/shallowequal-2.0.0.tgz'}
     dev: false
 
   /@rollup/plugin-node-resolve/13.1.1_rollup@2.62.0:
@@ -2715,6 +2731,14 @@ packages:
   /dlv/1.1.3:
     resolution: {integrity: sha1-XBmKihFFNZbnUUlNSYdLx3MvLnk=, tarball: dlv/download/dlv-1.1.3.tgz}
     dev: true
+
+  /dnd-core/14.0.1:
+    resolution: {integrity: sha1-dtAA5BxJSYMhD7IKSLg1+BogPC4=, tarball: dnd-core/download/dnd-core-14.0.1.tgz}
+    dependencies:
+      '@react-dnd/asap': 4.0.0
+      '@react-dnd/invariant': 2.0.0
+      redux: 4.1.2
+    dev: false
 
   /doctrine/2.1.0:
     resolution: {integrity: sha1-XNAfwQFiG0LEzX9dGmYkNxbT850=, tarball: doctrine/download/doctrine-2.1.0.tgz}
@@ -5403,7 +5427,7 @@ packages:
     dev: true
 
   /mime/1.6.0:
-    resolution: {integrity: sha1-Ms2eXGRVO9WNGaVor0Uqz/BJgbE=, tarball: mime/download/mime-1.6.0.tgz}
+    resolution: {integrity: sha1-Ms2eXGRVO9WNGaVor0Uqz/BJgbE=, tarball: mime/download/mime-1.6.0.tgz?cache=0&sync_timestamp=1636370946189&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Fmime%2Fdownload%2Fmime-1.6.0.tgz}
     engines: {node: '>=4'}
     hasBin: true
     requiresBuild: true
@@ -6696,6 +6720,36 @@ packages:
       tinycolor2: 1.4.2
     dev: false
 
+  /react-dnd-html5-backend/14.1.0:
+    resolution: {integrity: sha512-6ONeqEC3XKVf4eVmMTe0oPds+c5B9Foyj8p/ZKLb7kL2qh9COYxiBHv3szd6gztqi/efkmriywLUVlPotqoJyw==, tarball: react-dnd-html5-backend/download/react-dnd-html5-backend-14.1.0.tgz}
+    dependencies:
+      dnd-core: 14.0.1
+    dev: false
+
+  /react-dnd/14.0.5_b08e3c15324cbe90a6ff8fcd416c932c:
+    resolution: {integrity: sha512-9i1jSgbyVw0ELlEVt/NkCUkxy1hmhJOkePoCH713u75vzHGyXhPDm28oLfc2NMSBjZRM1Y+wRjHXJT3sPrTy+A==, tarball: react-dnd/download/react-dnd-14.0.5.tgz}
+    peerDependencies:
+      '@types/hoist-non-react-statics': '>= 3.3.1'
+      '@types/node': '>= 12'
+      '@types/react': '>= 16'
+      react: '>= 16.14'
+    peerDependenciesMeta:
+      '@types/hoist-non-react-statics':
+        optional: true
+      '@types/node':
+        optional: true
+      '@types/react':
+        optional: true
+    dependencies:
+      '@react-dnd/invariant': 2.0.0
+      '@react-dnd/shallowequal': 2.0.0
+      '@types/react': 17.0.38
+      dnd-core: 14.0.1
+      fast-deep-equal: 3.1.3
+      hoist-non-react-statics: 3.3.2
+      react: 17.0.2
+    dev: false
+
   /react-dom/17.0.2_react@17.0.2:
     resolution: {integrity: sha512-s4h96KtLDUQlsENhMn1ar8t2bEa+q/YAtj8pPPdIjPDGBDIVNsrD9aXNWqspUe6AzKCIG0C1HZZLqLV7qpOBGA==, tarball: react-dom/download/react-dom-17.0.2.tgz}
     peerDependencies:
@@ -6860,6 +6914,12 @@ packages:
       indent-string: 4.0.0
       strip-indent: 3.0.0
     dev: true
+
+  /redux/4.1.2:
+    resolution: {integrity: sha512-SH8PglcebESbd/shgf6mii6EIoRM0zrQyjcuQ+ojmfxjTtE0z9Y8pa62iA/OJ58qjP6j27uyW4kUF4jl/jd6sw==, tarball: redux/download/redux-4.1.2.tgz}
+    dependencies:
+      '@babel/runtime': 7.16.5
+    dev: false
 
   /regenerator-runtime/0.13.9:
     resolution: {integrity: sha1-iSV0Kpj/2QgUmI11Zq0wyjsmO1I=, tarball: regenerator-runtime/download/regenerator-runtime-0.13.9.tgz}
@@ -7208,7 +7268,7 @@ packages:
     engines: {node: '>=0.10.0'}
 
   /source-map/0.6.1:
-    resolution: {integrity: sha1-dHIq8y6WFOnCh6jQu95IteLxomM=, tarball: source-map/download/source-map-0.6.1.tgz?cache=0&sync_timestamp=1632822727980&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Fsource-map%2Fdownload%2Fsource-map-0.6.1.tgz}
+    resolution: {integrity: sha1-dHIq8y6WFOnCh6jQu95IteLxomM=, tarball: source-map/download/source-map-0.6.1.tgz}
     engines: {node: '>=0.10.0'}
     requiresBuild: true
 
