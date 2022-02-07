@@ -1,0 +1,13 @@
+/* 添加自定义tailwind组件层样式,一般无特殊需求可以用react组件抽象而不是在这里定义css类 */
+
+/* 如果要引用tailwind自带的值或tailwind.config.js的theme中配置的值,可以通过 "@apply"指令或"theme"函数获取 */
+
+/* 在"@layer"中添加的样式如果在程序中没有用到会在编译后被清除,如果需要强制存在于编译后的样式表,请在"@layer"外定义 */
+
+/* 示例:
+.btn-primary {
+    @apply py-2 px-4 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75;
+} */
+
+@layer components {
+}

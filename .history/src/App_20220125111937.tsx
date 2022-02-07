@@ -18,7 +18,7 @@ const useSetup = () => {
     useSetupAuth('/user/info');
     // 通过用户信息初始化路由
     useSetupRouter(router);
-    useSetupKeepAlive({ path: '/' });
+    useSetupKeepAlive('/');
     // 通过路由或用户信息初始化菜单
     useSetupMenu();
     // 初始化图标配置
