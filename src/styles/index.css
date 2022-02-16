@@ -32,3 +32,6 @@ body,
 *::-webkit-scrollbar-thumb:vertical:hover {
     background-color: var(--ant-info-color);
 }
+.ant-tabs-tab-remove {
+    display: flex;
+}

@@ -1,0 +1,30 @@
+{
+  "0 info pnpm": {
+    "message": "Using hooks from: /data/code/reacx/.pnpmfile.cjs",
+    "prefix": "/data/code/reacx"
+  },
+  "1 info pnpm": {
+    "message": "readPackage hook is declared. Manifests of dependencies might get overridden",
+    "prefix": "/data/code/reacx"
+  },
+  "2 debug pnpm:scope": {
+    "selected": 1
+  },
+  "3 error pnpm": {
+    "code": "ELIFECYCLE",
+    "errno": "ENOENT",
+    "syscall": "spawn",
+    "file": "sh",
+    "pkgid": "gkradmin@0.0.0",
+    "stage": "dev",
+    "script": "vite",
+    "pkgname": "gkradmin",
+    "err": {
+      "name": "pnpm",
+      "message": "gkradmin@0.0.0 dev: `vite`\nspawn ENOENT",
+      "code": "ELIFECYCLE",
+      "stack": "pnpm: gkradmin@0.0.0 dev: `vite`\nspawn ENOENT\n    at ChildProcess.<anonymous> (/home/pincman/.node_modules/pnpm-global/5/node_modules/.pnpm/pnpm@6.29.1/node_modules/pnpm/dist/pnpm.cjs:92187:22)\n    at ChildProcess.emit (node:events:390:28)\n    at maybeClose (node:internal/child_process:1064:16)\n    at Process.ChildProcess._handle.onexit (node:internal/child_process:301:5)"
+    }
+  },
+  "4 warn pnpm:global": " Local package.json exists, but node_modules missing, did you mean to install?"
+}

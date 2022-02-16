@@ -43,7 +43,7 @@ const getTabStyles = (index: number, isDragging = false) => {
               zIndex: 1,
               //   x: (index + 1) * 100,
           }
-        : { cursor: 'auto', opacity: 1, x: index * 100, zIndex: 0 };
+        : { cursor: 'auto', opacity: 1, x: `${(index * 85) / 16}rem`, zIndex: 0 };
 };
 const TabContext = createContext<TabContextType>({} as any);
 const TabActionContext = createContext<TabActionContextType>({} as any);
@@ -62,7 +62,7 @@ const TabItem: FC<{ id: string }> = ({ id, children }) => {
             isDragging: monitor.isDragging(),
         }),
         end: (item, monitor) => {
-            if (!monitor.didDrop()) move(item.id, id);
+            if (!monitor.didDrop()) move(item.id, item.id);
         },
     });
     const [, drop] = useDrop({
@@ -101,7 +101,7 @@ const TabsWrapper = () => {
             onChange={actions.active}
             renderTabBar={RenderTabBar}
             className={styles.navTabs}
-            style={{ '--tab-container-width': `${(data.length * 100) / 16}rem` } as any}
+            style={{ '--tab-container-width': `${(data.length * 85) / 16}rem` } as any}
         >
             {data.map((tab) => (
                 <TabPane tab={tab.name} key={tab.id}>
