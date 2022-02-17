@@ -7057,7 +7057,7 @@ packages:
     dev: true
 
   /resize-observer-polyfill/1.5.1:
-    resolution: {integrity: sha1-DpAg3T0hAkRY1OvSfiPkAmmBBGQ=, tarball: resize-observer-polyfill/download/resize-observer-polyfill-1.5.1.tgz}
+    resolution: {integrity: sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==}
     dev: false
 
   /resolve-cwd/3.0.0:

@@ -1,25 +1,16 @@
-import { animated, useSpring } from '@react-spring/web';
+import { animated, SpringRef, useSpring } from '@react-spring/web';
 import { Tabs } from 'antd';
 import produce, { Draft } from 'immer';
 import { find, findIndex, isNil } from 'ramda';
-import {
-    ComponentType,
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useMemo,
-    useState,
-} from 'react';
+import { ComponentType, createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { DropTargetMonitor, useDrag, useDrop } from 'react-dnd';
-import useMeasure from 'react-use-measure';
-import mergeRefs from 'react-merge-refs';
-
 import { useUpdateEffect } from 'react-use';
 
-import { ResizeObserver } from '@juggle/resize-observer';
+import { useDebounceFn } from 'ahooks';
 
 import styles from './index.module.less';
+
+import { Lookup } from '.pnpm/@react-spring+types@9.4.3/node_modules/@react-spring/types';
 
 const { TabPane } = Tabs;
 
@@ -36,50 +27,65 @@ const useOriginalIndex = (id: string) => {
     return useMemo(() => data.map((item) => item.id).indexOf(id), [id, data]);
 };
 const getTabStyles = (index: number, isDragging = false) => {
-    return isDragging
-        ? {
-              cursor: 'move',
-              opacity: 0.4,
-              zIndex: 1,
-              //   x: (index + 1) * 100,
-          }
-        : { cursor: 'auto', opacity: 1, x: `${(index * 85) / 16}rem`, zIndex: 0 };
+    return {
+        x: `${(index * 85) / 16}rem`,
+        ...(isDragging ? { cursor: 'move', opacity: 0.4 } : { cursor: 'auto', opacity: 1 }),
+    };
+    // return isDragging
+    //     ? {
+    //           cursor: 'move',
+    //           opacity: 0.4,
+    //           zIndex: 1,
+    //           x: curX,
+    //           //   x: `${(curX + dragIndex * 50) / 16}rem`,
+    //           immediate: (key: string) => key === 'x' || key === 'zIndex',
+    //       }
+    //     : { cursor: 'auto', opacity: 1, x: `${(index * 85) / 16}rem`, zIndex: 0, immediate: false };
 };
 const TabContext = createContext<TabContextType>({} as any);
 const TabActionContext = createContext<TabActionContextType>({} as any);
 const TabItem: FC<{ id: string }> = ({ id, children }) => {
     const { move } = useContext(TabActionContext);
     const index = useOriginalIndex(id);
-    const [spring, api] = useSpring<any>(() => getTabStyles(index), [index]);
-    const [ref, b] = useMeasure({ debounce: 10, scroll: true, polyfill: ResizeObserver });
+    const [spring, api] = useSpring<any>(() => getTabStyles(index), []);
+    const [{ isDragging }, drag] = useDrag(
+        {
+            type: 'TAB',
+            item: { id, index },
+            collect: (monitor) => ({
+                isDragging: monitor.isDragging(),
+            }),
+            end: (item, monitor) => {
+                if (!monitor.didDrop()) move(item.id, item.id);
+            },
+        },
+        [id, index, move],
+    );
+    const [, drop] = useDrop(
+        {
+            accept: 'TAB',
+            hover(item: { id: string }, monitor: DropTargetMonitor) {
+                if (item.id !== id && monitor.isOver({ shallow: true })) {
+                    move(item.id, id);
+                }
+            },
+            collect: (monitor) => ({
+                hover: monitor.isOver({ shallow: true }) && monitor.canDrop(),
+            }),
+        },
+        [move],
+    );
+    const { run: startSpring } = useDebounceFn(
+        (springApi: SpringRef<Lookup<any>>, springStyle: any) => {
+            springApi.start(springStyle);
+        },
+        { wait: 100 },
+    );
     useUpdateEffect(() => {
-        console.log(b);
-    }, [b]);
-    const [{ isDragging }, drag] = useDrag({
-        type: 'TAB',
-        item: { id, index },
-        collect: (monitor) => ({
-            isDragging: monitor.isDragging(),
-        }),
-        end: (item, monitor) => {
-            if (!monitor.didDrop()) move(item.id, item.id);
-        },
-    });
-    const [, drop] = useDrop({
-        accept: 'TAB',
-        hover(item: { id: string }, monitor: DropTargetMonitor) {
-            if (item.id !== id) move(item.id, id);
-        },
-    });
-    useEffect(() => {
-        api.start(getTabStyles(index, isDragging));
-    }, [isDragging]);
+        startSpring(api, getTabStyles(index, isDragging));
+    }, [index, isDragging]);
     return (
-        <animated.div
-            ref={mergeRefs([(node) => drag(drop(node)), ref])}
-            className="absolute w-20 h-9"
-            style={spring}
-        >
+        <animated.div ref={(node) => drag(drop(node))} className="absolute w-20 h-9" style={spring}>
             {children}
         </animated.div>
     );
