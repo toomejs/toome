@@ -27,20 +27,9 @@ const useOriginalIndex = (id: string) => {
     return useMemo(() => data.map((item) => item.id).indexOf(id), [id, data]);
 };
 const getTabStyles = (index: number, isDragging = false) => {
-    return {
-        x: `${(index * 85) / 16}rem`,
-        ...(isDragging ? { cursor: 'move', opacity: 0.4 } : { cursor: 'auto', opacity: 1 }),
-    };
-    // return isDragging
-    //     ? {
-    //           cursor: 'move',
-    //           opacity: 0.4,
-    //           zIndex: 1,
-    //           x: curX,
-    //           //   x: `${(curX + dragIndex * 50) / 16}rem`,
-    //           immediate: (key: string) => key === 'x' || key === 'zIndex',
-    //       }
-    //     : { cursor: 'auto', opacity: 1, x: `${(index * 85) / 16}rem`, zIndex: 0, immediate: false };
+    return isDragging
+        ? { cursor: 'move', opacity: 0.4, x: `${(index * 85) / 16}rem` }
+        : { cursor: 'auto', opacity: 1 };
 };
 const TabContext = createContext<TabContextType>({} as any);
 const TabActionContext = createContext<TabActionContextType>({} as any);
@@ -79,11 +68,14 @@ const TabItem: FC<{ id: string }> = ({ id, children }) => {
         (springApi: SpringRef<Lookup<any>>, springStyle: any) => {
             springApi.start(springStyle);
         },
-        { wait: 100 },
+        { wait: 10 },
     );
     useUpdateEffect(() => {
         startSpring(api, getTabStyles(index, isDragging));
-    }, [index, isDragging]);
+    }, [isDragging]);
+    useUpdateEffect(() => {
+        startSpring(api, getTabStyles(index));
+    }, [index]);
     return (
         <animated.div ref={(node) => drag(drop(node))} className="absolute w-20 h-9" style={spring}>
             {children}
