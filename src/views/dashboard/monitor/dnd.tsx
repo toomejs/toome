@@ -15,18 +15,17 @@ import { Lookup } from '.pnpm/@react-spring+types@9.4.3/node_modules/@react-spri
 const { TabPane } = Tabs;
 
 type TabItemType = { id: string; name: string; content: string };
-type TabContextType = { active: string; moving: string | null; data: Array<TabItemType> };
+type TabContextType = { active: string; data: Array<TabItemType> };
 type TabActionContextType = {
-    active: (id: string) => void;
-    setMoving: (id: string | null) => void;
-    move: (dragKey: string, hoverKey: string) => void;
+    changeOrder: (dragKey: string, hoverKey: string) => void;
+    setActive: (id: string) => void;
     setData: (fn: (state: Draft<Array<TabItemType>>) => void | Array<TabItemType>) => void;
 };
 const useOriginalIndex = (id: string) => {
     const { data } = useContext(TabContext);
     return useMemo(() => data.map((item) => item.id).indexOf(id), [id, data]);
 };
-const getTabStyles = (index: number, isDragging = false) => {
+const getTabStyles = (index: number, curIndex: number, isDragging = false) => {
     return isDragging
         ? { cursor: 'move', opacity: 0.4, x: `${(index * 85) / 16}rem` }
         : { cursor: 'auto', opacity: 1 };
@@ -96,7 +95,7 @@ const TabsWrapper = () => {
             size="small"
             hideAdd
             activeKey={active}
-            onChange={actions.active}
+            onChange={actions.setActive}
             renderTabBar={RenderTabBar}
             className={styles.navTabs}
             style={{ '--tab-container-width': `${(data.length * 85) / 16}rem` } as any}
@@ -118,12 +117,8 @@ export const DndContainer: FC = ({ children }) => {
         })),
     );
     const [active, setActive] = useState<string>('1');
-    const [moving, setMoving] = useState<string | null>(null);
-    const value = useMemo<TabContextType>(
-        () => ({ active, data: tabs, moving }),
-        [active, tabs, moving],
-    );
-    const changeActive = useCallback((id: string) => setActive(id), []);
+    const value = useMemo<TabContextType>(() => ({ active, data: tabs }), [active, tabs]);
+    const setActiveTab = useCallback((id: string) => setActive(id), []);
     const changeTabs = useCallback(
         (fn: (state: Draft<Array<TabItemType>>) => void | Array<TabItemType>) => {
             const nextState = typeof fn === 'function' ? produce(fn) : fn;
@@ -131,7 +126,7 @@ export const DndContainer: FC = ({ children }) => {
         },
         [],
     );
-    const moveTabNode = useCallback(
+    const changeTabsOrder = useCallback(
         (dragKey: string, hoverKey: string) => {
             changeTabs((state) => {
                 const dragIndex = findIndex((item) => item.id === dragKey, state);
@@ -146,10 +141,9 @@ export const DndContainer: FC = ({ children }) => {
     );
     const actions = useMemo<TabActionContextType>(
         () => ({
-            active: changeActive,
+            setActive: setActiveTab,
             setData: changeTabs,
-            move: moveTabNode,
-            setMoving,
+            changeOrder: changeTabsOrder,
         }),
         [],
     );
