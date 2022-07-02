@@ -1,7 +1,7 @@
 import { Button, Card, Col, Input, Row } from 'antd';
 import { useCallback, useState } from 'react';
 
-import { ServerApp, ServerInfo } from './components';
+import { CpuMonitor, ServerApp, ServerInfo } from './components';
 
 const analysisTabs = [
     {
@@ -28,7 +28,7 @@ const Dashboard = () => {
     const changeAnalysis = useCallback((tab: string) => {
         setAnalysis(tab);
     }, []);
-    const [ddd, setDdd] = useState('ddd');
+    const [ddd, setDdd] = useState('keepAlive测试');
     const changeDdd = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => setDdd(e.target.value),
         [],
@@ -60,7 +60,9 @@ const Dashboard = () => {
                         }
                     >
                         <Row>
-                            <Col span={4}>{/* <CpuMonitor /> */}</Col>
+                            <Col span={4}>
+                                <CpuMonitor />
+                            </Col>
                             <Col span={4}>{/* <MemoryMonitor /> */}</Col>
                             <Col span={4}>{/* <CacheBufferMonitor /> */}</Col>
                             <Col span={4}>{/* <DiskMonitor /> */}</Col>
